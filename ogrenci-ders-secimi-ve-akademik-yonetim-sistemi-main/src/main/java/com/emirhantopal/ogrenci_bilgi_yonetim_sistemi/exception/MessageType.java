@@ -16,6 +16,7 @@ public enum MessageType {
 
 
 
+
     private final String code;
     private final String message;
 

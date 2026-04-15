@@ -4,6 +4,7 @@ import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.controller.IDepartmentCont
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoDepartment;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoDepartmentIU;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.service.Impl.DepartmentService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,26 +21,26 @@ public class DepartmentController implements IDepartmentController {
 
     @PostMapping("/add")
     @Override
-    public DtoDepartment departmentAdd(DtoDepartmentIU dtoDepartmentIU) {
+    public DtoDepartment departmentAdd(@Valid @RequestBody DtoDepartmentIU dtoDepartmentIU) {
         return departmentService.departmentAdd(dtoDepartmentIU);
     }
 
     @DeleteMapping("/delete")
     @Override
-    public void departmentDelete(Long id) {
+    public void departmentDelete(@Valid @RequestBody Long id) {
         departmentService.departmentDelete(id);
 
     }
 
     @PutMapping("/update")
     @Override
-    public DtoDepartment departmentUpdate(Long id, DtoDepartmentIU dtoDepartmentIU) {
+    public DtoDepartment departmentUpdate(@Valid @RequestBody Long id, DtoDepartmentIU dtoDepartmentIU) {
         return departmentService.departmentUpdate(id, dtoDepartmentIU);
     }
 
     @GetMapping("/get")
     @Override
-    public DtoDepartment findByDepartmentId(Long id) {
+    public DtoDepartment findByDepartmentId(@Valid @RequestBody Long id) {
         return departmentService.findByDepartmentId(id);
     }
 

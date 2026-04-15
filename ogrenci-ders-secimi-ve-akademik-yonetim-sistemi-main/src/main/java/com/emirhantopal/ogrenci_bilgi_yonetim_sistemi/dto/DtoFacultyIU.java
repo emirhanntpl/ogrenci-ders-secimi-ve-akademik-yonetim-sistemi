@@ -1,5 +1,6 @@
 package com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,7 +8,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DtoFaculty {
+public class DtoFacultyIU {
+
 
     private  String name;
 
@@ -22,6 +24,9 @@ public class DtoFaculty {
     private String dean;
 
     private String secretary;
+
+
+
 
 
 
