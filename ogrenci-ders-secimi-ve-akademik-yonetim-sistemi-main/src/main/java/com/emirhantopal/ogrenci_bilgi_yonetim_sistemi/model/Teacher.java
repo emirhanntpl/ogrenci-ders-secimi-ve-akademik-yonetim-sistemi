@@ -12,22 +12,14 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Teacher  extends  BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Teacher extends BaseEntity {
 
+    private String firstName;
 
-    @OneToOne
-    @JoinColumn(name = "user_id")
-    private User user;
-
+    private String lastName;
 
     @ManyToOne
     @JoinColumn(name = "department_id")
     private Department department;
-
-    private String title;
-
 
 }
