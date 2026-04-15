@@ -17,9 +17,6 @@ import java.util.List;
 @Getter
 @Setter
 public class Course extends  BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)

@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DtoFacultyIU {
+public class DtoFacultyIU extends DtoBaseEntity {
 
 
     private  String name;

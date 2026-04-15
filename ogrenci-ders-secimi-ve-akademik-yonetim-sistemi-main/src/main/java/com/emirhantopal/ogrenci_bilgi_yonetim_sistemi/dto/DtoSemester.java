@@ -1,4 +1,4 @@
 package com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto;
 
-public class DtoSemester {
+public class DtoSemester extends DtoBaseEntity  {
 }

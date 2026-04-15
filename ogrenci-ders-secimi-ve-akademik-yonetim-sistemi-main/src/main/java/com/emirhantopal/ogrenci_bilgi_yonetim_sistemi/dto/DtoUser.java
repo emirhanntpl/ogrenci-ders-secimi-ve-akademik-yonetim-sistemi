@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DtoUser {
+public class DtoUser extends DtoBaseEntity {
 
 
     @NotEmpty

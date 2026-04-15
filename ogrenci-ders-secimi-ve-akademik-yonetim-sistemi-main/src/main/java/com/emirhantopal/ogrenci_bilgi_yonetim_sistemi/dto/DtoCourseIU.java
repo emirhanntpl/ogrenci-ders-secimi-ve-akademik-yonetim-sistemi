@@ -4,11 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
+public class DtoCourseIU extends DtoBaseEntity {
 
-public class DtoCourse  extends DtoBaseEntity {
+
     private String code;
 
     private String name;
@@ -18,5 +19,10 @@ public class DtoCourse  extends DtoBaseEntity {
     private Integer akts;
 
     private Integer quota;
+
+
+
+
+
 
 }
