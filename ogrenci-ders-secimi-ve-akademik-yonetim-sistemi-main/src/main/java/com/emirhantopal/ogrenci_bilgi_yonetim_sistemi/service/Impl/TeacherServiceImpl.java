@@ -99,9 +99,16 @@ public class TeacherServiceImpl implements ITeacherService {
         if (byId.isEmpty()){
             throw new BaseException(MessageType.INVALID_TEACHER_ID, HttpStatus.BAD_REQUEST);
         }
-        DtoTeacher dtoTeacher=new DtoTeacher();
-        BeanUtils.copyProperties(byId, dtoTeacher);
-        return dtoTeacher;
 
+        Teacher teacher = byId.get();
+        DtoTeacher dtoTeacher = new DtoTeacher();
+        BeanUtils.copyProperties(teacher, dtoTeacher);
+        
+        if (teacher.getDepartment() != null) {
+            DtoDepartment dtoDepartment = new DtoDepartment();
+            BeanUtils.copyProperties(teacher.getDepartment(), dtoDepartment);
+            dtoTeacher.setDepartment(dtoDepartment);
+        }
+        return dtoTeacher;
     }
 }
