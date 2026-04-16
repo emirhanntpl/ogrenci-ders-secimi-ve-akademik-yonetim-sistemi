@@ -1,6 +1,5 @@
 package com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.service.Impl;
 
-import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoDepartment;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoFaculty;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoFacultyIU;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.exception.BaseException;
@@ -17,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class FacultyService implements IFacultyService {
+public class FacultyServiceImpl implements IFacultyService {
 
  @Autowired
  private FacultyRepository facultyRepository;

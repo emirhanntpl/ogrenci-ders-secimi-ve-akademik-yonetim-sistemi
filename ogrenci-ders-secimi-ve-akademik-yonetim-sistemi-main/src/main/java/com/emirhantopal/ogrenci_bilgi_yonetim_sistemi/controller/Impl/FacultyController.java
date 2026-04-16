@@ -3,7 +3,7 @@ package com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.controller.Impl;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.controller.IFacultyController;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoFaculty;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoFacultyIU;
-import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.service.Impl.FacultyService;
+import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.service.Impl.FacultyServiceImpl;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +15,7 @@ import java.util.List;
 public class FacultyController implements IFacultyController {
 
     @Autowired
-    private FacultyService facultyService;
+    private FacultyServiceImpl facultyService;
 
 
     @PostMapping("/add")
