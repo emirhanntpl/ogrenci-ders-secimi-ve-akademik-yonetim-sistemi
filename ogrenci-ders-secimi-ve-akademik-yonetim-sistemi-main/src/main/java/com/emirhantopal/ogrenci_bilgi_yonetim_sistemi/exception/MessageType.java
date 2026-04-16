@@ -21,7 +21,11 @@ public enum MessageType {
 
     // Semester related messages
     INVALID_SEMESTER_ID("1016", "DÖNEM (SEMESTER) ID BULUNAMADI"),
-    SEMESTER_LIST_IS_EMPTY("1017", "DÖNEM LİSTESİ BOŞ.");
+    SEMESTER_LIST_IS_EMPTY("1017", "DÖNEM LİSTESİ BOŞ."),
+
+    // CourseSection related messages
+    INVALID_COURSE_SECTION_ID("1018", "DERS ŞUBESİ (COURSE SECTION) ID BULUNAMADI"),
+    COURSE_SECTION_LIST_IS_EMPTY("1019", "DERS ŞUBESİ LİSTESİ BOŞ.");
 
 
 

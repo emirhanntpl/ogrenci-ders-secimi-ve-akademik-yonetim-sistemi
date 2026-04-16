@@ -7,14 +7,13 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DtoCourseSection extends DtoBaseEntity {
+public class DtoCourseSectionIU extends DtoBaseEntity {
 
-    private DtoCourse course;
+    private Long courseId;
     
-    private DtoTeacher teacher;
+    private Long teacherId;
     
-    private DtoClassroom classroom;
+    private Long classroomId;
     
-    private DtoSemester semester;
-
+    private Long semesterId;
 }
