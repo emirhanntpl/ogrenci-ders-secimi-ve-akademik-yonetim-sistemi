@@ -21,7 +21,7 @@ public class CourseSection extends BaseEntity {
     @JoinColumn(name = "course_id")
     private Course course;
 
-    // Burada @ManyToOne eksikti, bu yüzden Hibernate Teacher sınıfını tabloya nasıl bağlayacağını bilemiyordu
+
     @ManyToOne
     @JoinColumn(name = "teacher_id")
     private Teacher teacher;

@@ -7,12 +7,11 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DtoGrade  extends DtoBaseEntity {
-
+public class DtoGradeIU {
+    
     private  Double midTerm;
 
     private  Double finalExam;
 
     private Double average;
-
 }
