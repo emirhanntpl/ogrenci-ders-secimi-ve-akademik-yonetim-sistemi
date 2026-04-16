@@ -26,20 +26,20 @@ public class FacultyController implements IFacultyController {
 
     @PutMapping("/update/{id}")
     @Override
-    public DtoFaculty facultyUpdate(@Valid @RequestBody Long id, DtoFacultyIU dtoFacultyIU) {
+    public DtoFaculty facultyUpdate(@PathVariable Long id, @Valid @RequestBody DtoFacultyIU dtoFacultyIU) {
         return facultyService.facultyUpdate(id, dtoFacultyIU);
     }
 
     @DeleteMapping("/delete/{id}")
     @Override
-    public void facultyDelete(@Valid @RequestBody Long id) {
+    public void facultyDelete(@PathVariable Long id) {
         facultyService.facultyDelete(id);
 
     }
 
     @GetMapping("/get/{id}")
     @Override
-    public DtoFaculty findByFacultyId(@Valid @RequestBody Long id) {
+    public DtoFaculty findByFacultyId(@PathVariable Long id) {
         return facultyService.findByFacultyId(id);
     }
 

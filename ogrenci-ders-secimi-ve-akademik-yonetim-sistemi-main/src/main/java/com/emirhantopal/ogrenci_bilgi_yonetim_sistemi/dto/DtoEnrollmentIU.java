@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DtoUser extends DtoBaseEntity {
-    private String username;
-    // Rolleri veya diğer alanları buraya ekleyebilirsiniz
+public class DtoEnrollmentIU {
+    private Long studentId;
+    private Long courseSectionId;
 }

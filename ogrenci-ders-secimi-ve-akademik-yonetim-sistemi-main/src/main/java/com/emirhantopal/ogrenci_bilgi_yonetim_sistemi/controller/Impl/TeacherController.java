@@ -27,13 +27,13 @@ public class TeacherController implements ITeacherController {
 
     @PutMapping("/update/{id}")
     @Override
-    public DtoTeacher teacherUpdate( @Valid @RequestBody Long id, DtoTeacherIU dtoTeacherIU) {
+    public DtoTeacher teacherUpdate(@PathVariable Long id, @Valid @RequestBody DtoTeacherIU dtoTeacherIU) {
         return teacherService.teacherUpdate(id, dtoTeacherIU);
     }
 
     @DeleteMapping("/delete/{id}")
     @Override
-    public void teacherDelete(@Valid @RequestBody Long id) {
+    public void teacherDelete(@PathVariable Long id) {
         teacherService.teacherDelete(id);
 
     }
@@ -46,7 +46,7 @@ public class TeacherController implements ITeacherController {
 
     @GetMapping("/{id}")
     @Override
-    public DtoTeacher findByTeacherId(@Valid @RequestBody Long id) {
+    public DtoTeacher findByTeacherId(@PathVariable Long id) {
         return teacherService.findByTeacherId(id);
     }
 }

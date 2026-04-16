@@ -119,6 +119,11 @@ public class CourseSectionServiceImpl implements ICourseSectionService {
         if (courseSection.getTeacher() != null) {
             DtoTeacher dtoTeacher = new DtoTeacher();
             BeanUtils.copyProperties(courseSection.getTeacher(), dtoTeacher);
+            if (courseSection.getTeacher().getDepartment() != null) {
+                DtoDepartment dtoDepartment = new DtoDepartment();
+                BeanUtils.copyProperties(courseSection.getTeacher().getDepartment(), dtoDepartment);
+                dtoTeacher.setDepartment(dtoDepartment);
+            }
             dto.setTeacher(dtoTeacher);
         }
 

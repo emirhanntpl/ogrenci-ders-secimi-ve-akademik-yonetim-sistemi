@@ -6,18 +6,9 @@ import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoStudentIU;
 import java.util.List;
 
 public interface IStudentService {
-
-    public DtoStudent studentAdd(DtoStudentIU dtoStudentIU);
-
-    public DtoStudent studentUpdate(Long id, DtoStudentIU dtoStudentIU);
-
-    public void studentDelete(Long id);
-
-    public List<DtoStudent> getAllStudent();
-
-    public DtoStudent getStudentById(Long id);
-
-
-
-
+    DtoStudent studentAdd(DtoStudentIU dtoStudentIU);
+    DtoStudent studentUpdate(Long id, DtoStudentIU dtoStudentIU);
+    void studentDelete(Long id);
+    List<DtoStudent> getAllStudents();
+    DtoStudent findByStudentId(Long id);
 }
