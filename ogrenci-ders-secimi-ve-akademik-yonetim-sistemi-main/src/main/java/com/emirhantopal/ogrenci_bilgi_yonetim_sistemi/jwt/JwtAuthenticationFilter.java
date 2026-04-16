@@ -11,6 +11,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -33,39 +34,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token;
         String username;
 
-        header = request.getHeader("Authorization");
-        if (header==null){
-            filterChain.doFilter(request,response);
+        header = request.getHeader("Authorization"); // "Bearer eyJhbGciOiJI..."
+        if (header == null || !header.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
             return;
         }
-        token = header.substring(7);
-        try{
-            username=jwtService.getUsernameByToken(token);
-            if (username!=null && SecurityContextHolder.getContext().getAuthentication()==null){
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                if (userDetails!=null && jwtService.isTokenValid(token)){
-                    UsernamePasswordAuthenticationToken authentication=
-                            new UsernamePasswordAuthenticationToken(username,null,userDetails.getAuthorities());
-                    authentication.setDetails(userDetails);
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-
-                }
+        token = header.substring(7); // "Bearer " kısmını atıyoruz.
+        username = jwtService.getUsernameByToken(token);
+        
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+            if (jwtService.isTokenValid(token, userDetails)) {
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities()
+                );
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authToken);
             }
-        }catch (ExpiredJwtException e){
-            System.out.println("Token süresi doldu, yeniden giriş yapınız." + e.getMessage());
-
-        }catch (Exception e){
-            System.out.println("Genel bir hata oluştu, lütfen tekrar deneyiniz." +e.getMessage());
         }
-        filterChain.doFilter(request,response);
-
-
-
-
-
-
-
-
-
+        filterChain.doFilter(request, response);
     }
 }

@@ -15,10 +15,6 @@ import java.util.List;
 @Getter
 @Setter
 public class Department extends  BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
 
     @ManyToOne
     @JoinColumn(name = "faculty_id")

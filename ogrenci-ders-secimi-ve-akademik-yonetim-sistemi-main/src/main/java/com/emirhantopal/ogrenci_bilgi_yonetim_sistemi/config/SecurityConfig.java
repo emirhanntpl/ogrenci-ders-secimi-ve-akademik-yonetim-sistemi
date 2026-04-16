@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -14,13 +15,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity // @PreAuthorize gibi metot seviyesi güvenlik için bunu da ekleyelim, ileride lazım olabilir.
 public class SecurityConfig {
 
-    public static  final String AUTHENTICATE ="/authenticate";
-    public static  final String REGISTER ="/register";
-    public static  final String REFRESH_TOKEN ="/refreshToken";
-
-
+    // Bu endpoint'ler herkese açık olacak.
+    private static final String[] WHITE_LIST_URL = {"/auth/**"};
     @Autowired
     private AuthenticationProvider authenticationProvider;
 
@@ -28,20 +27,30 @@ public class SecurityConfig {
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
 
-
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(request ->
-                        request.requestMatchers(AUTHENTICATE,REGISTER,REFRESH_TOKEN)
+                        request.requestMatchers(WHITE_LIST_URL)
                                 .permitAll()
+
+                                .requestMatchers("/faculty/**", "/department/**", "/semester/**", "/classroom/**")
+                                .hasRole("ADMIN")
+
+                                .requestMatchers("/teacher/**", "/course/**", "/coursesection/**")
+                                .hasAnyRole("ADMIN", "TEACHER")
+
+
+                                .requestMatchers("/grade/**")
+                                .hasAnyRole("ADMIN", "TEACHER", "STUDENT")
+
+                                .requestMatchers("/enrollment/**")
+                                .hasAnyRole("ADMIN", "STUDENT")
                                 .anyRequest()
                                 .authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
-
     }
 }

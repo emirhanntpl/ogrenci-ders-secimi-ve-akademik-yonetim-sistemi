@@ -16,10 +16,6 @@ import java.util.List;
 @Getter
 @Setter
 public class Faculty extends BaseEntity  {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
 
     @OneToMany(mappedBy = "faculty", cascade = CascadeType.ALL)
     private List<Department> departments;

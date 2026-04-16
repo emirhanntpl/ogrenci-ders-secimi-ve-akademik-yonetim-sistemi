@@ -18,5 +18,5 @@ public class User extends BaseEntity {
     private String username;
     private String password;
 
-    // Roller (Roles) ve diğer güvenlik alanları buraya eklenebilir.
+
 }

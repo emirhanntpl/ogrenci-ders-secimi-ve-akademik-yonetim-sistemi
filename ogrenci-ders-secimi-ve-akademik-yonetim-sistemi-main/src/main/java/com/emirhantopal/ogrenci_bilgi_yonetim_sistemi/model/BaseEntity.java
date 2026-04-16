@@ -7,6 +7,8 @@ import jakarta.persistence.MappedSuperclass;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDateTime;
+
 @MappedSuperclass
 @Data
 public class BaseEntity {
@@ -16,6 +18,6 @@ public class BaseEntity {
     private Long id;
 
     @CreationTimestamp
-    private String createdDate;
+    private LocalDateTime createdDate;
 
 }
