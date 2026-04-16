@@ -23,13 +23,13 @@ public class StudentController implements IStudentController {
         return studentService.studentAdd(dtoStudentIU);
     }
 
-    @PutMapping("/update")
+    @PutMapping("/update/{id}")
     @Override
     public DtoStudent studentUpdate(@Valid @RequestBody Long id, DtoStudentIU dtoStudentIU) {
         return studentService.studentUpdate(id, dtoStudentIU);
     }
 
-    @DeleteMapping("/delete")
+    @DeleteMapping("/delete/{id}")
     @Override
     public void studentDelete(@Valid @RequestBody Long id) {
         studentService.studentDelete(id);
@@ -41,7 +41,7 @@ public class StudentController implements IStudentController {
         return studentService.getAllStudent();
     }
 
-    @GetMapping("/getById")
+    @GetMapping("/getById/{id}")
     @Override
     public DtoStudent getStudentById(Long id) {
         return studentService.getStudentById(id);

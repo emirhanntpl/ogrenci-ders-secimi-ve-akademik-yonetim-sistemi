@@ -12,7 +12,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Teacher extends BaseEntity {
+public class Teacher  extends  BaseEntity {
 
     private String firstName;
 

@@ -25,20 +25,20 @@ public class DepartmentController implements IDepartmentController {
         return departmentService.departmentAdd(dtoDepartmentIU);
     }
 
-    @DeleteMapping("/delete")
+    @DeleteMapping("/delete/{id}")
     @Override
     public void departmentDelete(@Valid @RequestBody Long id) {
         departmentService.departmentDelete(id);
 
     }
 
-    @PutMapping("/update")
+    @PutMapping("/update/{id}")
     @Override
     public DtoDepartment departmentUpdate(@Valid @RequestBody Long id, DtoDepartmentIU dtoDepartmentIU) {
         return departmentService.departmentUpdate(id, dtoDepartmentIU);
     }
 
-    @GetMapping("/get")
+    @GetMapping("/get/{id}")
     @Override
     public DtoDepartment findByDepartmentId(@Valid @RequestBody Long id) {
         return departmentService.findByDepartmentId(id);

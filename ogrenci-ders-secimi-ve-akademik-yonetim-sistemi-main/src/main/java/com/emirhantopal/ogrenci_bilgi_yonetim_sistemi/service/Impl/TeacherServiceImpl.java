@@ -1,6 +1,5 @@
 package com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.service.Impl;
 
-import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoDepartment;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoTeacher;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoTeacherIU;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.exception.BaseException;
@@ -15,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 

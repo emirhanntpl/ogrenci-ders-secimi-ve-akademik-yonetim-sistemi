@@ -24,20 +24,20 @@ public class FacultyController implements IFacultyController {
         return facultyService.facultyAdd(dtoFacultyIU);
     }
 
-    @PutMapping("/update")
+    @PutMapping("/update/{id}")
     @Override
     public DtoFaculty facultyUpdate(@Valid @RequestBody Long id, DtoFacultyIU dtoFacultyIU) {
         return facultyService.facultyUpdate(id, dtoFacultyIU);
     }
 
-    @DeleteMapping("/delete")
+    @DeleteMapping("/delete/{id}")
     @Override
     public void facultyDelete(@Valid @RequestBody Long id) {
         facultyService.facultyDelete(id);
 
     }
 
-    @GetMapping("/get")
+    @GetMapping("/get/{id}")
     @Override
     public DtoFaculty findByFacultyId(@Valid @RequestBody Long id) {
         return facultyService.findByFacultyId(id);

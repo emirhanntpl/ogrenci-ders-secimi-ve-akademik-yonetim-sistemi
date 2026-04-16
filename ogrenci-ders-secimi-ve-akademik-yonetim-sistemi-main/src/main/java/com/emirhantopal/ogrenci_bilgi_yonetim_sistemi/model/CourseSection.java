@@ -13,9 +13,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CourseSection extends BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+
+
 
     @ManyToOne
     @JoinColumn(name = "course_id")

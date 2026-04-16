@@ -26,22 +26,22 @@ public class ClassroomController implements IClassroomController {
         return classroomService.classroomAdd(dtoClassroomIU);
     }
 
-    @DeleteMapping("/delete")
+    @DeleteMapping("/delete/{id}")
     @Override
     public void classroomDelete(@Valid @RequestBody Long id) {
         classroomService.classroomDelete(id);
 
     }
 
-    @PutMapping("/update")
+    @PutMapping("/update/{id}")
     @Override
-    public DtoClassroom classroomUpdate(@Valid @RequestBody Long id, DtoClassroomIU dtoClassroomIU) {
+    public DtoClassroom classroomUpdate(@PathVariable Long id, @RequestBody @Valid DtoClassroomIU dtoClassroomIU) {
         return classroomService.classroomUpdate(id, dtoClassroomIU);
     }
 
     @GetMapping("/{id}")
     @Override
-    public DtoClassroom findByClassroomId(@Valid @RequestBody Long id) {
+    public DtoClassroom findByClassroomId(@PathVariable Long id) {
         return classroomService.findByClassroomId(id);
     }
 

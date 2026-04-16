@@ -25,13 +25,13 @@ public class TeacherController implements ITeacherController {
         return teacherService.teacherAdd(dtoTeacherIU);
     }
 
-    @PutMapping("/update")
+    @PutMapping("/update/{id}")
     @Override
     public DtoTeacher teacherUpdate( @Valid @RequestBody Long id, DtoTeacherIU dtoTeacherIU) {
         return teacherService.teacherUpdate(id, dtoTeacherIU);
     }
 
-    @DeleteMapping("/delete")
+    @DeleteMapping("/delete/{id}")
     @Override
     public void teacherDelete(@Valid @RequestBody Long id) {
         teacherService.teacherDelete(id);
@@ -44,7 +44,7 @@ public class TeacherController implements ITeacherController {
         return teacherService.teacherAll();
     }
 
-    @GetMapping("/find")
+    @GetMapping("/{id}")
     @Override
     public DtoTeacher findByTeacherId(@Valid @RequestBody Long id) {
         return teacherService.findByTeacherId(id);

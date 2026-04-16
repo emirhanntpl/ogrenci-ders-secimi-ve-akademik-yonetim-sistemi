@@ -23,13 +23,13 @@ public class CourseController implements ICourseController {
         return courseService.courseAdd(dtoCourseIU);
     }
 
-    @PutMapping("/update")
+    @PutMapping("/update/{id}")
     @Override
     public DtoCourse courseUpdate(@Valid @RequestBody Long id, DtoCourseIU dtoCourseIU) {
         return courseService.courseUpdate(id, dtoCourseIU);
     }
 
-    @DeleteMapping("/delete")
+    @DeleteMapping("/delete/{id}")
     @Override
     public void courseDelete(@Valid @RequestBody Long id) {
         courseService.courseDelete(id);
