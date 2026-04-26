@@ -3,9 +3,7 @@ package com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.controller.Impl;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.controller.IClassroomController;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoClassroom;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoClassroomIU;
-import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.service.IClassroomService;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.service.Impl.ClassroomService;
-import jakarta.persistence.Access;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -28,14 +26,13 @@ public class ClassroomController implements IClassroomController {
 
     @DeleteMapping("/delete/{id}")
     @Override
-    public void classroomDelete(@Valid @RequestBody Long id) {
+    public void classroomDelete(@PathVariable(name = "id") Long id) {
         classroomService.classroomDelete(id);
-
     }
 
     @PutMapping("/update/{id}")
     @Override
-    public DtoClassroom classroomUpdate(@PathVariable Long id, @RequestBody @Valid DtoClassroomIU dtoClassroomIU) {
+    public DtoClassroom classroomUpdate(@PathVariable(name = "id") Long id, @RequestBody @Valid DtoClassroomIU dtoClassroomIU) {
         return classroomService.classroomUpdate(id, dtoClassroomIU);
     }
 

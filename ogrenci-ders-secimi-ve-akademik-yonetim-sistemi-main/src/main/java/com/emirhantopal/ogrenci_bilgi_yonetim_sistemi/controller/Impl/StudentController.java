@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
 @RestController
 @RequestMapping("/student")
 public class StudentController implements IStudentController {
@@ -25,25 +26,19 @@ public class StudentController implements IStudentController {
 
     @PutMapping("/update/{id}")
     @Override
-    public DtoStudent studentUpdate(@Valid @RequestBody Long id, DtoStudentIU dtoStudentIU) {
+    public DtoStudent studentUpdate(@PathVariable(name = "id") Long id, @Valid @RequestBody DtoStudentIU dtoStudentIU) {
         return studentService.studentUpdate(id, dtoStudentIU);
     }
 
     @DeleteMapping("/delete/{id}")
     @Override
-    public void studentDelete(@Valid @RequestBody Long id) {
+    public void studentDelete(@PathVariable(name = "id") Long id) {
         studentService.studentDelete(id);
     }
 
     @GetMapping("/getAll")
     @Override
     public List<DtoStudent> getAllStudent() {
-        return studentService.getAllStudent();
-    }
-
-    @GetMapping("/getById/{id}")
-    @Override
-    public DtoStudent getStudentById(Long id) {
-        return studentService.getStudentById(id);
+        return studentService.getAllStudents();
     }
 }

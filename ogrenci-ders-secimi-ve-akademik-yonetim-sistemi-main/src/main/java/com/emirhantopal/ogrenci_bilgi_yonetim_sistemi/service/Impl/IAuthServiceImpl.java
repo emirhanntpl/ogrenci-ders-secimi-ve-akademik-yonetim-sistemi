@@ -2,6 +2,8 @@ package com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.service.Impl;
 
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoUser;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.enums.Role;
+import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.exception.BaseException;
+import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.exception.MessageType;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.jwt.AuthRequest;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.jwt.AuthResponse;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.jwt.JwtService;
@@ -10,17 +12,19 @@ import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.model.User;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.repository.RefreshTokenRepository;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.repository.UserRepository;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.service.IAuthService;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
-import java.util.Optional;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class IAuthServiceImpl implements IAuthService {
@@ -28,80 +32,95 @@ public class IAuthServiceImpl implements IAuthService {
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
 
-
     @Autowired
-    private AuthenticationProvider authenticationProvider;
+    private AuthenticationManager authenticationManager;
 
     @Autowired
     private JwtService jwtService;
 
     @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private UserRepository userRepository;
 
-
     @Override
-    public DtoUser register(AuthRequest request) {
-        DtoUser dto=new DtoUser();
+    @Transactional
+    public DtoUser register(AuthRequest request, Role role) {
         User user = new User();
         user.setUsername(request.getUsername());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole(Role.USER);
+        user.setRole(role != null ? role : Role.USER);
         User savedUser = userRepository.save(user);
-        BeanUtils.copyProperties(savedUser, dto);
-        return dto;
+        return convertToDto(savedUser);
     }
 
-
+    @Override
+    @Transactional
     public DtoUser registerAdmin(AuthRequest request){
-        DtoUser dtoAdmin=new DtoUser();
-        User userAdmin=new User();
-        userAdmin.setUsername(request.getUsername());
-        userAdmin.setPassword(passwordEncoder.encode(request.getPassword()));
-        userAdmin.setRole(Role.ADMIN);
-        User savedAdmin = userRepository.save(userAdmin);
-        BeanUtils.copyProperties(savedAdmin, dtoAdmin);
-        return dtoAdmin;
-
+        return register(request, Role.ADMIN);
     }
 
     @Override
     public AuthResponse authenticate(AuthRequest request) {
-
         try {
-            UsernamePasswordAuthenticationToken auth =
-                    new UsernamePasswordAuthenticationToken(request.getUsername(),request.getPassword());
-            authenticationProvider.authenticate(auth);
+            authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+            );
+            
+            User user = userRepository.findByUsername(request.getUsername())
+                    .orElseThrow(() -> new BaseException(MessageType.INVALID_USER_ID, HttpStatus.BAD_REQUEST));
 
-            Optional<User> userName = userRepository.findByUsername(request.getUsername());
-
-            String accessToken = jwtService.generateToken(userName.get());
-
-            RefreshToken refreshToken = createRefreshToken(userName.get());
-
+            String accessToken = jwtService.generateToken(user);
+            RefreshToken refreshToken = createRefreshToken(user);
             refreshTokenRepository.save(refreshToken);
 
-            return new AuthResponse(accessToken,refreshToken.getRefreshToken());
+            return new AuthResponse(accessToken, refreshToken.getRefreshToken());
 
-        }catch (Exception e){
-            System.out.println("Kullanıcı adı veya şifre hatalı, tekrar deneyiniz." + e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException("Giriş başarısız: " + e.getMessage());
         }
+    }
 
-        return null;
+    @Override
+    public List<DtoUser> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void deleteUser(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
+        
+        List<RefreshToken> tokens = refreshTokenRepository.findByUser(user);
+        if (tokens != null && !tokens.isEmpty()) {
+            refreshTokenRepository.deleteAll(tokens);
+        }
+        
+        userRepository.delete(user);
     }
 
     private RefreshToken createRefreshToken(User user){
         RefreshToken refreshToken = new RefreshToken();
         refreshToken.setRefreshToken(UUID.randomUUID().toString());
-        refreshToken.setExpireDate(new Date(System.currentTimeMillis() +1000*60*60*12));
+        refreshToken.setExpireDate(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 12));
         refreshToken.setUser(user);
-
-        return  refreshToken;
+        return refreshToken;
     }
 
-
-
-
+    private DtoUser convertToDto(User user) {
+        DtoUser dto = new DtoUser();
+        BeanUtils.copyProperties(user, dto);
+        dto.setId(user.getId());
+        if (user.getRole() != null) {
+            dto.setRole(user.getRole().name());
+        }
+        if (user.getCreatedDate() != null) {
+            dto.setCreatedDate(user.getCreatedDate().toString());
+        }
+        return dto;
+    }
 }

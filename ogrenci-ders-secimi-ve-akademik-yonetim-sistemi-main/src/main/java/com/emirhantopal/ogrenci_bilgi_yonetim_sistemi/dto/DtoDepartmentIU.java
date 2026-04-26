@@ -7,16 +7,14 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DtoDepartmentIU extends DtoBaseEntity {
+public class DtoDepartmentIU {
 
-
-    private  String name;
+    private String name;
 
     private String quota;
 
     private String head_of_department;
 
-
-
+    private Long facultyId;
 
 }

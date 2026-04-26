@@ -11,7 +11,9 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -24,67 +26,64 @@ public class CourseServiceImpl implements ICourseService {
 
 
     @Override
+    @Transactional
     public DtoCourse courseAdd(DtoCourseIU dtoCourseIU) {
         Course course = new Course();
-        DtoCourse dtoCourse=new DtoCourse();
         course.setCode(dtoCourseIU.getCode());
         course.setName(dtoCourseIU.getName());
         course.setCredit(dtoCourseIU.getCredit());
         course.setAkts(dtoCourseIU.getAkts());
         course.setQuota(dtoCourseIU.getQuota());
         Course savedCourse = courseRepository.save(course);
-        BeanUtils.copyProperties(savedCourse, dtoCourse);
-
-        return dtoCourse;
+        return convertToDto(savedCourse);
     }
 
     @Override
+    @Transactional
     public DtoCourse courseUpdate(Long id ,DtoCourseIU dtoCourseIU) {
-        Optional<Course> byId = courseRepository.findById(id);
-        if(byId.isEmpty()){
-            throw new BaseException(MessageType.INVALID_COURSE_ID, HttpStatus.BAD_REQUEST);
-        }
-        Course course = byId.get();
-        DtoCourse dtoCourse=new DtoCourse();
+        Course course = courseRepository.findById(id)
+                .orElseThrow(() -> new BaseException(MessageType.INVALID_COURSE_ID, HttpStatus.BAD_REQUEST));
+        
         course.setAkts(dtoCourseIU.getAkts());
         course.setCredit(dtoCourseIU.getCredit());
         course.setCode(dtoCourseIU.getCode());
         course.setName(dtoCourseIU.getName());
         course.setQuota(dtoCourseIU.getQuota());
         Course savedCourse = courseRepository.save(course);
-        BeanUtils.copyProperties(savedCourse, dtoCourse);
-        return dtoCourse;
+        return convertToDto(savedCourse);
     }
 
     @Override
+    @Transactional
     public void courseDelete(Long id) {
-        Optional<Course> byId = courseRepository.findById(id);
-        if (byId.isEmpty()){
-            throw new BaseException(MessageType.INVALID_COURSE_ID,HttpStatus.BAD_REQUEST);
-        }
-        Course course = byId.get();
+        Course course = courseRepository.findById(id)
+                .orElseThrow(() -> new BaseException(MessageType.INVALID_COURSE_ID, HttpStatus.BAD_REQUEST));
+        
+        // cascade = CascadeType.ALL olduğu için buna bağlı CourseSectionlar otomatik silinir.
+        // Ancak herhangi bir sorun çıkmaması için repository üzerinden siliyoruz.
         courseRepository.delete(course);
         System.out.println("Ders kaydı silindi. "+ id);
-
     }
 
     @Override
     public List<DtoCourse> courseAll() {
         List<Course> allCourse = courseRepository.findAll();
-        if (allCourse.isEmpty()){
-            throw new BaseException(MessageType.COURSE_LIST_IS_EMPTY,HttpStatus.BAD_REQUEST);
-        }
         List<DtoCourse> dtoCourses=new ArrayList<>();
         for (Course course:allCourse){
-            DtoCourse dtoCourse=new DtoCourse();
-            dtoCourse.setCode(course.getCode());
-            dtoCourse.setName(course.getName());
-            dtoCourse.setCredit(course.getCredit());
-            dtoCourse.setAkts(course.getAkts());
-            dtoCourse.setQuota(course.getQuota());
-            dtoCourses.add(dtoCourse);
-
+            dtoCourses.add(convertToDto(course));
         }
         return dtoCourses;
+    }
+
+    private DtoCourse convertToDto(Course course) {
+        DtoCourse dto = new DtoCourse();
+        BeanUtils.copyProperties(course, dto);
+        dto.setId(course.getId());
+        if (course.getCreatedDate() != null) {
+            dto.setCreatedDate(course.getCreatedDate().toString());
+        } else {
+            dto.setCreatedDate(LocalDateTime.now().toString());
+        }
+        return dto;
     }
 }

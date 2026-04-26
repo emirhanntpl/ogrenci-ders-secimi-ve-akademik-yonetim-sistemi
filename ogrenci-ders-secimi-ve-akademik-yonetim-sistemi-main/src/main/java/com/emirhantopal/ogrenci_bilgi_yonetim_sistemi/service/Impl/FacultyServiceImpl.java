@@ -5,13 +5,17 @@ import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoFacultyIU;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.exception.BaseException;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.exception.MessageType;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.model.Faculty;
+import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.model.Department;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.repository.FacultyRepository;
+import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.repository.DepartmentRepository;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.service.IFacultyService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,11 +25,14 @@ public class FacultyServiceImpl implements IFacultyService {
  @Autowired
  private FacultyRepository facultyRepository;
 
+ @Autowired
+ private DepartmentRepository departmentRepository;
+
 
     @Override
+    @Transactional
     public DtoFaculty facultyAdd(DtoFacultyIU dtoFacultyIU) {
         Faculty faculty=new Faculty();
-        DtoFaculty dtoFaculty=new DtoFaculty();
         faculty.setName(dtoFacultyIU.getName());
         faculty.setNumberOfPersonel(dtoFacultyIU.getNumberOfPersonel());
         faculty.setDean(dtoFacultyIU.getDean());
@@ -33,15 +40,16 @@ public class FacultyServiceImpl implements IFacultyService {
         faculty.setSecretary(dtoFacultyIU.getSecretary());
         faculty.setAddress(dtoFacultyIU.getAddress());
         faculty.setYear_of_establishment(dtoFacultyIU.getYear_of_establishment());
+        
         Faculty savedFaculty = facultyRepository.save(faculty);
-        BeanUtils.copyProperties(savedFaculty, dtoFaculty);
-        return dtoFaculty;
+        // saveAndFlush kullanılabilir veya DTO'ya manuel atama yapılabilir
+        return convertToDto(savedFaculty);
     }
 
     @Override
+    @Transactional
     public DtoFaculty facultyUpdate(Long id,DtoFacultyIU dtoFacultyIU) {
         Faculty faculty = facultyRepository.findById(id).orElseThrow(() -> new BaseException(MessageType.INVALID_FACULTY_ID, HttpStatus.BAD_REQUEST));
-        DtoFaculty dtoFaculty=new DtoFaculty();
         faculty.setAddress(dtoFacultyIU.getAddress());
         faculty.setAvailable(dtoFacultyIU.getAvailable());
         faculty.setDean(dtoFacultyIU.getDean());
@@ -50,44 +58,51 @@ public class FacultyServiceImpl implements IFacultyService {
         faculty.setNumberOfPersonel(dtoFacultyIU.getNumberOfPersonel());
         faculty.setYear_of_establishment(dtoFacultyIU.getYear_of_establishment());
         Faculty savedFaculty = facultyRepository.save(faculty);
-        BeanUtils.copyProperties(savedFaculty, dtoFaculty);
-        return dtoFaculty;
+        return convertToDto(savedFaculty);
     }
 
     @Override
+    @Transactional
     public void facultyDelete(Long id) {
         Faculty faculty = facultyRepository.findById(id).orElseThrow(() -> new BaseException(MessageType.INVALID_FACULTY_ID, HttpStatus.BAD_REQUEST));
-        facultyRepository.delete(faculty);
-        System.out.println("Fakülte kaydı silindi . "+ id);
+        
+        if (faculty.getDepartments() != null) {
+            for (Department department : faculty.getDepartments()) {
+                department.setFaculty(null);
+                departmentRepository.save(department);
+            }
+        }
 
+        facultyRepository.delete(faculty);
     }
 
     @Override
     public DtoFaculty findByFacultyId(Long id) {
         Faculty faculty = facultyRepository.findById(id).orElseThrow(() -> new BaseException(MessageType.INVALID_FACULTY_ID, HttpStatus.BAD_REQUEST));
-        DtoFaculty dtoFaculty=new DtoFaculty();
-        BeanUtils.copyProperties(faculty, dtoFaculty);
-        return dtoFaculty;
+        return convertToDto(faculty);
     }
 
     @Override
     public List<DtoFaculty> getAllFaculty() {
         List<Faculty> allFaculty = facultyRepository.findAll();
-        if (allFaculty.isEmpty()){
-            throw new BaseException(MessageType.FACULTY_LIST_IS_EMPTY,HttpStatus.BAD_REQUEST);
-        }
         List<DtoFaculty> dtoFaculties=new ArrayList<>();
         for (Faculty faculty:allFaculty){
-            DtoFaculty faculty1=new DtoFaculty();
-            faculty1.setDean(faculty.getDean());
-            faculty1.setAvailable(faculty.getAvailable());
-            faculty1.setName(faculty.getName());
-            faculty1.setSecretary(faculty.getSecretary());
-            faculty1.setNumberOfPersonel(faculty.getNumberOfPersonel());
-            faculty1.setYear_of_establishment(faculty.getYear_of_establishment());
-            faculty1.setAddress(faculty.getAddress());
-            dtoFaculties.add(faculty1);
+            dtoFaculties.add(convertToDto(faculty));
         }
         return dtoFaculties ;
+    }
+
+    private DtoFaculty convertToDto(Faculty faculty) {
+        DtoFaculty dto = new DtoFaculty();
+        BeanUtils.copyProperties(faculty, dto);
+        dto.setId(faculty.getId());
+        
+        // Eğer createdDate null ise (henüz veritabanından dönmediyse) şimdiki zamanı set et
+        if (faculty.getCreatedDate() != null) {
+            dto.setCreatedDate(faculty.getCreatedDate().toString());
+        } else {
+            dto.setCreatedDate(LocalDateTime.now().toString());
+        }
+        return dto;
     }
 }

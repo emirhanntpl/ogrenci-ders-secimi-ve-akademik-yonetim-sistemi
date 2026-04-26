@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class DtoUser extends DtoBaseEntity {
     private String username;
-    // Rolleri veya diğer alanları buraya ekleyebilirsiniz
+    private String role;
 }

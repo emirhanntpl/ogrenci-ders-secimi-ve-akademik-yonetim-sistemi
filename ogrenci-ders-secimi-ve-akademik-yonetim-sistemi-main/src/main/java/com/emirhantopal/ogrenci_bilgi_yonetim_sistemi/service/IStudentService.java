@@ -11,4 +11,6 @@ public interface IStudentService {
     void studentDelete(Long id);
     List<DtoStudent> getAllStudents();
     DtoStudent findByStudentId(Long id);
+
+
 }

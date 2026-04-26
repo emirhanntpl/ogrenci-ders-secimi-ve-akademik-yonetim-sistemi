@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KTÜ BYS - Yönetim Paneli</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .active-menu { background-color: #2563eb !important; color: white !important; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3); }
+        .section { display: none; }
+        .section.active { display: block; }
+    </style>
+</head>
+<body class="bg-[#f8fafc] font-sans antialiased overflow-hidden text-slate-900">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-72 bg-[#0f172a] text-white flex flex-col shrink-0 shadow-2xl z-20 overflow-y-auto font-medium text-sm">
+            <div class="p-8 border-b border-slate-800 flex items-center gap-3 italic">
+                <i class="fas fa-graduation-cap text-blue-500 text-3xl"></i>
+                <span class="text-2xl font-black italic tracking-tighter">KTÜ BYS</span>
+            </div>
+
+            <nav class="flex-1 p-4 space-y-1 mt-4">
+                <button onclick="showSection('dashboard')" id="menu-dashboard" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800 transition-all text-slate-400">
+                    <i class="fas fa-th-large w-5"></i><span>Dashboard</span>
+                </button>
+                <div class="px-4 pt-4 pb-2 text-[10px] font-black uppercase text-slate-500 tracking-widest">Sistem</div>
+                <button onclick="showSection('users')" id="menu-users" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800 transition-all text-slate-400">
+                    <i class="fas fa-users-cog w-5 text-blue-400"></i><span>Kullanıcı Yönetimi</span>
+                </button>
+                <button onclick="showSection('faculties')" id="menu-faculties" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800 transition-all text-slate-400">
+                    <i class="fas fa-university w-5"></i><span>Fakülteler</span>
+                </button>
+
+                <div class="px-4 pt-4 pb-2 text-[10px] font-black uppercase text-slate-500 tracking-widest">Akademik</div>
+                <button onclick="showSection('students')" id="menu-students" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800 transition-all text-slate-400">
+                    <i class="fas fa-user-graduate w-5"></i><span>Öğrenciler</span>
+                </button>
+                <button onclick="showSection('teachers')" id="menu-teachers" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800 transition-all text-slate-400">
+                    <i class="fas fa-chalkboard-teacher w-5"></i><span>Hocalar</span>
+                </button>
+                <button onclick="showSection('courses')" id="menu-courses" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800 transition-all text-slate-400">
+                    <i class="fas fa-book w-5"></i><span>Dersler</span>
+                </button>
+
+                <div class="px-4 pt-4 pb-2 text-[10px] font-black uppercase text-slate-500 tracking-widest">Planlama</div>
+                <button onclick="showSection('sections')" id="menu-sections" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800 transition-all text-slate-400">
+                    <i class="fas fa-layer-group w-5"></i><span>Şube & Ders Programı</span>
+                </button>
+            </nav>
+
+            <div class="p-6 border-t border-slate-800">
+                <button onclick="logout()" class="flex items-center gap-3 p-3 w-full text-red-400 hover:bg-red-500/10 rounded-2xl transition-all">
+                    <i class="fas fa-power-off"></i><span>Oturumu Kapat</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+            <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-10 shrink-0 z-10">
+                <h2 id="pageTitle" class="text-xl font-black text-slate-800 uppercase tracking-widest italic tracking-tighter">KTÜ BYS Panel</h2>
+                <div class="flex items-center gap-4">
+                    <p id="userNameDisplay" class="text-sm font-black text-slate-900 leading-tight">Admin</p>
+                    <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-black shadow-lg">ET</div>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-y-auto p-10">
+
+                <!-- SECTION: DASHBOARD -->
+                <div id="section-dashboard" class="section active">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+                        <div class="bg-white p-6 rounded-3xl shadow-xl border border-slate-100"><p class="text-slate-400 text-xs font-black uppercase">Öğrenci</p><h3 id="stat-students" class="text-3xl font-black mt-1">0</h3></div>
+                        <div class="stat-card bg-white p-6 rounded-3xl shadow-xl border border-slate-100"><p class="text-slate-400 text-xs font-black uppercase">Hoca</p><h3 id="stat-teachers" class="text-3xl font-black mt-1">0</h3></div>
+                        <div class="stat-card bg-white p-6 rounded-3xl shadow-xl border border-slate-100"><p class="text-slate-400 text-xs font-black uppercase">Ders</p><h3 id="stat-courses" class="text-3xl font-black mt-1">0</h3></div>
+                        <div class="stat-card bg-white p-6 rounded-3xl shadow-xl border border-slate-100"><p class="text-slate-400 text-xs font-black uppercase">Fakülte</p><h3 id="stat-faculties" class="text-3xl font-black mt-1">0</h3></div>
+                    </div>
+                </div>
+
+                <!-- SECTION: USERS (Kullanıcı Yönetimi) -->
+                <div id="section-users" class="section">
+                    <div class="flex justify-between items-center mb-8">
+                        <h1 class="text-3xl font-black italic">Kullanıcı Yönetimi</h1>
+                        <button onclick="openModal('userModal')" class="bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold shadow-xl">+ Yeni Kullanıcı Oluştur</button>
+                    </div>
+                    <div class="bg-white rounded-[2rem] shadow-xl overflow-hidden">
+                        <table class="w-full text-left font-bold text-slate-700">
+                            <thead class="bg-slate-50 text-slate-400 text-[10px] uppercase font-black tracking-widest border-b">
+                                <tr><th class="px-8 py-5">Kullanıcı Adı</th><th class="px-8 py-5">Yetki (Rol)</th><th class="px-8 py-5">Kayıt Tarihi</th><th class="px-8 py-5 text-center">İşlem</th></tr>
+                            </thead>
+                            <tbody id="usersTableBody" class="divide-y font-bold text-slate-600"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Diğer Seksiyonlar Buraya Gelecek (Basitleştirilmiş) -->
+                <div id="section-students" class="section">
+                    <div class="flex justify-between items-center mb-8"><h1 class="text-3xl font-black italic">Öğrenciler</h1><button onclick="openModal('studentModal')" class="bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold">+ Yeni Öğrenci</button></div>
+                    <div class="bg-white rounded-[2rem] shadow-xl overflow-hidden"><table class="w-full text-left"><tbody id="studentTableBody" class="divide-y font-bold"></tbody></table></div>
+                </div>
+                <div id="section-faculties" class="section"><div id="facultyCards" class="grid grid-cols-3 gap-6"></div></div>
+                <div id="section-courses" class="section"><div id="courseList" class="grid grid-cols-2 gap-4"></div></div>
+                <div id="section-teachers" class="section"><div id="teacherList" class="grid grid-cols-1 gap-2"></div></div>
+                <div id="section-sections" class="section"><div class="bg-white rounded-[2rem] shadow-xl overflow-hidden"><table class="w-full text-left"><tbody id="sectionsTableBody" class="divide-y font-bold text-slate-700"></tbody></table></div></div>
+            </main>
+        </div>
+    </div>
+
+    <!-- MODAL: ADD USER (Rol Atamalı) -->
+    <div id="userModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-[2.5rem] max-w-md w-full shadow-2xl p-10">
+            <h3 class="text-2xl font-black italic mb-6 text-slate-800">Yeni Sistem Kullanıcısı</h3>
+            <form id="addUserForm" class="space-y-4">
+                <input type="text" id="uUsername" placeholder="Kullanıcı Adı" required class="p-4 rounded-2xl border w-full font-bold outline-none focus:ring-4 focus:ring-blue-500/10">
+                <input type="password" id="uPassword" placeholder="Şifre" required class="p-4 rounded-2xl border w-full font-bold outline-none focus:ring-4 focus:ring-blue-500/10">
+                <select id="uRole" required class="p-4 rounded-2xl border w-full font-bold outline-none bg-slate-50">
+                    <option value="USER">Standart Kullanıcı (USER)</option>
+                    <option value="ADMIN">Yönetici (ADMIN)</option>
+                    <option value="TEACHER">Öğretmen (TEACHER)</option>
+                    <option value="STUDENT">Öğrenci (STUDENT)</option>
+                </select>
+                <div class="pt-4">
+                    <button type="submit" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-xl uppercase italic hover:bg-blue-700 transition-all">Kullanıcıyı Tanımla</button>
+                </div>
+            </form>
+            <button onclick="closeModal('userModal')" class="mt-4 text-slate-400 w-full font-bold text-sm">Vazgeç</button>
+        </div>
+    </div>
+
+    <!-- OTHER MODALS (Already existed) -->
+    <div id="studentModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm"><div class="bg-white rounded-[2.5rem] max-w-lg w-full p-8"><h3 class="text-2xl font-black mb-6">Öğrenci</h3><form id="studentForm" class="space-y-4"><input type="hidden" id="studentEditId"><div class="grid grid-cols-2 gap-4"><input type="text" id="sFirstName" placeholder="Ad" required class="p-4 border rounded-2xl w-full font-bold"><input type="text" id="sLastName" placeholder="Soyad" required class="p-4 border rounded-2xl w-full font-bold"></div><input type="text" id="sNumber" placeholder="No" class="p-4 border rounded-2xl w-full font-bold"><input type="email" id="sEmail" placeholder="Email" class="p-4 border rounded-2xl w-full font-bold"><div class="grid grid-cols-2 gap-4"><input type="number" id="sDeptId" placeholder="Bölüm ID" class="p-4 border rounded-2xl w-full font-bold"><input type="number" id="sUserId" placeholder="User ID" class="p-4 border rounded-2xl w-full font-bold"></div><button type="submit" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black italic">Kaydet</button></form></div></div>
+
+    <script>
+        const API_URL = 'http://localhost:8080';
+        const token = localStorage.getItem('token');
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!token) { window.location.href = 'index.html'; return; }
+            document.getElementById('userNameDisplay').innerText = localStorage.getItem('username');
+            showSection('dashboard');
+        });
+
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('section-' + id).classList.add('active');
+            document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active-menu'));
+            document.getElementById('menu-' + id).classList.add('active-menu');
+
+            if(id === 'users') loadUsers();
+            if(id === 'students') loadStudents();
+            if(id === 'faculties') loadFaculties();
+            if(id === 'courses') loadCourses();
+            if(id === 'teachers') loadTeachers();
+            if(id === 'dashboard') loadStats();
+        }
+
+        // --- USER MODULE ---
+        async function loadUsers() {
+            const body = document.getElementById('usersTableBody');
+            try {
+                const res = await fetch(`${API_URL}/users/all`, { headers: { 'Authorization': 'Bearer ' + token } });
+                const users = await res.json();
+                body.innerHTML = users.map(u => `
+                    <tr class="hover:bg-blue-50/50 transition-all border-b border-slate-50">
+                        <td class="px-8 py-5 text-slate-800">${u.username}</td>
+                        <td class="px-8 py-5 text-sm uppercase tracking-widest font-black ${u.role==='ADMIN'?'text-red-500':u.role==='TEACHER'?'text-blue-500':'text-green-500'}">${u.role}</td>
+                        <td class="px-8 py-5 text-slate-400 text-xs">${u.createdDate ? u.createdDate.split('T')[0] : '---'}</td>
+                        <td class="px-8 py-5 text-center">
+                            <button onclick="deleteData('users', ${u.id})" class="text-red-300 hover:text-red-600"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (e) { body.innerHTML = '<tr><td colspan="4" class="p-10 text-center">Hata!</td></tr>'; }
+        }
+
+        document.getElementById('addUserForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const data = {
+                username: document.getElementById('uUsername').value,
+                password: document.getElementById('uPassword').value
+            };
+            const role = document.getElementById('uRole').value;
+            try {
+                const res = await fetch(`${API_URL}/register?role=${role}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify(data)
+                });
+                if(res.ok) { alert('Kullanıcı Oluşturuldu!'); closeModal('userModal'); loadUsers(); }
+                else alert('Hata! Kullanıcı adı zaten var olabilir.');
+            } catch (e) { alert('Sunucu hatası!'); }
+        };
+
+        // --- OTHER UTILS ---
+        async function deleteData(type, id) {
+            if(!confirm('Emin misiniz?')) return;
+            let url = `${API_URL}/${type}/delete/${id}`;
+            if(type === 'users') url = `${API_URL}/users/delete/${id}`;
+            const res = await fetch(url, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
+            if(res.ok) showSection(document.querySelector('.section.active').id.split('-')[1]);
+        }
+
+        // Stats & Rest of the functions (simplified for brevity)
+        async function loadStats() {
+            const [s, t, c, f] = await Promise.all([
+                fetch(`${API_URL}/student/getAll`, { headers: { 'Authorization': 'Bearer ' + token } }),
+                fetch(`${API_URL}/teacher/all`, { headers: { 'Authorization': 'Bearer ' + token } }),
+                fetch(`${API_URL}/course/all`, { headers: { 'Authorization': 'Bearer ' + token } }),
+                fetch(`${API_URL}/faculty/getAll`, { headers: { 'Authorization': 'Bearer ' + token } })
+            ]);
+            document.getElementById('stat-students').innerText = (await s.json()).length || 0;
+            document.getElementById('stat-teachers').innerText = (await t.json()).length || 0;
+            document.getElementById('stat-courses').innerText = (await c.json()).length || 0;
+            document.getElementById('stat-faculties').innerText = (await f.json()).length || 0;
+        }
+
+        async function loadStudents() { const res = await fetch(`${API_URL}/student/getAll`, { headers: { 'Authorization': 'Bearer ' + token } }); const data = await res.json(); document.getElementById('studentTableBody').innerHTML = data.map(s => `<tr class="border-b"><td class="px-8 py-5 text-blue-600 italic tracking-tighter">${s.studentNumber}</td><td class="px-8 py-5">${s.firstName} ${s.lastName}</td><td class="px-8 py-5 text-center"><button onclick="deleteData('student', ${s.id})" class="text-red-400 hover:text-red-600"><i class="fas fa-trash-alt"></i></button></td></tr>`).join(''); }
+        function openModal(id) { document.getElementById(id).classList.replace('hidden', 'flex'); }
+        function closeModal(id) { document.getElementById(id).classList.replace('flex', 'hidden'); if(document.getElementById('addUserForm')) document.getElementById('addUserForm').reset(); }
+        function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+    </script>
+</body>
+</html>
