@@ -12,7 +12,11 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Teacher  extends  BaseEntity {
+public class Teacher extends BaseEntity {
+
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     private String firstName;
 

@@ -2,6 +2,7 @@ package com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.service.Impl;
 
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoDepartment;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoDepartmentIU;
+import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoFaculty;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.exception.BaseException;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.exception.MessageType;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.model.Department;
@@ -43,6 +44,7 @@ public class DepartmentService implements IDepartmentService {
     public DtoDepartment departmentAdd(DtoDepartmentIU dtoDepartmentIU) {
         Department department=new Department();
         department.setName(dtoDepartmentIU.getName());
+        department.setCode(dtoDepartmentIU.getCode());
         department.setHead_of_department(dtoDepartmentIU.getHead_of_department());
         department.setQuota(dtoDepartmentIU.getQuota());
 
@@ -63,6 +65,7 @@ public class DepartmentService implements IDepartmentService {
         department.setHead_of_department(dtoDepartmentIU.getHead_of_department());
         department.setQuota(dtoDepartmentIU.getQuota());
         department.setName(dtoDepartmentIU.getName());
+        department.setCode(dtoDepartmentIU.getCode());
 
         if (dtoDepartmentIU.getFacultyId() != null) {
             Faculty faculty = facultyRepository.findById(dtoDepartmentIU.getFacultyId())
@@ -116,10 +119,27 @@ public class DepartmentService implements IDepartmentService {
         DtoDepartment dto = new DtoDepartment();
         BeanUtils.copyProperties(department, dto);
         dto.setId(department.getId());
+        dto.setCode(department.getCode());
+        
         if (department.getCreatedDate() != null) {
             dto.setCreatedDate(department.getCreatedDate().toString());
         } else {
             dto.setCreatedDate(LocalDateTime.now().toString());
+        }
+
+        if (department.getFaculty() != null) {
+            dto.setFaculty(convertToDto(department.getFaculty()));
+        }
+        
+        return dto;
+    }
+
+    private DtoFaculty convertToDto(Faculty faculty) {
+        DtoFaculty dto = new DtoFaculty();
+        BeanUtils.copyProperties(faculty, dto);
+        dto.setId(faculty.getId());
+        if (faculty.getCreatedDate() != null) {
+            dto.setCreatedDate(faculty.getCreatedDate().toString());
         }
         return dto;
     }

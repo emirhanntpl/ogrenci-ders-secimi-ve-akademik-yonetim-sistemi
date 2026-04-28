@@ -18,10 +18,11 @@ public class RestAuthController implements IRestAuthController {
     @Autowired
     private IAuthServiceImpl authService;
 
+    // Sadece Request Body alır, rol otomatik USER atanır.
     @PostMapping("/register")
     @Override
-    public DtoUser register(@Valid @RequestBody AuthRequest request, @RequestParam(required = false) Role role) {
-        return authService.register(request, role);
+    public DtoUser register(@Valid @RequestBody AuthRequest request) {
+        return authService.register(request);
     }
 
     @PostMapping("/authenticate")
@@ -34,6 +35,13 @@ public class RestAuthController implements IRestAuthController {
     @Override
     public List<DtoUser> getAllUsers() {
         return authService.getAllUsers();
+    }
+
+    // Yeni: Belirli bir kullanıcının rolünü güncelleme endpoint'i
+    @PutMapping("/users/updateRole/{id}")
+    @Override
+    public DtoUser updateRole(@PathVariable Long id, @RequestParam Role role) {
+        return authService.updateRole(id, role);
     }
 
     @DeleteMapping("/users/delete/{id}")

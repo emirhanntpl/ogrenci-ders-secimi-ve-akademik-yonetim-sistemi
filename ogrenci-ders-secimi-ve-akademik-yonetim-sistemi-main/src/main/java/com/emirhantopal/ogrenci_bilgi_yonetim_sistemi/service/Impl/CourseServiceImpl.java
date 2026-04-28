@@ -5,7 +5,11 @@ import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoCourseIU;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.exception.BaseException;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.exception.MessageType;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.model.Course;
+import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.model.CourseSection;
+import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.model.Enrollment;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.repository.CourseRepository;
+import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.repository.CourseSectionRepository;
+import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.repository.EnrollmentRepository;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.service.ICourseService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +28,11 @@ public class CourseServiceImpl implements ICourseService {
     @Autowired
     private CourseRepository courseRepository;
 
+    @Autowired
+    private CourseSectionRepository courseSectionRepository;
+
+    @Autowired
+    private EnrollmentRepository enrollmentRepository;
 
     @Override
     @Transactional
@@ -59,8 +68,24 @@ public class CourseServiceImpl implements ICourseService {
         Course course = courseRepository.findById(id)
                 .orElseThrow(() -> new BaseException(MessageType.INVALID_COURSE_ID, HttpStatus.BAD_REQUEST));
         
-        // cascade = CascadeType.ALL olduğu için buna bağlı CourseSectionlar otomatik silinir.
-        // Ancak herhangi bir sorun çıkmaması için repository üzerinden siliyoruz.
+        // 1. Önce bu derse bağlı şubeleri (CourseSection) bulalım
+        List<CourseSection> sections = courseSectionRepository.findAll();
+        for (CourseSection section : sections) {
+            if (section.getCourse() != null && section.getCourse().getId().equals(course.getId())) {
+                
+                // 2. Bu şubeye bağlı kayıtları (Enrollment) bulup silelim
+                List<Enrollment> enrollments = enrollmentRepository.findAll();
+                for(Enrollment enrollment : enrollments){
+                     if(enrollment.getCourseSection() != null && enrollment.getCourseSection().getId().equals(section.getId())){
+                         enrollmentRepository.delete(enrollment);
+                     }
+                }
+                // 3. Şubeyi silelim
+                courseSectionRepository.delete(section);
+            }
+        }
+        
+        // 4. En son dersi silelim
         courseRepository.delete(course);
         System.out.println("Ders kaydı silindi. "+ id);
     }

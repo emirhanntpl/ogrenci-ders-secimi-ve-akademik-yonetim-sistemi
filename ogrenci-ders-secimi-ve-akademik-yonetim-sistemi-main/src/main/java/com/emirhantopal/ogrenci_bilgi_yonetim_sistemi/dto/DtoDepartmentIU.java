@@ -10,11 +10,9 @@ import lombok.NoArgsConstructor;
 public class DtoDepartmentIU {
 
     private String name;
-
+    private String code; // Yeni eklendi
     private String quota;
-
     private String head_of_department;
-
     private Long facultyId;
 
 }

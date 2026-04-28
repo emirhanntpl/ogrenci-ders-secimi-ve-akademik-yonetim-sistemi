@@ -29,7 +29,11 @@ public enum MessageType {
 
     // Enrollment related messages
     INVALID_ENROLLMENT_ID("1020", "DERS KAYDI (ENROLLMENT) ID BULUNAMADI"),
-    ENROLLMENT_LIST_IS_EMPTY("1021", "DERS KAYDI LİSTESİ BOŞ.");
+    ENROLLMENT_LIST_IS_EMPTY("1021", "DERS KAYDI LİSTESİ BOŞ."),
+
+    // Announcement related messages
+    INVALID_ANNOUNCEMENT_ID("1022", "DUYURU ID BULUNAMADI"),
+    ANNOUNCEMENT_LIST_IS_EMPTY("1023", "DUYURU LİSTESİ BOŞ.");
 
 
 

@@ -15,5 +15,7 @@ public class DtoTeacher extends DtoBaseEntity {
     private String lastName;
 
     private DtoDepartment department;
+    
+    private DtoUser user;
 
 }

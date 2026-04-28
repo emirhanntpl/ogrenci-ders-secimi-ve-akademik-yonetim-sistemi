@@ -8,13 +8,15 @@ import java.util.List;
 
 public interface IAuthService {
 
-    public DtoUser register(AuthRequest request, Role role);
+    public DtoUser register(AuthRequest request); // Artık dışarıdan rol almıyor
 
     public DtoUser registerAdmin(AuthRequest request);
 
     public AuthResponse authenticate(AuthRequest request);
     
     public List<DtoUser> getAllUsers();
+
+    public DtoUser updateRole(Long id, Role role); // Yeni rol güncelleme metodu
     
     public void deleteUser(Long id);
 

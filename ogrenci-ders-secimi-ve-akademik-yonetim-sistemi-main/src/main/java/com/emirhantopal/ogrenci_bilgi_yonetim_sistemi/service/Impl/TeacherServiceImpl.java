@@ -7,13 +7,16 @@ import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.exception.BaseException;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.exception.MessageType;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.model.Department;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.model.Teacher;
+import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.model.CourseSection;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.repository.DepartmentRepository;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.repository.TeacherRepository;
+import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.repository.CourseSectionRepository;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.service.ITeacherService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,48 +30,63 @@ public class TeacherServiceImpl implements ITeacherService {
 
     @Autowired
     private DepartmentRepository departmentRepository;
+
+    @Autowired
+    private CourseSectionRepository courseSectionRepository;
     
     @Override
+    @Transactional
     public DtoTeacher teacherAdd(DtoTeacherIU dtoTeacherIU) {
         Teacher teacher = new Teacher();
-        DtoTeacher dtoTeacher = new DtoTeacher();
         
         teacher.setFirstName(dtoTeacherIU.getFirstName());
         teacher.setLastName(dtoTeacherIU.getLastName());
         
 
-        if (dtoTeacherIU.getDepartmentId() != null) {
+        if (dtoTeacherIU.getDepartmentId() != null && dtoTeacherIU.getDepartmentId() > 0) {
             Department department = departmentRepository.findById(dtoTeacherIU.getDepartmentId())
                     .orElseThrow(() -> new BaseException(MessageType.INVALID_DEPARTMENT_ID, HttpStatus.BAD_REQUEST));
             teacher.setDepartment(department);
         }
         
         Teacher savedTeacher = teacherRepository.save(teacher);
-        BeanUtils.copyProperties(savedTeacher, dtoTeacher);
-        return dtoTeacher;
+        return convertToDto(savedTeacher);
     }
 
     @Override
+    @Transactional
     public DtoTeacher teacherUpdate(Long id, DtoTeacherIU dtoTeacherIU) {
         Teacher teacher = teacherRepository.findById(id)
                 .orElseThrow(() -> new BaseException(MessageType.INVALID_TEACHER_ID, HttpStatus.BAD_REQUEST));
-        DtoTeacher dtoTeacher = new DtoTeacher();
         teacher.setFirstName(dtoTeacherIU.getFirstName());
         teacher.setLastName(dtoTeacherIU.getLastName());
 
-        if (dtoTeacherIU.getDepartmentId() != null) {
+        if (dtoTeacherIU.getDepartmentId() != null && dtoTeacherIU.getDepartmentId() > 0) {
             Department department = departmentRepository.findById(dtoTeacherIU.getDepartmentId())
                     .orElseThrow(() -> new BaseException(MessageType.INVALID_DEPARTMENT_ID, HttpStatus.BAD_REQUEST));
             teacher.setDepartment(department);
+        } else {
+            teacher.setDepartment(null);
         }
+        
         Teacher savedTeacher = teacherRepository.save(teacher);
-        BeanUtils.copyProperties(savedTeacher, dtoTeacher);
-        return dtoTeacher;
+        return convertToDto(savedTeacher);
     }
 
     @Override
+    @Transactional
     public void teacherDelete(Long id) {
         Teacher teacher = teacherRepository.findById(id).orElseThrow(() -> new BaseException(MessageType.INVALID_TEACHER_ID, HttpStatus.BAD_REQUEST));
+        
+        // Öğretmene bağlı CourseSection'ları temizle
+        List<CourseSection> allSections = courseSectionRepository.findAll();
+        for (CourseSection section : allSections) {
+            if (section.getTeacher() != null && section.getTeacher().getId().equals(id)) {
+                section.setTeacher(null);
+                courseSectionRepository.save(section);
+            }
+        }
+
         teacherRepository.delete(teacher);
         System.out.println("Öğretmen kaydı silindi. "+ id);
     }
@@ -76,39 +94,40 @@ public class TeacherServiceImpl implements ITeacherService {
     @Override
     public List<DtoTeacher> teacherAll() {
         List<Teacher> allTeacher = teacherRepository.findAll();
-        if (allTeacher.isEmpty())
-            throw new BaseException(MessageType.TEACHER_LIST_IS_EMPTY, HttpStatus.BAD_REQUEST);
         List<DtoTeacher> dtoTeachers = new ArrayList<>();
         for (Teacher teacher :allTeacher){
-            DtoTeacher dtoTeacher=new DtoTeacher();
-            dtoTeacher.setFirstName(teacher.getFirstName());
-            dtoTeacher.setLastName(teacher.getLastName());
-            if (teacher.getDepartment() != null){
-                DtoDepartment dtoDepartment=new DtoDepartment();
-                BeanUtils.copyProperties(teacher.getDepartment(), dtoDepartment);
-                dtoTeacher.setDepartment(dtoDepartment);
-            }
-            dtoTeachers.add(dtoTeacher);
+            dtoTeachers.add(convertToDto(teacher));
         }
         return dtoTeachers;
     }
 
     @Override
     public DtoTeacher findByTeacherId(Long id) {
-        Optional<Teacher> byId = teacherRepository.findById(id);
-        if (byId.isEmpty()){
-            throw new BaseException(MessageType.INVALID_TEACHER_ID, HttpStatus.BAD_REQUEST);
+        Teacher teacher = teacherRepository.findById(id)
+                .orElseThrow(() -> new BaseException(MessageType.INVALID_TEACHER_ID, HttpStatus.BAD_REQUEST));
+        return convertToDto(teacher);
+    }
+
+    private DtoTeacher convertToDto(Teacher teacher) {
+        DtoTeacher dto = new DtoTeacher();
+        BeanUtils.copyProperties(teacher, dto);
+        
+        // ID set etme işlemini garantiye al
+        dto.setId(teacher.getId());
+        
+        if (teacher.getCreatedDate() != null) {
+            dto.setCreatedDate(teacher.getCreatedDate().toString());
         }
 
-        Teacher teacher = byId.get();
-        DtoTeacher dtoTeacher = new DtoTeacher();
-        BeanUtils.copyProperties(teacher, dtoTeacher);
-        
         if (teacher.getDepartment() != null) {
             DtoDepartment dtoDepartment = new DtoDepartment();
             BeanUtils.copyProperties(teacher.getDepartment(), dtoDepartment);
-            dtoTeacher.setDepartment(dtoDepartment);
+            dtoDepartment.setId(teacher.getDepartment().getId());
+            if (teacher.getDepartment().getCreatedDate() != null) {
+                dtoDepartment.setCreatedDate(teacher.getDepartment().getCreatedDate().toString());
+            }
+            dto.setDepartment(dtoDepartment);
         }
-        return dtoTeacher;
+        return dto;
     }
 }

@@ -8,8 +8,6 @@ import lombok.Setter;
 
 import java.util.List;
 
-
-
 @Entity
 @Table
 @AllArgsConstructor
@@ -18,10 +16,12 @@ import java.util.List;
 @Setter
 public class Course extends  BaseEntity {
 
-
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
     private List<CourseSection> courseSections;
 
+    @ManyToOne
+    @JoinColumn(name = "department_id") // Yeni eklendi
+    private Department department;
 
     private String code;
 
@@ -32,8 +32,4 @@ public class Course extends  BaseEntity {
     private Integer akts;
 
     private Integer quota;
-
-
-
-
 }

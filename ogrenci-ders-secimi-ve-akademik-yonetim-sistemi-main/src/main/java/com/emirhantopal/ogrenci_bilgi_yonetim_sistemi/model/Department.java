@@ -31,6 +31,8 @@ public class Department extends  BaseEntity {
 
     private  String name;
 
+    private String code;
+
     private String quota;
 
     private String head_of_department;

@@ -46,11 +46,11 @@ public class IAuthServiceImpl implements IAuthService {
 
     @Override
     @Transactional
-    public DtoUser register(AuthRequest request, Role role) {
+    public DtoUser register(AuthRequest request) {
         User user = new User();
         user.setUsername(request.getUsername());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole(role != null ? role : Role.USER);
+        user.setRole(Role.USER); // Varsayılan olarak her zaman USER atanır
         User savedUser = userRepository.save(user);
         return convertToDto(savedUser);
     }
@@ -58,7 +58,12 @@ public class IAuthServiceImpl implements IAuthService {
     @Override
     @Transactional
     public DtoUser registerAdmin(AuthRequest request){
-        return register(request, Role.ADMIN);
+        User userAdmin = new User();
+        userAdmin.setUsername(request.getUsername());
+        userAdmin.setPassword(passwordEncoder.encode(request.getPassword()));
+        userAdmin.setRole(Role.ADMIN); // Admin kaydı için özel metod
+        User savedAdmin = userRepository.save(userAdmin);
+        return convertToDto(savedAdmin);
     }
 
     @Override
@@ -87,6 +92,18 @@ public class IAuthServiceImpl implements IAuthService {
         return userRepository.findAll().stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
+    }
+
+    // Yeni: Rol Güncelleme Metodu
+    @Override
+    @Transactional
+    public DtoUser updateRole(Long id, Role role) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
+        
+        user.setRole(role);
+        User updatedUser = userRepository.save(user);
+        return convertToDto(updatedUser);
     }
 
     @Override
