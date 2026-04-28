@@ -218,8 +218,8 @@
         <div class="bg-white rounded-[2.5rem] max-w-md w-full shadow-2xl p-10">
             <h3 class="text-2xl font-black italic mb-6">Yeni Sistem Kullanıcısı</h3>
             <form id="addUserForm" class="space-y-4">
-                <label for="uUsername" class="block text-sm font-semibold text-slate-500">Kullanıcı ID (Sayısal, Örn: 445909)</label>
-                <input type="number" id="uUsername" placeholder="Örn: 445909" required min="1" class="p-4 rounded-2xl border w-full font-bold outline-none focus:ring-4 focus:ring-blue-500/10">
+                <label for="uUsername" class="block text-sm font-semibold text-slate-500">Kullanıcı ID / Sicil No</label>
+                <input type="text" id="uUsername" placeholder="Kullanıcı Adı" required class="p-4 rounded-2xl border w-full font-bold outline-none focus:ring-4 focus:ring-blue-500/10">
 
                 <label for="uPassword" class="block text-sm font-semibold text-slate-500 mt-2">Şifre</label>
                 <input type="password" id="uPassword" placeholder="Şifre" required class="p-4 rounded-2xl border w-full font-bold outline-none focus:ring-4 focus:ring-blue-500/10">
@@ -297,7 +297,7 @@
                 <input type="text" id="tFirstName" placeholder="Ad" required class="p-4 border w-full rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10">
                 <input type="text" id="tLastName" placeholder="Soyad" required class="p-4 border w-full rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10">
                 <select id="tDeptId" required class="p-4 rounded-2xl border border-slate-200 w-full font-bold outline-none bg-slate-50 focus:ring-4 focus:ring-blue-500/10"></select>
-                <input type="number" id="tNumber" placeholder="Sicil Numarası" required class="p-4 rounded-2xl border border-slate-200 w-full font-bold outline-none focus:ring-4 focus:ring-blue-500/10">
+                <input type="text" id="tNumber" placeholder="Sicil Numarası" required class="p-4 rounded-2xl border border-slate-200 w-full font-bold outline-none focus:ring-4 focus:ring-blue-500/10">
                 <button type="submit" class="w-full bg-blue-600 text-white py-4 rounded-2xl italic font-black uppercase shadow-xl mt-4">Kaydet</button>
             </form>
             <button onclick="closeModal('teacherModal')" class="mt-4 text-slate-400 font-bold w-full text-center">Kapat</button>
@@ -433,10 +433,10 @@
                     fetch(`${API_URL}/course/all`, { headers: { 'Authorization': 'Bearer ' + token } }).then(r => r.json()),
                     fetch(`${API_URL}/faculty/getAll`, { headers: { 'Authorization': 'Bearer ' + token } }).then(r => r.json())
                 ]);
-                document.getElementById('stat-students').innerText = s.length || 0;
-                document.getElementById('stat-teachers').innerText = t.length || 0;
-                document.getElementById('stat-courses').innerText = c.length || 0;
-                document.getElementById('stat-faculties').innerText = f.length || 0;
+                document.getElementById('stat-students').innerText = (s || []).length || 0;
+                document.getElementById('stat-teachers').innerText = (t || []).length || 0;
+                document.getElementById('stat-courses').innerText = (c || []).length || 0;
+                document.getElementById('stat-faculties').innerText = (f || []).length || 0;
             } catch (e) {}
         }
 
@@ -454,7 +454,11 @@
             const options = { method, headers: { 'Authorization': 'Bearer ' + token } };
             if (data) { options.headers['Content-Type'] = 'application/json'; options.body = JSON.stringify(data); }
             const res = await fetch(`${API_URL}${endpoint}`, options);
-            if (!res.ok) { const err = await res.json(); alert(err.message || 'Bir hata oluştu'); return null; }
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({ message: 'Bir hata oluştu' }));
+                alert(err.message || 'Bir hata oluştu');
+                return null;
+            }
             return res.status !== 204 ? res.json() : true;
         }
 
@@ -464,10 +468,64 @@
             if (await apiRequest(endpoint, 'DELETE')) showSection(document.querySelector('.section.active').id.split('-')[1]);
         }
 
+        // --- USERS ---
+        async function loadUsers() {
+            const users = await apiRequest('/users/all');
+            document.getElementById('usersTableBody').innerHTML = (users || []).map(u => `
+                <tr class="hover:bg-slate-50 border-b">
+                    <td class="px-8 py-5 text-blue-600 font-mono tracking-widest font-black">${u.username}</td>
+                    <td class="px-8 py-5 text-sm uppercase tracking-widest font-black ${u.role==='ADMIN'?'text-red-500':u.role==='TEACHER'?'text-green-600':u.role==='STUDENT'?'text-orange-500':'text-slate-500'}">${u.role || 'USER'}</td>
+                    <td class="px-8 py-5 text-center"><button onclick="openRoleModal(${u.id}, '${u.username}', '${u.role || 'USER'}')" class="bg-blue-50 text-blue-600 px-4 py-2 rounded-xl text-[10px] uppercase font-black tracking-widest hover:bg-blue-600 hover:text-white transition-all">Yetki Ver</button></td>
+                    <td class="px-8 py-5 text-center"><button onclick="deleteData('users', ${u.id})" class="text-red-400 hover:text-red-600"><i class="fas fa-trash-alt"></i></button></td>
+                </tr>
+            `).join('');
+        }
+
+        document.getElementById('addUserForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const data = {
+                username: document.getElementById('uUsername').value.trim(),
+                password: document.getElementById('uPassword').value
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                    body: JSON.stringify(data)
+                });
+                if(res.ok) {
+                    alert('Kullanıcı başarıyla oluşturuldu!');
+                    closeModal('userModal');
+                    document.getElementById('addUserForm').reset();
+                    loadUsers();
+                } else {
+                    const err = await res.json().catch(() => ({ message: 'Kullanıcı zaten mevcut veya hatalı giriş!' }));
+                    alert(err.message || 'Hata oluştu!');
+                }
+            } catch (err) {
+                alert('Sunucu hatası!');
+            }
+        };
+
+        function openRoleModal(id, username, currentRole) {
+            document.getElementById('rUserId').value = id;
+            document.getElementById('rUsername').innerText = username;
+            document.getElementById('rRole').value = currentRole;
+            openModal('roleModal');
+        }
+
+        document.getElementById('updateRoleForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('rUserId').value;
+            const newRole = document.getElementById('rRole').value;
+            if (await apiRequest(`/users/updateRole/${id}?role=${newRole}`, 'PUT')) { closeModal('roleModal'); loadUsers(); alert('Yetki güncellendi!'); }
+        };
+
         // --- ANNOUNCEMENTS ---
         async function loadAnnouncements() {
             allData.announcements = await apiRequest('/announcement/all');
-            document.getElementById('announcementList').innerHTML = allData.announcements.map(a => `
+            document.getElementById('announcementList').innerHTML = (allData.announcements || []).map(a => `
                 <div class="bg-white p-8 rounded-[2rem] shadow-xl border">
                     <div class="flex justify-between items-start mb-4">
                         <div>
@@ -504,23 +562,10 @@
             if (await apiRequest(id ? `/announcement/update/${id}` : '/announcement/add', id ? 'PUT' : 'POST', data)) { closeModal('announcementModal'); loadAnnouncements(); }
         };
 
-        // --- USERS ---
-        async function loadUsers() {
-            const users = await apiRequest('/users/all');
-            document.getElementById('usersTableBody').innerHTML = users.map(u => `
-                <tr class="hover:bg-slate-50 border-b">
-                    <td class="px-8 py-5 text-blue-600 font-mono tracking-widest font-black">${u.username}</td>
-                    <td class="px-8 py-5 text-sm uppercase tracking-widest font-black ${u.role==='ADMIN'?'text-red-500':u.role==='TEACHER'?'text-green-600':u.role==='STUDENT'?'text-orange-500':'text-slate-500'}">${u.role || 'USER'}</td>
-                    <td class="px-8 py-5 text-center"><button onclick="openRoleModal(${u.id}, '${u.username}', '${u.role || 'USER'}')" class="bg-blue-50 text-blue-600 px-4 py-2 rounded-xl text-[10px] uppercase font-black tracking-widest hover:bg-blue-600 hover:text-white transition-all">Yetki Ver</button></td>
-                    <td class="px-8 py-5 text-center"><button onclick="deleteData('users', ${u.id})" class="text-red-400 hover:text-red-600"><i class="fas fa-trash-alt"></i></button></td>
-                </tr>
-            `).join('');
-        }
-
         // --- FACULTIES ---
         async function loadFaculties() {
             allData.faculties = await apiRequest('/faculty/getAll');
-            document.getElementById('facultyCards').innerHTML = allData.faculties.map(f => `
+            document.getElementById('facultyCards').innerHTML = (allData.faculties || []).map(f => `
                 <div class="bg-white p-8 rounded-[2rem] shadow-xl border">
                     <h3 class="text-xl font-black italic">${f.name}</h3>
                     <p class="text-xs text-slate-400 mt-2">${f.address}</p>
@@ -572,7 +617,7 @@
         // --- DEPARTMENTS ---
         async function loadDepartments() {
             allData.departments = await apiRequest('/department/getAll');
-            document.getElementById('departmentCards').innerHTML = allData.departments.map(d => `
+            document.getElementById('departmentCards').innerHTML = (allData.departments || []).map(d => `
                 <div class="bg-white p-8 rounded-[2rem] shadow-xl border">
                     <h3 class="text-xl font-black italic">${d.name}</h3>
                     <p class="text-xs text-slate-400 mt-2">Kod: ${d.code}</p>
@@ -589,7 +634,7 @@
 
         async function openDepartmentModal(data = null) {
             const faculties = await apiRequest('/faculty/getAll');
-            document.getElementById('dFacultyId').innerHTML = '<option value="">Fakülte Seçin</option>' + faculties.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
+            document.getElementById('dFacultyId').innerHTML = '<option value="">Fakülte Seçin</option>' + (faculties || []).map(f => `<option value="${f.id}">${f.name}</option>`).join('');
             document.getElementById('departmentEditId').value = data?.id || '';
             document.getElementById('departmentModalTitle').innerText = data ? 'Departmanı Düzenle' : 'Yeni Departman';
             document.getElementById('dName').value = data?.name || '';
@@ -608,7 +653,7 @@
         // --- STUDENTS ---
         async function loadStudents() {
             allData.students = await apiRequest('/student/getAll');
-            document.getElementById('studentTableBody').innerHTML = allData.students.map(s => `
+            document.getElementById('studentTableBody').innerHTML = (allData.students || []).map(s => `
                 <tr class="hover:bg-slate-50 border-b">
                     <td class="px-8 py-5 text-blue-600 italic font-black">${s.studentNumber}</td>
                     <td class="px-8 py-5">${s.firstName} ${s.lastName}</td>
@@ -624,7 +669,7 @@
 
         async function openStudentModal(data = null) {
             const depts = await apiRequest('/department/getAll');
-            document.getElementById('sDeptId').innerHTML = '<option value="">Departman Seçin</option>' + depts.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+            document.getElementById('sDeptId').innerHTML = '<option value="">Departman Seçin</option>' + (depts || []).map(d => `<option value="${d.id}">${d.name}</option>`).join('');
             document.getElementById('studentEditId').value = data?.id || '';
             document.getElementById('studentModalTitle').innerText = data ? 'Öğrenciyi Düzenle' : 'Öğrenci Kaydı';
             document.getElementById('sFirstName').value = data?.firstName || '';
@@ -641,8 +686,8 @@
             const id = document.getElementById('studentEditId').value;
             const num = document.getElementById('sNumber').value.toString();
             const users = await apiRequest('/users/all');
-            const user = users.find(u => u.username === num);
-            if (!user) { alert(`Kullanıcı ID ${num} bulunamadı!`); return; }
+            const user = (users || []).find(u => u.username === num);
+            if (!user) { alert(`Kullanıcı ID ${num} bulunamadı! Lütfen önce 'Sistem Kullanıcıları' sekmesinden bu numara ile bir kullanıcı oluşturun.`); return; }
             const data = { firstName: document.getElementById('sFirstName').value, lastName: document.getElementById('sLastName').value, studentNumber: num, email: document.getElementById('sEmail').value, telNumber: document.getElementById('sTel').value, departmentId: parseInt(document.getElementById('sDeptId').value), userId: user.id };
             if (await apiRequest(id ? `/student/update/${id}` : '/student/add', id ? 'PUT' : 'POST', data)) { closeModal('studentModal'); loadStudents(); }
         };
@@ -650,10 +695,10 @@
         // --- TEACHERS ---
         async function loadTeachers() {
             allData.teachers = await apiRequest('/teacher/all');
-            document.getElementById('teacherList').innerHTML = allData.teachers.map(t => `
+            document.getElementById('teacherList').innerHTML = (allData.teachers || []).map(t => `
                 <div class="bg-white p-6 rounded-3xl border flex justify-between items-center mb-2 shadow-sm">
                     <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 font-black flex items-center justify-center">${t.firstName[0]}${t.lastName[0]}</div>
+                        <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 font-black flex items-center justify-center">${t.firstName ? t.firstName[0] : '?'}${t.lastName ? t.lastName[0] : '?'}</div>
                         <div><h4 class="font-black italic text-slate-800 uppercase">${t.firstName} ${t.lastName}</h4><p class="text-xs text-slate-400 font-bold">${t.department?.name || '---'}</p></div>
                     </div>
                     <div class="flex gap-4">
@@ -666,7 +711,7 @@
 
         async function openTeacherModal(data = null) {
             const depts = await apiRequest('/department/getAll');
-            document.getElementById('tDeptId').innerHTML = '<option value="">Departman Seçin</option>' + depts.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+            document.getElementById('tDeptId').innerHTML = '<option value="">Departman Seçin</option>' + (depts || []).map(d => `<option value="${d.id}">${d.name}</option>`).join('');
             document.getElementById('teacherEditId').value = data?.id || '';
             document.getElementById('teacherModalTitle').innerText = data ? 'Hocayı Düzenle' : 'Hoca Kaydı';
             document.getElementById('tFirstName').value = data?.firstName || '';
@@ -681,8 +726,8 @@
             const id = document.getElementById('teacherEditId').value;
             const num = document.getElementById('tNumber').value.toString();
             const users = await apiRequest('/users/all');
-            const user = users.find(u => u.username === num);
-            if (!user) { alert(`Kullanıcı ID ${num} bulunamadı!`); return; }
+            const user = (users || []).find(u => u.username === num);
+            if (!user) { alert(`Kullanıcı ID ${num} bulunamadı! Lütfen önce 'Sistem Kullanıcıları' sekmesinden bu numara ile bir kullanıcı oluşturun.`); return; }
             const data = { firstName: document.getElementById('tFirstName').value, lastName: document.getElementById('tLastName').value, departmentId: parseInt(document.getElementById('tDeptId').value), userId: user.id };
             if (await apiRequest(id ? `/teacher/update/${id}` : '/teacher/add', id ? 'PUT' : 'POST', data)) { closeModal('teacherModal'); loadTeachers(); }
         };
@@ -690,7 +735,7 @@
         // --- COURSES ---
         async function loadCourses() {
             allData.courses = await apiRequest('/course/all');
-            document.getElementById('courseList').innerHTML = allData.courses.map(c => `
+            document.getElementById('courseList').innerHTML = (allData.courses || []).map(c => `
                 <div class="flex items-center justify-between p-6 bg-white rounded-3xl border border-slate-100 shadow-sm">
                     <div><span class="text-[10px] font-black text-blue-500 bg-blue-50 px-3 py-1 rounded-full uppercase italic">${c.code}</span><h4 class="text-lg font-black mt-2 italic text-slate-800">${c.name}</h4><p class="text-xs text-slate-400 mt-1 font-bold">Kredi: ${c.credit} | AKTS: ${c.akts}</p></div>
                     <div class="flex gap-4">
@@ -722,7 +767,7 @@
         // --- CLASSROOMS ---
         async function loadClassrooms() {
             const data = await apiRequest('/classroom/all');
-            document.getElementById('classroomCards').innerHTML = data.map(c => `
+            document.getElementById('classroomCards').innerHTML = (data || []).map(c => `
                 <div class="bg-white p-6 rounded-3xl border flex justify-between items-center shadow-sm">
                     <div><h4 class="text-xl font-black italic">${c.roomNumber}</h4><p class="text-xs text-slate-400 font-bold uppercase mt-1">Kapasite: ${c.capacity}</p></div>
                     <div class="flex gap-4">
@@ -751,7 +796,7 @@
         // --- SEMESTERS ---
         async function loadSemesters() {
             const data = await apiRequest('/semester/all');
-            document.getElementById('semesterList').innerHTML = data.map(s => `
+            document.getElementById('semesterList').innerHTML = (data || []).map(s => `
                 <div class="bg-white p-6 rounded-3xl border flex justify-between items-center shadow-sm">
                     <span class="font-black italic">${s.term}</span>
                     <div class="flex items-center gap-4">
@@ -781,7 +826,7 @@
         // --- SECTIONS & ENROLLMENTS ---
         async function loadSections() {
             const data = await apiRequest('/coursesection/all');
-            document.getElementById('sectionsTableBody').innerHTML = data.map(s => `
+            document.getElementById('sectionsTableBody').innerHTML = (data || []).map(s => `
                 <tr class="hover:bg-slate-50 border-b">
                     <td class="px-8 py-5 text-blue-600 uppercase font-black italic">${s.course?.name || '---'}</td>
                     <td class="px-8 py-5">${s.teacher?.firstName} ${s.teacher?.lastName}</td>
@@ -793,7 +838,7 @@
 
         async function loadEnrollments() {
             const data = await apiRequest('/enrollment/all');
-            document.getElementById('enrollmentsTableBody').innerHTML = data.map(e => `
+            document.getElementById('enrollmentsTableBody').innerHTML = (data || []).map(e => `
                 <tr class="hover:bg-slate-50 border-b">
                     <td class="px-8 py-5 text-blue-600 italic font-black">${e.student?.studentNumber}</td>
                     <td class="px-8 py-5">${e.student?.firstName} ${e.student?.lastName}</td>
@@ -805,17 +850,17 @@
 
         async function openSectionModal() {
             const [c, t, cl, s] = await Promise.all([apiRequest('/course/all'), apiRequest('/teacher/all'), apiRequest('/classroom/all'), apiRequest('/semester/all')]);
-            document.getElementById('secCourse').innerHTML = c.map(x => `<option value="${x.id}">${x.code} - ${x.name}</option>`).join('');
-            document.getElementById('secTeacher').innerHTML = t.map(x => `<option value="${x.id}">${x.firstName} ${x.lastName}</option>`).join('');
-            document.getElementById('secClassroom').innerHTML = cl.map(x => `<option value="${x.id}">${x.roomNumber}</option>`).join('');
-            document.getElementById('secSemester').innerHTML = s.map(x => `<option value="${x.id}">${x.term}</option>`).join('');
+            document.getElementById('secCourse').innerHTML = (c || []).map(x => `<option value="${x.id}">${x.code} - ${x.name}</option>`).join('');
+            document.getElementById('secTeacher').innerHTML = (t || []).map(x => `<option value="${x.id}">${x.firstName} ${x.lastName}</option>`).join('');
+            document.getElementById('secClassroom').innerHTML = (cl || []).map(x => `<option value="${x.id}">${x.roomNumber}</option>`).join('');
+            document.getElementById('secSemester').innerHTML = (s || []).map(x => `<option value="${x.id}">${x.term}</option>`).join('');
             openModal('sectionModal');
         }
 
         async function openEnrollmentModal() {
             const [st, se] = await Promise.all([apiRequest('/student/getAll'), apiRequest('/coursesection/all')]);
-            document.getElementById('enrStudent').innerHTML = st.map(x => `<option value="${x.id}">${x.studentNumber} - ${x.firstName} ${x.lastName}</option>`).join('');
-            document.getElementById('enrSection').innerHTML = se.map(x => `<option value="${x.id}">${x.course?.name} (${x.teacher?.lastName})</option>`).join('');
+            document.getElementById('enrStudent').innerHTML = (st || []).map(x => `<option value="${x.id}">${x.studentNumber} - ${x.firstName} ${x.lastName}</option>`).join('');
+            document.getElementById('enrSection').innerHTML = (se || []).map(x => `<option value="${x.id}">${x.course?.name} (${x.teacher?.lastName})</option>`).join('');
             openModal('enrollmentModal');
         }
 
