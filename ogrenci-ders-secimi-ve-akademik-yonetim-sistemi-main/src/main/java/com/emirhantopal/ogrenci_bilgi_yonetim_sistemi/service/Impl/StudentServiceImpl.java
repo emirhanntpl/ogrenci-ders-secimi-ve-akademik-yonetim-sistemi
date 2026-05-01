@@ -4,6 +4,7 @@ import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoDepartment;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoStudent;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoStudentIU;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoUser;
+import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.enums.Role;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.exception.BaseException;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.exception.MessageType;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.model.Department;
@@ -19,8 +20,8 @@ import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.repository.UserRepository;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.service.IStudentService;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,20 +32,21 @@ import java.util.Optional;
 @Service
 public class StudentServiceImpl implements IStudentService {
 
-    @Autowired
-    private StudentRepository studentRepository;
+    private final StudentRepository studentRepository;
+    private final DepartmentRepository departmentRepository;
+    private final UserRepository userRepository;
+    private final EnrollmentRepository enrollmentRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private DepartmentRepository departmentRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private EnrollmentRepository enrollmentRepository;
-
-    @Autowired
-    private RefreshTokenRepository refreshTokenRepository;
+    public StudentServiceImpl(StudentRepository studentRepository, DepartmentRepository departmentRepository, UserRepository userRepository, EnrollmentRepository enrollmentRepository, RefreshTokenRepository refreshTokenRepository, PasswordEncoder passwordEncoder) {
+        this.studentRepository = studentRepository;
+        this.departmentRepository = departmentRepository;
+        this.userRepository = userRepository;
+        this.enrollmentRepository = enrollmentRepository;
+        this.refreshTokenRepository = refreshTokenRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     @Transactional
@@ -70,7 +72,38 @@ public class StudentServiceImpl implements IStudentService {
         student.setEmail(dtoIU.getEmail());
         student.setTelNumber(dtoIU.getTelNumber());
 
-        mapEntitiesToStudent(dtoIU, student);
+        if (dtoIU.getDepartmentId() != null && dtoIU.getDepartmentId() > 0) {
+            Department department = departmentRepository.findById(dtoIU.getDepartmentId())
+                    .orElseThrow(() -> new BaseException(MessageType.INVALID_DEPARTMENT_ID, HttpStatus.BAD_REQUEST));
+            student.setDepartment(department);
+        } else {
+            student.setDepartment(null);
+        }
+
+        // OTOMATİK KULLANICI OLUŞTURMA VEYA BAĞLAMA MANTIĞI
+        String username = dtoIU.getStudentNumber(); // Öğrenci no'yu username olarak kullanacağız
+        
+        Optional<User> existingUser = userRepository.findByUsername(username);
+        User user;
+        if(existingUser.isPresent()){
+            user = existingUser.get();
+            // Eğer bu kullanıcı hesabı (user) zaten başka bir öğrenciye bağlıysa:
+            final Long userId = user.getId(); // Lambda için final değişken
+            Optional<Student> existingStudentWithThisUser = studentRepository.findAll().stream()
+                .filter(s -> s.getUser() != null && s.getUser().getId().equals(userId))
+                .findFirst();
+            if (existingStudentWithThisUser.isPresent()) {
+                throw new RuntimeException("Bu kullanıcı hesabı (" + username + ") zaten başka bir öğrenciye tanımlı!");
+            }
+        } else {
+            // Kullanıcı yoksa, otomatik olarak yeni bir STUDENT rolünde kullanıcı oluştur
+            user = new User();
+            user.setUsername(username);
+            user.setPassword(passwordEncoder.encode(username)); // Şifre varsayılan olarak Öğrenci No ile aynı
+            user.setRole(Role.STUDENT);
+            user = userRepository.save(user);
+        }
+        student.setUser(user);
 
         Student savedStudent = studentRepository.save(student);
         return convertToDto(savedStudent);
@@ -106,7 +139,30 @@ public class StudentServiceImpl implements IStudentService {
         student.setEmail(dtoIU.getEmail());
         student.setTelNumber(dtoIU.getTelNumber());
 
-        mapEntitiesToStudent(dtoIU, student);
+        if (dtoIU.getDepartmentId() != null && dtoIU.getDepartmentId() > 0) {
+            Department department = departmentRepository.findById(dtoIU.getDepartmentId())
+                    .orElseThrow(() -> new BaseException(MessageType.INVALID_DEPARTMENT_ID, HttpStatus.BAD_REQUEST));
+            student.setDepartment(department);
+        } else {
+            student.setDepartment(null);
+        }
+
+        // Güncellemede öğrenci no (username) değişiyorsa
+        String newUsername = dtoIU.getStudentNumber();
+        if (student.getUser() == null || !student.getUser().getUsername().equals(newUsername)) {
+             Optional<User> existingUser = userRepository.findByUsername(newUsername);
+             User user;
+             if(existingUser.isPresent()){
+                 user = existingUser.get();
+             } else {
+                 user = new User();
+                 user.setUsername(newUsername);
+                 user.setPassword(passwordEncoder.encode(newUsername)); // Varsayılan şifre
+                 user.setRole(Role.STUDENT);
+                 user = userRepository.save(user);
+             }
+             student.setUser(user);
+        }
 
         Student updatedStudent = studentRepository.save(student);
         return convertToDto(updatedStudent);
@@ -160,35 +216,6 @@ public class StudentServiceImpl implements IStudentService {
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new BaseException(MessageType.INVALID_STUDENT_ID, HttpStatus.BAD_REQUEST));
         return convertToDto(student);
-    }
-
-    // --- HELPER METHODS ---
-
-    private void mapEntitiesToStudent(DtoStudentIU dtoIU, Student student) {
-        if (dtoIU.getDepartmentId() != null && dtoIU.getDepartmentId() > 0) {
-            Department department = departmentRepository.findById(dtoIU.getDepartmentId())
-                    .orElseThrow(() -> new BaseException(MessageType.INVALID_DEPARTMENT_ID, HttpStatus.BAD_REQUEST));
-            student.setDepartment(department);
-        } else {
-            student.setDepartment(null);
-        }
-
-        if (dtoIU.getUserId() != null && dtoIU.getUserId() > 0) {
-            // Eğer bu UserId başka bir öğrenciye zaten atanmışsa hata ver (Bir kullanıcı hesabı sadece bir öğrenciye ait olabilir)
-            Optional<Student> existingStudentWithThisUser = studentRepository.findAll().stream()
-                    .filter(s -> s.getUser() != null && s.getUser().getId().equals(dtoIU.getUserId()))
-                    .findFirst();
-                    
-            if (existingStudentWithThisUser.isPresent() && !existingStudentWithThisUser.get().getId().equals(student.getId())) {
-                 throw new RuntimeException("Bu kullanıcı hesabı (" + dtoIU.getUserId() + ") zaten başka bir öğrenciye tanımlı!");
-            }
-
-            User user = userRepository.findById(dtoIU.getUserId())
-                    .orElseThrow(() -> new BaseException(MessageType.INVALID_USER_ID, HttpStatus.BAD_REQUEST));
-            student.setUser(user);
-        } else {
-            student.setUser(null);
-        }
     }
 
     private DtoStudent convertToDto(Student student) {

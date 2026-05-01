@@ -22,10 +22,8 @@ import java.util.List;
 public class SecurityConfig {
 
     private static final String[] WHITE_LIST_URL = {
-            "/register", 
             "/authenticate", 
             "/refreshToken",
-            "/register-admin",
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/swagger-ui.html"
@@ -43,8 +41,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(request ->
                         request.requestMatchers(WHITE_LIST_URL).permitAll()
-                                .requestMatchers("/users/**").hasAuthority("ADMIN") // Kullanıcı yönetimi sadece ADMIN'de
-                                .requestMatchers("/faculty/**", "/department/**", "/semester/**", "/classroom/**").hasAuthority("ADMIN")
+                                .requestMatchers("/faculty/**", "/department/**", "/semester/**", "/classroom/**", "/announcement/**").hasAuthority("ADMIN")
                                 .requestMatchers("/teacher/**", "/course/**", "/coursesection/**").hasAnyAuthority("ADMIN", "TEACHER")
                                 .requestMatchers("/student/**").hasAnyAuthority("ADMIN", "TEACHER")
                                 .requestMatchers("/grade/**").hasAnyAuthority("ADMIN", "TEACHER", "STUDENT")

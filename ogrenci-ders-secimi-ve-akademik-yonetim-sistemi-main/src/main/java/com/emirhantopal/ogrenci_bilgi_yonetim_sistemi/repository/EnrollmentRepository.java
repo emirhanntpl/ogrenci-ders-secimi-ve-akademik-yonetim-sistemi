@@ -9,5 +9,6 @@ import java.util.List;
 
 @Repository
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
-    List<Enrollment> findByStudent(Student student); // Bu metot eklendi
+    List<Enrollment> findByStudent(Student student);
+    List<Enrollment> findByCourseSection_Id(Long courseSectionId);
 }

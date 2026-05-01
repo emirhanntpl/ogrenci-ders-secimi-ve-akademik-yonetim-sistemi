@@ -15,7 +15,8 @@ public interface IStudentController {
 
     public List<DtoStudent> getAllStudent();
 
+    public DtoStudent getStudentById(Long id);
 
-
+    public DtoStudent getStudentByUsername(String username);
 
 }

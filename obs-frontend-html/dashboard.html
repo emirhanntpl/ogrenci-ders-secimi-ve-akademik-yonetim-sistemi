@@ -27,9 +27,6 @@
                     <i class="fas fa-th-large w-5"></i><span>Dashboard</span>
                 </button>
                 <div class="px-4 pt-4 pb-2 text-[10px] font-black uppercase text-slate-500 tracking-widest">Sistem Yönetimi</div>
-                <button onclick="showSection('users')" id="menu-users" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800 transition-all text-slate-400">
-                    <i class="fas fa-users-cog w-5 text-blue-400"></i><span>Sistem Kullanıcıları</span>
-                </button>
                 <button onclick="showSection('announcements')" id="menu-announcements" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800 transition-all text-slate-400">
                     <i class="fas fa-bullhorn w-5 text-yellow-400"></i><span>Duyurular</span>
                 </button>
@@ -109,22 +106,6 @@
                         <button onclick="openAnnouncementModal()" class="bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold shadow-xl">+ Yeni Duyuru</button>
                     </div>
                     <div id="announcementList" class="grid grid-cols-1 gap-6"></div>
-                </div>
-
-                <!-- SECTION: USERS -->
-                <div id="section-users" class="section">
-                    <div class="flex justify-between items-center mb-8">
-                        <h1 class="text-3xl font-black italic">Sistem Kullanıcıları</h1>
-                        <button onclick="openModal('userModal')" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-xl shadow-blue-500/30">+ Yeni Kullanıcı</button>
-                    </div>
-                    <div class="bg-white rounded-[2rem] shadow-xl overflow-hidden border border-slate-200">
-                        <table class="w-full text-left font-bold text-slate-700">
-                            <thead class="bg-slate-50 text-slate-400 text-[10px] uppercase font-black tracking-widest border-b">
-                                <tr><th class="px-8 py-5">Kullanıcı Adı (ID)</th><th class="px-8 py-5">Şu Anki Rolü</th><th class="px-8 py-5 text-center">Yetki İşlemleri</th><th class="px-8 py-5 text-center">Sil</th></tr>
-                            </thead>
-                            <tbody id="usersTableBody" class="divide-y font-bold text-slate-600"></tbody>
-                        </table>
-                    </div>
                 </div>
 
                 <!-- SECTION: STUDENTS -->
@@ -213,24 +194,6 @@
         </div>
     </div>
 
-    <!-- MODAL: ADD USER -->
-    <div id="userModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-[2.5rem] max-w-md w-full shadow-2xl p-10">
-            <h3 class="text-2xl font-black italic mb-6">Yeni Sistem Kullanıcısı</h3>
-            <form id="addUserForm" class="space-y-4">
-                <label for="uUsername" class="block text-sm font-semibold text-slate-500">Kullanıcı ID / Sicil No</label>
-                <input type="text" id="uUsername" placeholder="Kullanıcı Adı" required class="p-4 rounded-2xl border w-full font-bold outline-none focus:ring-4 focus:ring-blue-500/10">
-
-                <label for="uPassword" class="block text-sm font-semibold text-slate-500 mt-2">Şifre</label>
-                <input type="password" id="uPassword" placeholder="Şifre" required class="p-4 rounded-2xl border w-full font-bold outline-none focus:ring-4 focus:ring-blue-500/10">
-
-                <div class="pt-4">
-                    <button type="submit" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-xl uppercase italic hover:bg-blue-700 transition-all">Kullanıcıyı Kaydet (Oto: USER)</button>
-                </div>
-            </form>
-            <button onclick="closeModal('userModal')" class="mt-4 text-slate-400 w-full font-bold text-sm">Vazgeç</button>
-        </div>
-    </div>
 
     <!-- MODAL: ANNOUNCEMENT -->
     <div id="announcementModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
@@ -244,27 +207,6 @@
                 <button type="submit" class="w-full bg-blue-600 text-white py-4 rounded-2xl italic font-black uppercase shadow-xl mt-4">Kaydet</button>
             </form>
             <button onclick="closeModal('announcementModal')" class="mt-4 text-slate-400 font-bold w-full text-center">Kapat</button>
-        </div>
-    </div>
-
-    <!-- MODAL: UPDATE ROLE -->
-    <div id="roleModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-[2.5rem] max-w-md w-full p-10 shadow-2xl">
-            <h3 class="text-2xl font-black italic mb-6">Rolü Güncelle</h3>
-            <form id="updateRoleForm" class="space-y-4">
-                <input type="hidden" id="rUserId">
-                <p id="rUsername" class="text-center font-black text-2xl mb-4 text-blue-600 font-mono tracking-widest"></p>
-                <select id="rRole" required class="p-4 rounded-2xl border w-full font-bold outline-none bg-slate-50 text-blue-600 cursor-pointer">
-                    <option value="USER">USER (Standart)</option>
-                    <option value="STUDENT">STUDENT (Öğrenci)</option>
-                    <option value="TEACHER">TEACHER (Öğretmen)</option>
-                    <option value="ADMIN">ADMIN (Yönetici)</option>
-                </select>
-                <div class="pt-4">
-                    <button type="submit" class="w-full bg-green-600 text-white py-4 rounded-2xl font-black uppercase italic shadow-xl shadow-green-600/30 hover:bg-green-700 transition-all">Yetkiyi Değiştir</button>
-                </div>
-            </form>
-            <button onclick="closeModal('roleModal')" class="mt-4 w-full font-bold text-slate-400">İptal</button>
         </div>
     </div>
 
@@ -416,7 +358,7 @@
     <script>
         const API_URL = 'http://localhost:8080';
         const token = localStorage.getItem('token');
-        let allData = { students: [], courses: [], teachers: [], faculties: [], classrooms: [], semesters: [], users: [], departments: [], announcements: [] };
+        let allData = { students: [], courses: [], teachers: [], faculties: [], classrooms: [], semesters: [], departments: [], announcements: [] };
 
         document.addEventListener('DOMContentLoaded', () => {
             if (!token) { window.location.href = 'index.html'; return; }
@@ -446,7 +388,7 @@
             document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active-menu'));
             document.getElementById('menu-' + id).classList.add('active-menu');
             document.getElementById('pageTitle').innerText = id.toUpperCase();
-            const loaders = { users: loadUsers, students: loadStudents, classrooms: loadClassrooms, semesters: loadSemesters, courses: loadCourses, teachers: loadTeachers, faculties: loadFaculties, departments: loadDepartments, sections: loadSections, enrollments: loadEnrollments, announcements: loadAnnouncements };
+            const loaders = { students: loadStudents, classrooms: loadClassrooms, semesters: loadSemesters, courses: loadCourses, teachers: loadTeachers, faculties: loadFaculties, departments: loadDepartments, sections: loadSections, enrollments: loadEnrollments, announcements: loadAnnouncements };
             if (loaders[id]) loaders[id]();
         }
 
@@ -468,59 +410,6 @@
             if (await apiRequest(endpoint, 'DELETE')) showSection(document.querySelector('.section.active').id.split('-')[1]);
         }
 
-        // --- USERS ---
-        async function loadUsers() {
-            const users = await apiRequest('/users/all');
-            document.getElementById('usersTableBody').innerHTML = (users || []).map(u => `
-                <tr class="hover:bg-slate-50 border-b">
-                    <td class="px-8 py-5 text-blue-600 font-mono tracking-widest font-black">${u.username}</td>
-                    <td class="px-8 py-5 text-sm uppercase tracking-widest font-black ${u.role==='ADMIN'?'text-red-500':u.role==='TEACHER'?'text-green-600':u.role==='STUDENT'?'text-orange-500':'text-slate-500'}">${u.role || 'USER'}</td>
-                    <td class="px-8 py-5 text-center"><button onclick="openRoleModal(${u.id}, '${u.username}', '${u.role || 'USER'}')" class="bg-blue-50 text-blue-600 px-4 py-2 rounded-xl text-[10px] uppercase font-black tracking-widest hover:bg-blue-600 hover:text-white transition-all">Yetki Ver</button></td>
-                    <td class="px-8 py-5 text-center"><button onclick="deleteData('users', ${u.id})" class="text-red-400 hover:text-red-600"><i class="fas fa-trash-alt"></i></button></td>
-                </tr>
-            `).join('');
-        }
-
-        document.getElementById('addUserForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const data = {
-                username: document.getElementById('uUsername').value.trim(),
-                password: document.getElementById('uPassword').value
-            };
-
-            try {
-                const res = await fetch(`${API_URL}/register`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify(data)
-                });
-                if(res.ok) {
-                    alert('Kullanıcı başarıyla oluşturuldu!');
-                    closeModal('userModal');
-                    document.getElementById('addUserForm').reset();
-                    loadUsers();
-                } else {
-                    const err = await res.json().catch(() => ({ message: 'Kullanıcı zaten mevcut veya hatalı giriş!' }));
-                    alert(err.message || 'Hata oluştu!');
-                }
-            } catch (err) {
-                alert('Sunucu hatası!');
-            }
-        };
-
-        function openRoleModal(id, username, currentRole) {
-            document.getElementById('rUserId').value = id;
-            document.getElementById('rUsername').innerText = username;
-            document.getElementById('rRole').value = currentRole;
-            openModal('roleModal');
-        }
-
-        document.getElementById('updateRoleForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('rUserId').value;
-            const newRole = document.getElementById('rRole').value;
-            if (await apiRequest(`/users/updateRole/${id}?role=${newRole}`, 'PUT')) { closeModal('roleModal'); loadUsers(); alert('Yetki güncellendi!'); }
-        };
 
         // --- ANNOUNCEMENTS ---
         async function loadAnnouncements() {
@@ -620,7 +509,7 @@
             document.getElementById('departmentCards').innerHTML = (allData.departments || []).map(d => `
                 <div class="bg-white p-8 rounded-[2rem] shadow-xl border">
                     <h3 class="text-xl font-black italic">${d.name}</h3>
-                    <p class="text-xs text-slate-400 mt-2">Kod: ${d.code}</p>
+                    <p class="text-xs text-slate-400 mt-2">Kod: ${d.code || '---'}</p>
                     <div class="mt-6 flex justify-between items-center">
                         <span class="text-blue-600 font-black text-[10px] uppercase italic tracking-widest">Fakülte: ${d.faculty?.name || '---'}</span>
                         <div class="flex gap-3">
@@ -685,10 +574,7 @@
             e.preventDefault();
             const id = document.getElementById('studentEditId').value;
             const num = document.getElementById('sNumber').value.toString();
-            const users = await apiRequest('/users/all');
-            const user = (users || []).find(u => u.username === num);
-            if (!user) { alert(`Kullanıcı ID ${num} bulunamadı! Lütfen önce 'Sistem Kullanıcıları' sekmesinden bu numara ile bir kullanıcı oluşturun.`); return; }
-            const data = { firstName: document.getElementById('sFirstName').value, lastName: document.getElementById('sLastName').value, studentNumber: num, email: document.getElementById('sEmail').value, telNumber: document.getElementById('sTel').value, departmentId: parseInt(document.getElementById('sDeptId').value), userId: user.id };
+            const data = { firstName: document.getElementById('sFirstName').value, lastName: document.getElementById('sLastName').value, studentNumber: num, email: document.getElementById('sEmail').value, telNumber: document.getElementById('sTel').value, departmentId: parseInt(document.getElementById('sDeptId').value) };
             if (await apiRequest(id ? `/student/update/${id}` : '/student/add', id ? 'PUT' : 'POST', data)) { closeModal('studentModal'); loadStudents(); }
         };
 
@@ -717,7 +603,7 @@
             document.getElementById('tFirstName').value = data?.firstName || '';
             document.getElementById('tLastName').value = data?.lastName || '';
             document.getElementById('tDeptId').value = data?.department?.id || '';
-            document.getElementById('tNumber').value = data?.user?.username || '';
+            document.getElementById('tNumber').value = data?.registrationNumber || data?.user?.username || '';
             openModal('teacherModal');
         }
 
@@ -725,10 +611,7 @@
             e.preventDefault();
             const id = document.getElementById('teacherEditId').value;
             const num = document.getElementById('tNumber').value.toString();
-            const users = await apiRequest('/users/all');
-            const user = (users || []).find(u => u.username === num);
-            if (!user) { alert(`Kullanıcı ID ${num} bulunamadı! Lütfen önce 'Sistem Kullanıcıları' sekmesinden bu numara ile bir kullanıcı oluşturun.`); return; }
-            const data = { firstName: document.getElementById('tFirstName').value, lastName: document.getElementById('tLastName').value, departmentId: parseInt(document.getElementById('tDeptId').value), userId: user.id };
+            const data = { firstName: document.getElementById('tFirstName').value, lastName: document.getElementById('tLastName').value, departmentId: parseInt(document.getElementById('tDeptId').value), registrationNumber: num };
             if (await apiRequest(id ? `/teacher/update/${id}` : '/teacher/add', id ? 'PUT' : 'POST', data)) { closeModal('teacherModal'); loadTeachers(); }
         };
 

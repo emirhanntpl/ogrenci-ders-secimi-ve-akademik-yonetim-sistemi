@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KTÜ BYS - Öğretmen Paneli</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .active-menu { background-color: #059669 !important; color: white !important; shadow: 0 10px 15px -3px rgba(5, 150, 105, 0.3); }
+        .section { display: none; }
+        .section.active { display: block; }
+    </style>
+</head>
+<body class="bg-[#f0fdf4] font-sans antialiased overflow-hidden text-slate-900">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-72 bg-[#064e3b] text-white flex flex-col shrink-0 shadow-2xl z-20 overflow-y-auto font-medium text-sm">
+            <div class="p-8 border-b border-emerald-900 flex items-center gap-3">
+                <i class="fas fa-chalkboard-teacher text-emerald-400 text-3xl"></i>
+                <span class="text-2xl font-black tracking-tighter italic">HOCA PANELİ</span>
+            </div>
+
+            <nav class="flex-1 p-4 space-y-1 mt-4">
+                <button onclick="showSection('my-courses')" id="menu-my-courses" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-emerald-800 transition-all text-emerald-100">
+                    <i class="fas fa-book-open w-5"></i><span>Derslerim</span>
+                </button>
+                <button onclick="showSection('my-students')" id="menu-my-students" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-emerald-800 transition-all text-emerald-100">
+                    <i class="fas fa-user-graduate w-5"></i><span>Öğrencilerim</span>
+                </button>
+                <button onclick="showSection('exams')" id="menu-exams" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-emerald-800 transition-all text-emerald-100">
+                    <i class="fas fa-calendar-check w-5"></i><span>Sınav Tarihleri</span>
+                </button>
+                <button onclick="showSection('assignments')" id="menu-assignments" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-emerald-800 transition-all text-emerald-100">
+                    <i class="fas fa-tasks w-5"></i><span>Ödevler</span>
+                </button>
+                <button onclick="showSection('announcements')" id="menu-announcements" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-emerald-800 transition-all text-emerald-100">
+                    <i class="fas fa-bullhorn w-5"></i><span>Duyuru Yap</span>
+                </button>
+            </nav>
+
+            <div class="p-6 border-t border-emerald-900">
+                <button onclick="logout()" class="flex items-center gap-3 p-3 w-full text-emerald-300 hover:bg-emerald-500/10 rounded-2xl transition-all">
+                    <i class="fas fa-power-off"></i><span>Oturumu Kapat</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+            <header class="h-20 bg-white border-b border-emerald-100 flex items-center justify-between px-10 shrink-0 z-10">
+                <div class="flex items-center gap-4 flex-1">
+                    <h2 id="pageTitle" class="text-xl font-black text-emerald-900 uppercase tracking-widest italic">Derslerim</h2>
+                </div>
+                <div class="flex items-center gap-4">
+                    <p id="teacherNameDisplay" class="text-sm font-black text-emerald-900 leading-tight">Yükleniyor...</p>
+                    <div class="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-black shadow-lg">HP</div>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-y-auto p-10">
+                <!-- SECTION: MY COURSES -->
+                <div id="section-my-courses" class="section active">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="courseList"></div>
+                </div>
+
+                <!-- SECTION: MY STUDENTS -->
+                <div id="section-my-students" class="section">
+                    <div class="bg-white rounded-[2rem] shadow-xl overflow-hidden border border-emerald-100">
+                        <div class="p-6 border-b border-emerald-50 flex justify-between items-center bg-emerald-50/30">
+                            <select id="studentCourseFilter" onchange="loadMyStudents()" class="p-3 rounded-xl border border-emerald-200 outline-none font-bold text-emerald-800 bg-white min-w-[250px]">
+                                <option value="">Ders Seçiniz</option>
+                            </select>
+                        </div>
+                        <table class="w-full text-left font-bold text-slate-700">
+                            <thead class="bg-emerald-50 text-emerald-700 text-[10px] uppercase font-black tracking-widest border-b">
+                                <tr><th class="px-8 py-5">No</th><th class="px-8 py-5">Ad Soyad</th><th class="px-8 py-5 text-center">Vize</th><th class="px-8 py-5 text-center">Final</th><th class="px-8 py-5 text-center">Ortalama</th><th class="px-8 py-5 text-center">İşlem</th></tr>
+                            </thead>
+                            <tbody id="studentTableBody" class="divide-y font-bold text-slate-600"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- SECTION: EXAMS -->
+                <div id="section-exams" class="section">
+                    <div class="flex justify-between items-center mb-8">
+                        <h1 class="text-3xl font-black italic text-emerald-900">Sınav Takvimi</h1>
+                        <button onclick="openExamModal()" class="bg-emerald-600 text-white px-6 py-3 rounded-2xl font-bold shadow-xl">+ Sınav Ekle</button>
+                    </div>
+                    <div id="examList" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+                </div>
+
+                <!-- SECTION: ASSIGNMENTS -->
+                <div id="section-assignments" class="section">
+                    <div class="flex justify-between items-center mb-8">
+                        <h1 class="text-3xl font-black italic text-emerald-900">Ödev Yönetimi</h1>
+                        <button onclick="openAssignmentModal()" class="bg-emerald-600 text-white px-6 py-3 rounded-2xl font-bold shadow-xl">+ Ödev Ver</button>
+                    </div>
+                    <div id="assignmentList" class="grid grid-cols-1 gap-6"></div>
+                </div>
+
+                <!-- SECTION: ANNOUNCEMENTS -->
+                <div id="section-announcements" class="section">
+                    <div class="flex justify-between items-center mb-8">
+                        <h1 class="text-3xl font-black italic text-emerald-900">Duyurularım</h1>
+                        <button onclick="openAnnouncementModal()" class="bg-emerald-600 text-white px-6 py-3 rounded-2xl font-bold shadow-xl">+ Yeni Duyuru</button>
+                    </div>
+                    <div id="teacherAnnouncementList" class="grid grid-cols-1 gap-6"></div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- MODALS (Sınav, Ödev, Duyuru, Not) -->
+    <!-- Not Giriş Modalı -->
+    <div id="gradeModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-[2.5rem] max-w-md w-full p-10 font-bold shadow-2xl">
+            <h3 class="text-2xl font-black mb-6 italic text-emerald-900 text-center">Not Girişi</h3>
+            <div class="mb-6 p-4 bg-emerald-50 rounded-2xl">
+                <p id="gradeStudentName" class="text-emerald-800 text-center"></p>
+                <p id="gradeCourseName" class="text-emerald-600 text-sm text-center mt-1 font-medium"></p>
+            </div>
+            <form id="gradeForm" class="space-y-4">
+                <input type="hidden" id="gradeStudentId">
+                <input type="hidden" id="gradeCourseSectionId">
+                <div>
+                    <label class="block text-xs uppercase text-slate-400 mb-2 px-2">Sınav Tipi</label>
+                    <select id="gradeExamType" required class="p-4 border w-full rounded-2xl outline-none focus:ring-4 focus:ring-emerald-500/10">
+                        <option value="MIDTERM">Vize (Midterm)</option>
+                        <option value="FINAL">Final</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs uppercase text-slate-400 mb-2 px-2">Not Değeri (0-100)</label>
+                    <input type="number" id="gradeValue" placeholder="Örn: 85" required min="0" max="100" step="0.01" class="p-4 border w-full rounded-2xl outline-none focus:ring-4 focus:ring-emerald-500/10">
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 text-white py-4 rounded-2xl italic font-black uppercase shadow-xl mt-4">Notu Kaydet</button>
+            </form>
+            <button onclick="closeModal('gradeModal')" class="mt-4 text-slate-400 font-bold w-full text-center">Kapat</button>
+        </div>
+    </div>
+
+    <!-- Sınav Modalı -->
+    <div id="examModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-[2.5rem] max-w-md w-full p-10 font-bold shadow-2xl">
+            <h3 id="examModalTitle" class="text-2xl font-black mb-6 italic text-emerald-900">Sınav Tanımla</h3>
+            <form id="examForm" class="space-y-4">
+                <input type="hidden" id="examEditId">
+                <select id="examCourse" required class="p-4 border w-full rounded-2xl outline-none bg-emerald-50"></select>
+                <input type="text" id="examName" placeholder="Sınav Adı (Vize, Final...)" required class="p-4 border w-full rounded-2xl">
+                <input type="datetime-local" id="examDate" required class="p-4 border w-full rounded-2xl">
+                <input type="text" id="examClassroom" placeholder="Sınıf/Derslik" required class="p-4 border w-full rounded-2xl">
+                <button type="submit" class="w-full bg-emerald-600 text-white py-4 rounded-2xl italic font-black uppercase shadow-xl">Kaydet</button>
+            </form>
+            <button onclick="closeModal('examModal')" class="mt-4 text-slate-400 font-bold w-full">İptal</button>
+        </div>
+    </div>
+
+    <!-- Ödev Modalı -->
+    <div id="assignmentModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-[2.5rem] max-w-md w-full p-10 font-bold shadow-2xl">
+            <h3 id="assignmentModalTitle" class="text-2xl font-black mb-6 italic text-emerald-900">Ödev Ver</h3>
+            <form id="assignmentForm" class="space-y-4">
+                <input type="hidden" id="assignmentEditId">
+                <select id="assignmentCourse" required class="p-4 border w-full rounded-2xl outline-none bg-emerald-50"></select>
+                <input type="text" id="assignmentTitle" placeholder="Ödev Başlığı" required class="p-4 border w-full rounded-2xl">
+                <textarea id="assignmentDesc" placeholder="Ödev Açıklaması" required class="p-4 border w-full rounded-2xl h-32"></textarea>
+                <input type="datetime-local" id="assignmentDueDate" required class="p-4 border w-full rounded-2xl">
+                <button type="submit" class="w-full bg-emerald-600 text-white py-4 rounded-2xl italic font-black uppercase shadow-xl">Yayınla</button>
+            </form>
+            <button onclick="closeModal('assignmentModal')" class="mt-4 text-slate-400 font-bold w-full">İptal</button>
+        </div>
+    </div>
+
+    <!-- Duyuru Modalı (Hoca İçin) -->
+    <div id="announcementModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-[2.5rem] max-w-lg w-full p-10 font-bold shadow-2xl">
+            <h3 id="announcementModalTitle" class="text-2xl font-black mb-6 italic text-emerald-900">Duyuru Yayınla</h3>
+            <form id="announcementForm" class="space-y-4">
+                <input type="hidden" id="announcementEditId">
+                <input type="text" id="annTitle" placeholder="Başlık" required class="p-4 border w-full rounded-2xl">
+                <textarea id="annContent" placeholder="Mesajınız..." required class="p-4 border w-full rounded-2xl h-32"></textarea>
+                <button type="submit" class="w-full bg-emerald-600 text-white py-4 rounded-2xl italic font-black uppercase shadow-xl">Gönder</button>
+            </form>
+            <button onclick="closeModal('announcementModal')" class="mt-4 text-slate-400 font-bold w-full">Kapat</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8080';
+        const token = localStorage.getItem('token');
+        const username = localStorage.getItem('username');
+        let currentTeacher = null;
+        let teacherCourses = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!token || localStorage.getItem('userRole') !== 'TEACHER') { window.location.href = 'index.html'; return; }
+            await loadTeacherInfo();
+            showSection('my-courses');
+        });
+
+        async function apiRequest(endpoint, method = 'GET', data = null) {
+            const options = { method, headers: { 'Authorization': 'Bearer ' + token } };
+            if (data) { options.headers['Content-Type'] = 'application/json'; options.body = JSON.stringify(data); }
+            const res = await fetch(`${API_URL}${endpoint}`, options);
+            if (!res.ok) { const err = await res.json().catch(() => ({ message: 'İşlem başarısız' })); alert(err.message || 'Hata!'); return null; }
+            return res.status !== 204 ? res.json() : true;
+        }
+
+        async function loadTeacherInfo() {
+            currentTeacher = await apiRequest(`/teacher/by-username?username=${username}`);
+            if (currentTeacher) {
+                document.getElementById('teacherNameDisplay').innerText = `Dr. ${currentTeacher.firstName} ${currentTeacher.lastName}`;
+                teacherCourses = await apiRequest(`/teacher/${currentTeacher.id}/course-sections`);
+                populateCourseFilters();
+            }
+        }
+
+        function populateCourseFilters() {
+            const options = teacherCourses.map(c => `<option value="${c.id}">${c.course?.name} (${c.course?.code})</option>`).join('');
+            document.getElementById('studentCourseFilter').innerHTML = '<option value="">Ders Seçiniz</option>' + options;
+            document.getElementById('examCourse').innerHTML = options;
+            document.getElementById('assignmentCourse').innerHTML = options;
+        }
+
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('section-' + id).classList.add('active');
+            document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active-menu'));
+            document.getElementById('menu-' + id).classList.add('active-menu');
+            document.getElementById('pageTitle').innerText = id.toUpperCase().replace('-', ' ');
+
+            if (id === 'my-courses') loadMyCourses();
+            if (id === 'exams') loadExams();
+            if (id === 'assignments') loadAssignments();
+            if (id === 'announcements') loadAnnouncements();
+        }
+
+        async function loadMyCourses() {
+            document.getElementById('courseList').innerHTML = teacherCourses.map(c => `
+                <div class="bg-white p-8 rounded-[2rem] shadow-xl border border-emerald-50">
+                    <span class="text-[10px] font-black text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full uppercase italic">${c.course?.code}</span>
+                    <h3 class="text-xl font-black italic mt-4 text-emerald-900">${c.course?.name}</h3>
+                    <p class="text-xs text-slate-400 mt-2">Dönem: ${c.semester?.term || '---'}</p>
+                    <div class="mt-6 flex gap-2">
+                        <button onclick="viewStudents(${c.id})" class="flex-1 bg-emerald-600 text-white py-3 rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/20">Öğrencileri Gör</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function viewStudents(sectionId) {
+            document.getElementById('studentCourseFilter').value = sectionId;
+            showSection('my-students');
+            loadMyStudents();
+        }
+
+        async function loadMyStudents() {
+            const sectionId = document.getElementById('studentCourseFilter').value;
+            if (!sectionId) { document.getElementById('studentTableBody').innerHTML = ''; return; }
+
+            const students = await apiRequest(`/teacher/course-section/${sectionId}/students`);
+            const tbody = document.getElementById('studentTableBody');
+
+            tbody.innerHTML = '';
+            for (const s of students) {
+                const grades = await apiRequest(`/grade/course-section/${sectionId}/student/${s.id}`);
+                const midterm = grades.find(g => g.midTerm !== null)?.midTerm || '-';
+                const final = grades.find(g => g.finalExam !== null)?.finalExam || '-';
+                const avg = grades[0]?.average || '-';
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-emerald-50/50 border-b">
+                        <td class="px-8 py-5 text-emerald-600 italic font-black">${s.studentNumber}</td>
+                        <td class="px-8 py-5">${s.firstName} ${s.lastName}</td>
+                        <td class="px-8 py-5 text-center font-mono">${midterm}</td>
+                        <td class="px-8 py-5 text-center font-mono">${final}</td>
+                        <td class="px-8 py-5 text-center font-black ${avg >= 50 ? 'text-blue-600' : 'text-red-500'}">${avg}</td>
+                        <td class="px-8 py-5 text-center">
+                            <button onclick="openGradeModal(${s.id}, ${sectionId}, '${s.firstName} ${s.lastName}')" class="bg-emerald-50 text-emerald-600 px-4 py-2 rounded-xl text-[10px] uppercase font-black tracking-widest hover:bg-emerald-600 hover:text-white transition-all">Not Gir</button>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // --- GRADE FUNCTIONS ---
+        function openGradeModal(studentId, sectionId, name) {
+            document.getElementById('gradeStudentId').value = studentId;
+            document.getElementById('gradeCourseSectionId').value = sectionId;
+            document.getElementById('gradeStudentName').innerText = name;
+            openModal('gradeModal');
+        }
+
+        document.getElementById('gradeForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const sid = document.getElementById('gradeStudentId').value;
+            const csid = document.getElementById('gradeCourseSectionId').value;
+            const type = document.getElementById('gradeExamType').value;
+            const val = document.getElementById('gradeValue').value;
+
+            if (await apiRequest(`/grade/course-section/${csid}/student/${sid}/update-grade?examType=${type}&gradeValue=${val}`, 'PUT')) {
+                closeModal('gradeModal');
+                loadMyStudents();
+            }
+        };
+
+        // --- EXAM & ASSIGNMENT & ANNOUNCEMENT (CRUD) ---
+        async function loadExams() {
+            const exams = await apiRequest('/exam/all');
+            document.getElementById('examList').innerHTML = exams.filter(e => teacherCourses.some(tc => tc.id === e.courseSection?.id)).map(e => `
+                <div class="bg-white p-8 rounded-[2rem] shadow-xl border border-emerald-50">
+                    <div class="flex justify-between">
+                        <h3 class="text-xl font-black italic text-emerald-900">${e.examName}</h3>
+                        <button onclick="deleteData('exam', ${e.id})" class="text-red-400"><i class="fas fa-trash"></i></button>
+                    </div>
+                    <p class="text-sm text-emerald-600 font-bold mt-2">${e.courseSection?.course?.name}</p>
+                    <div class="mt-6 space-y-2">
+                        <p class="text-xs font-bold text-slate-400"><i class="far fa-clock mr-2"></i>${new Date(e.examDate).toLocaleString()}</p>
+                        <p class="text-xs font-bold text-slate-400"><i class="fas fa-map-marker-alt mr-2"></i>Sınıf: ${e.classroom}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadAssignments() {
+            const list = await apiRequest('/assignment/all');
+            document.getElementById('assignmentList').innerHTML = list.filter(a => teacherCourses.some(tc => tc.id === a.courseSection?.id)).map(a => `
+                <div class="bg-white p-8 rounded-[2rem] shadow-xl border border-emerald-50">
+                    <div class="flex justify-between">
+                        <h3 class="text-xl font-black italic text-emerald-900">${a.title}</h3>
+                        <button onclick="deleteData('assignment', ${a.id})" class="text-red-400"><i class="fas fa-trash"></i></button>
+                    </div>
+                    <p class="text-emerald-600 font-bold text-xs mb-4">${a.courseSection?.course?.name}</p>
+                    <p class="text-slate-600 text-sm mb-6">${a.description}</p>
+                    <div class="pt-4 border-t border-emerald-50">
+                        <p class="text-[10px] font-black uppercase text-red-400"><i class="fas fa-hourglass-end mr-2"></i>Son Teslim: ${new Date(a.dueDate).toLocaleString()}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadAnnouncements() {
+            const list = await apiRequest('/announcement/all');
+            document.getElementById('teacherAnnouncementList').innerHTML = list.filter(a => a.author === `${currentTeacher.firstName} ${currentTeacher.lastName}`).map(a => `
+                <div class="bg-white p-8 rounded-[2rem] shadow-xl border border-emerald-50">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-xl font-black italic text-emerald-900">${a.title}</h3>
+                        <button onclick="deleteData('announcement', ${a.id})" class="text-red-400"><i class="fas fa-trash"></i></button>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1 mb-4">${new Date(a.publishDate).toLocaleString()}</p>
+                    <p class="text-slate-600 text-sm">${a.content}</p>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('examForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const data = { examName: document.getElementById('examName').value, examDate: document.getElementById('examDate').value, classroom: document.getElementById('examClassroom').value, courseSectionId: parseInt(document.getElementById('examCourse').value) };
+            if (await apiRequest('/exam/add', 'POST', data)) { closeModal('examModal'); loadExams(); }
+        };
+
+        document.getElementById('assignmentForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const data = { title: document.getElementById('assignmentTitle').value, description: document.getElementById('assignmentDesc').value, dueDate: document.getElementById('assignmentDueDate').value, courseSectionId: parseInt(document.getElementById('assignmentCourse').value) };
+            if (await apiRequest('/assignment/add', 'POST', data)) { closeModal('assignmentModal'); loadAssignments(); }
+        };
+
+        document.getElementById('announcementForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const data = { title: document.getElementById('annTitle').value, content: document.getElementById('annContent').value, author: `${currentTeacher.firstName} ${currentTeacher.lastName}` };
+            if (await apiRequest('/announcement/add', 'POST', data)) { closeModal('announcementModal'); loadAnnouncements(); }
+        };
+
+        async function deleteData(type, id) {
+            if (!confirm('Emin misiniz?')) return;
+            if (await apiRequest(`/${type}/delete/${id}`, 'DELETE')) showSection(document.querySelector('.section.active').id.split('-')[1]);
+        }
+
+        function openModal(id) { document.getElementById(id).classList.replace('hidden', 'flex'); }
+        function closeModal(id) { document.getElementById(id).classList.replace('flex', 'hidden'); }
+        function openExamModal() { document.getElementById('examForm').reset(); openModal('examModal'); }
+        function openAssignmentModal() { document.getElementById('assignmentForm').reset(); openModal('assignmentModal'); }
+        function openAnnouncementModal() { document.getElementById('announcementForm').reset(); openModal('announcementModal'); }
+        function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+    </script>
+</body>
+</html>

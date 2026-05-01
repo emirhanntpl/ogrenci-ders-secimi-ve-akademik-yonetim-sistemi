@@ -17,5 +17,7 @@ public interface IGradeController {
 
     DtoGrade findByGradeId(Long id);
 
+    List<DtoGrade> getGradesByCourseSectionAndStudent(Long courseSectionId, Long studentId);
 
+    DtoGrade updateStudentGrade(Long courseSectionId, Long studentId, String examType, Double gradeValue);
 }

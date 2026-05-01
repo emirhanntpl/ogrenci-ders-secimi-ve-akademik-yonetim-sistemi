@@ -33,7 +33,15 @@ public enum MessageType {
 
     // Announcement related messages
     INVALID_ANNOUNCEMENT_ID("1022", "DUYURU ID BULUNAMADI"),
-    ANNOUNCEMENT_LIST_IS_EMPTY("1023", "DUYURU LİSTESİ BOŞ.");
+    ANNOUNCEMENT_LIST_IS_EMPTY("1023", "DUYURU LİSTESİ BOŞ."),
+
+    // Exam related messages
+    INVALID_EXAM_ID("1024", "SINAV (EXAM) ID BULUNAMADI"),
+    EXAM_LIST_IS_EMPTY("1025", "SINAV LİSTESİ BOŞ."),
+
+    // Assignment related messages
+    INVALID_ASSIGNMENT_ID("1026", "ÖDEV (ASSIGNMENT) ID BULUNAMADI"),
+    ASSIGNMENT_LIST_IS_EMPTY("1027", "ÖDEV LİSTESİ BOŞ.");
 
 
 

@@ -12,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/student")
+@CrossOrigin(origins = "*")
 public class StudentController implements IStudentController {
 
     @Autowired
@@ -40,5 +41,17 @@ public class StudentController implements IStudentController {
     @Override
     public List<DtoStudent> getAllStudent() {
         return studentService.getAllStudents();
+    }
+
+    @GetMapping("/getById/{id}")
+    @Override
+    public DtoStudent getStudentById(@PathVariable(name = "id") Long id) {
+        return studentService.findByStudentId(id);
+    }
+
+    @GetMapping("/by-username")
+    @Override
+    public DtoStudent getStudentByUsername(@RequestParam String username) {
+        return studentService.findByUsername(username);
     }
 }

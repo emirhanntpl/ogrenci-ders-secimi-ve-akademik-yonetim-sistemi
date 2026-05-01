@@ -14,13 +14,16 @@ import lombok.Setter;
 @Setter
 public class Teacher extends BaseEntity {
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
     private User user;
 
     private String firstName;
 
     private String lastName;
+
+    @Column(unique = true)
+    private String registrationNumber;
 
     @ManyToOne
     @JoinColumn(name = "department_id")

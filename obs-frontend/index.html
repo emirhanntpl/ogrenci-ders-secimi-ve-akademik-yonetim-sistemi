@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Öğrenci Bilgi Sistemi (OBS)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- GİRİŞ TÜRÜ SEÇİM EKRANI -->
+    <div id="login-type-container" class="container active">
+        <h2>OBS Giriş Tipi Seçiniz</h2>
+        <div class="login-options">
+            <button class="btn btn-primary btn-large" onclick="showLoginForm('student')">👨‍🎓 Öğrenci Girişi</button>
+            <button class="btn btn-primary btn-large" onclick="showLoginRoleSelection()">👔 Personel Girişi</button>
+        </div>
+    </div>
+
+    <!-- PERSONEL ROLÜ SEÇİM EKRANI -->
+    <div id="role-selection-container" class="container hidden">
+        <h2>Personel Girişi</h2>
+        <div class="login-options">
+            <button class="btn btn-primary btn-large" onclick="showLoginForm('admin')">👑 Yönetici Girişi</button>
+            <button class="btn btn-primary btn-large" onclick="showLoginForm('teacher')">👨‍🏫 Öğretmen Girişi</button>
+        </div>
+        <button class="btn btn-danger" style="margin-top:20px;" onclick="goBackToLoginType()">Geri Dön</button>
+    </div>
+
+    <!-- GİRİŞ FORMU EKRANI -->
+    <div id="login-container" class="container hidden">
+        <h2 id="login-title">Giriş Paneli</h2>
+        <form id="login-form">
+            <input type="hidden" id="login-role"> <!-- Hangi tiple girildiğini tutacak -->
+            <div class="input-group">
+                <label for="username">Kullanıcı Adı / Okul-Sicil No</label>
+                <input type="text" id="username" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Şifre</label>
+                <input type="password" id="password" required>
+            </div>
+            <button type="submit" class="btn btn-success">Giriş Yap</button>
+            <button type="button" class="btn btn-danger" style="margin-top:10px; width:100%;" onclick="goBackToLoginType()">İptal</button>
+            <p id="login-error" class="error-msg"></p>
+        </form>
+    </div>
+
+    <!-- ANA PANEL (Giriş Başarılı Olunca Görünür) -->
+    <div id="dashboard-container" class="container hidden">
+        <header>
+            <h1 id="dashboard-title">OBS Paneli</h1>
+            <button id="logout-btn" class="btn btn-danger">Çıkış Yap</button>
+        </header>
+
+        <!-- YÖNETİCİ (ADMIN) MENÜSÜ VE İÇERİĞİ -->
+        <div id="admin-panel" class="panel-layout hidden">
+            <nav class="sidebar">
+                <ul>
+                    <li><button onclick="showSection('admin', 'announcements')">Duyurular</button></li>
+                    <li><button onclick="showSection('admin', 'faculties')">Fakülteler</button></li>
+                    <li><button onclick="showSection('admin', 'departments')">Bölümler</button></li>
+                    <li><button onclick="showSection('admin', 'teachers')">Öğretmenler</button></li>
+                    <li><button onclick="showSection('admin', 'students')">Öğrenciler</button></li>
+                    <li><button onclick="showSection('admin', 'classrooms')">Sınıflar</button></li>
+                    <li><button onclick="showSection('admin', 'semesters')">Dönemler</button></li>
+                    <li><button onclick="showSection('admin', 'courses')">Dersler</button></li>
+                </ul>
+            </nav>
+            <main class="content">
+                <!-- DUYURULAR -->
+                <section id="admin-announcements-section" class="content-section active">
+                    <h2>Duyurular (Yönetici)</h2>
+                    <div class="card">
+                        <h3>Yeni Duyuru Ekle</h3>
+                        <label for="ann-title" class="hidden">Başlık</label>
+                        <input type="text" id="ann-title" placeholder="Başlık" class="form-input">
+                        <label for="ann-content" class="hidden">İçerik</label>
+                        <textarea id="ann-content" placeholder="İçerik" class="form-input"></textarea>
+                        <label for="ann-teacher-id" class="hidden">Yapan Hoca ID</label>
+                        <input type="number" id="ann-teacher-id" placeholder="Yapan Hoca ID" class="form-input">
+                        <button class="btn btn-primary" onclick="addAnnouncement()">Ekle</button>
+                    </div>
+                    <div class="card" style="margin-top:20px;">
+                        <button class="btn btn-success" onclick="fetchAnnouncements('admin')">Listele</button>
+                        <ul id="admin-announcements-list" class="data-list"></ul>
+                    </div>
+                </section>
+
+                <!-- FAKÜLTELER -->
+                <section id="admin-faculties-section" class="content-section hidden">
+                    <h2>Fakülteler (Yönetici)</h2>
+                     <div class="card">
+                        <h3>Yeni Fakülte Ekle</h3>
+                        <input type="text" id="fac-name" placeholder="Fakülte Adı" class="form-input">
+                        <input type="text" id="fac-dean" placeholder="Dekan Adı" class="form-input">
+                        <input type="text" id="fac-address" placeholder="Adres" class="form-input">
+                        <input type="text" id="fac-establishment" placeholder="Kuruluş Yılı" class="form-input">
+                        <button class="btn btn-primary" onclick="addFaculty()">Ekle</button>
+                    </div>
+                    <div class="card" style="margin-top:20px;">
+                        <button class="btn btn-success" onclick="fetchFaculties('admin')">Listele</button>
+                        <ul id="admin-faculties-list" class="data-list"></ul>
+                    </div>
+                </section>
+
+                <!-- BÖLÜMLER -->
+                <section id="admin-departments-section" class="content-section hidden">
+                    <h2>Bölümler (Yönetici)</h2>
+                     <div class="card">
+                        <h3>Yeni Bölüm Ekle</h3>
+                        <input type="text" id="dep-name" placeholder="Bölüm Adı" class="form-input">
+                        <input type="number" id="dep-quota" placeholder="Kontenjan" class="form-input">
+                        <input type="text" id="dep-head" placeholder="Bölüm Başkanı" class="form-input">
+                        <button class="btn btn-primary" onclick="addDepartment()">Ekle</button>
+                    </div>
+                    <div class="card" style="margin-top:20px;">
+                        <button class="btn btn-success" onclick="fetchDepartments('admin')">Listele</button>
+                        <ul id="admin-departments-list" class="data-list"></ul>
+                    </div>
+                </section>
+
+                <!-- ÖĞRETMENLER -->
+                <section id="admin-teachers-section" class="content-section hidden">
+                    <h2>Öğretmenler (Yönetici)</h2>
+                     <div class="card">
+                        <h3>Yeni Öğretmen Ekle</h3>
+                        <input type="text" id="teach-fn" placeholder="Adı" class="form-input">
+                        <input type="text" id="teach-ln" placeholder="Soyadı" class="form-input">
+                        <input type="text" id="teach-reg-no" placeholder="Sicil Numarası" class="form-input">
+                        <input type="number" id="teach-dep-id" placeholder="Bölüm ID" class="form-input">
+                        <button class="btn btn-primary" onclick="addTeacher()">Ekle</button>
+                    </div>
+                    <div class="card" style="margin-top:20px;">
+                        <button class="btn btn-success" onclick="fetchTeachers('admin')">Listele</button>
+                        <ul id="admin-teachers-list" class="data-list"></ul>
+                    </div>
+                </section>
+
+                <!-- ÖĞRENCİLER -->
+                <section id="admin-students-section" class="content-section hidden">
+                    <h2>Öğrenciler (Yönetici)</h2>
+                     <div class="card">
+                        <h3>Yeni Öğrenci Ekle</h3>
+                        <input type="text" id="stu-fn" placeholder="Adı" class="form-input">
+                        <input type="text" id="stu-ln" placeholder="Soyadı" class="form-input">
+                        <input type="text" id="stu-no" placeholder="Öğrenci No" class="form-input">
+                        <input type="email" id="stu-email" placeholder="Email" class="form-input">
+                        <input type="text" id="stu-tel" placeholder="Telefon No" class="form-input">
+                        <input type="number" id="stu-dep-id" placeholder="Bölüm ID" class="form-input">
+                        <button class="btn btn-primary" onclick="addStudent()">Ekle</button>
+                    </div>
+                    <div class="card" style="margin-top:20px;">
+                        <button class="btn btn-success" onclick="fetchStudents('admin')">Listele</button>
+                        <ul id="admin-students-list" class="data-list"></ul>
+                    </div>
+                </section>
+
+                <!-- SINIFLAR -->
+                <section id="admin-classrooms-section" class="content-section hidden">
+                    <h2>Sınıflar (Yönetici)</h2>
+                     <div class="card">
+                        <h3>Yeni Sınıf Ekle</h3>
+                        <input type="text" id="cls-room" placeholder="Sınıf No" class="form-input">
+                        <input type="number" id="cls-cap" placeholder="Kapasite" class="form-input">
+                        <button class="btn btn-primary" onclick="addClassroom()">Ekle</button>
+                    </div>
+                    <div class="card" style="margin-top:20px;">
+                        <button class="btn btn-success" onclick="fetchClassrooms('admin')">Listele</button>
+                        <ul id="admin-classrooms-list" class="data-list"></ul>
+                    </div>
+                </section>
+
+                <!-- DÖNEMLER -->
+                <section id="admin-semesters-section" class="content-section hidden">
+                    <h2>Dönemler (Yönetici)</h2>
+                     <div class="card">
+                        <h3>Yeni Dönem Ekle</h3>
+                        <input type="text" id="sem-term" placeholder="Dönem Adı" class="form-input">
+                        <label for="sem-active">Aktif mi?</label>
+                        <input type="checkbox" id="sem-active" checked>
+                        <button class="btn btn-primary" style="margin-top:10px;" onclick="addSemester()">Ekle</button>
+                    </div>
+                    <div class="card" style="margin-top:20px;">
+                        <button class="btn btn-success" onclick="fetchSemesters('admin')">Listele</button>
+                        <ul id="admin-semesters-list" class="data-list"></ul>
+                    </div>
+                </section>
+
+                <!-- DERSLER -->
+                <section id="admin-courses-section" class="content-section hidden">
+                    <h2>Dersler (Yönetici)</h2>
+                     <div class="card">
+                        <h3>Yeni Ders Ekle</h3>
+                        <input type="text" id="crs-code" placeholder="Ders Kodu" class="form-input">
+                        <input type="text" id="crs-name" placeholder="Ders Adı" class="form-input">
+                        <input type="text" id="crs-credit" placeholder="Kredi" class="form-input">
+                        <input type="number" id="crs-akts" placeholder="AKTS" class="form-input">
+                        <input type="number" id="crs-quota" placeholder="Kontenjan" class="form-input">
+                        <button class="btn btn-primary" onclick="addCourse()">Ekle</button>
+                    </div>
+                    <div class="card" style="margin-top:20px;">
+                        <button class="btn btn-success" onclick="fetchCourses('admin')">Listele</button>
+                        <ul id="admin-courses-list" class="data-list"></ul>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <!-- ÖĞRETMEN (TEACHER) MENÜSÜ VE İÇERİĞİ -->
+        <div id="teacher-panel" class="panel-layout hidden">
+            <nav class="sidebar">
+                <ul>
+                    <li><button onclick="showSection('teacher', 'announcements')">Duyurularım</button></li>
+                    <li><button onclick="showSection('teacher', 'grades')">Not Girişi</button></li>
+                </ul>
+            </nav>
+            <main class="content">
+                <section id="teacher-announcements-section" class="content-section active">
+                    <h2>Duyurularım (Öğretmen)</h2>
+                    <div class="card">
+                        <h3>Yeni Duyuru Ekle</h3>
+                        <label for="t-ann-title" class="hidden">Başlık</label>
+                        <input type="text" id="t-ann-title" placeholder="Başlık" class="form-input">
+                        <label for="t-ann-content" class="hidden">İçerik</label>
+                        <textarea id="t-ann-content" placeholder="İçerik" class="form-input"></textarea>
+                        <button class="btn btn-primary" onclick="addTeacherAnnouncement()">Duyuru Yayınla</button>
+                    </div>
+                    <div class="card" style="margin-top:20px;">
+                        <button class="btn btn-success" onclick="fetchAnnouncements('teacher')">Tüm Duyuruları Listele</button>
+                        <ul id="teacher-announcements-list" class="data-list"></ul>
+                    </div>
+                </section>
+
+                <section id="teacher-grades-section" class="content-section hidden">
+                    <h2>Not Girişi (Öğretmen)</h2>
+                    <div class="card">
+                        <p>Not giriş sistemi daha sonra eklenecektir.</p>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <!-- ÖĞRENCİ (STUDENT) MENÜSÜ VE İÇERİĞİ -->
+        <div id="student-panel" class="panel-layout hidden">
+            <nav class="sidebar">
+                <ul>
+                    <li><button onclick="showSection('student', 'announcements')">Duyurular</button></li>
+                    <li><button onclick="showSection('student', 'grades')">Notlarım</button></li>
+                    <li><button onclick="showSection('student', 'enrollment')">Ders Seçimi</button></li>
+                </ul>
+            </nav>
+            <main class="content">
+                <section id="student-announcements-section" class="content-section active">
+                    <h2>Duyurular (Öğrenci)</h2>
+                    <div class="card">
+                        <button class="btn btn-success" onclick="fetchAnnouncements('student')">Güncelle</button>
+                        <ul id="student-announcements-list" class="data-list"></ul>
+                    </div>
+                </section>
+
+                <section id="student-grades-section" class="content-section hidden">
+                    <h2>Notlarım (Öğrenci)</h2>
+                    <div class="card">
+                        <p>Not sistemi daha sonra eklenecektir.</p>
+                    </div>
+                </section>
+
+                <section id="student-enrollment-section" class="content-section hidden">
+                    <h2>Ders Seçimi (Öğrenci)</h2>
+                    <div class="card">
+                        <p>Ders seçimi dönemi aktif değil.</p>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+    </div>
+
+    <!-- GÜNCELLEME MODALI -->
+    <div id="edit-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeEditModal()">&times;</span>
+            <h2 id="edit-modal-title">Güncelle</h2>
+            <div id="edit-modal-form">
+                <!-- Dinamik olarak dolacak -->
+            </div>
+            <button class="btn btn-success" onclick="submitUpdate()" style="margin-top:20px; width:100%;">Kaydet</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

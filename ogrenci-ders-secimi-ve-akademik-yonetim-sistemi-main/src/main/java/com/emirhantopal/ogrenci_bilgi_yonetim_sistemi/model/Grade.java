@@ -22,8 +22,7 @@ public class Grade extends BaseEntity {
     @JoinColumn(name = "enrollment_id")
     private Enrollment enrollment;
 
-
-
+    private String examName; // Vize, Final, Ödev vb.
 
     private  Double midTerm;
 

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KTÜ BYS - Öğrenci Paneli</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .active-menu { background-color: #2563eb !important; color: white !important; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3); }
+        .section { display: none; }
+        .section.active { display: block; }
+    </style>
+</head>
+<body class="bg-[#f8fafc] font-sans antialiased overflow-hidden text-slate-900">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-72 bg-[#0f172a] text-white flex flex-col shrink-0 shadow-2xl z-20 overflow-y-auto font-medium text-sm">
+            <div class="p-8 border-b border-slate-800 flex items-center gap-3">
+                <i class="fas fa-user-graduate text-blue-500 text-3xl"></i>
+                <span class="text-2xl font-black tracking-tighter italic text-white">Öğrenci Paneli</span>
+            </div>
+
+            <nav class="flex-1 p-4 space-y-1 mt-4">
+                <button onclick="showSection('dashboard')" id="menu-dashboard" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800 transition-all text-slate-400">
+                    <i class="fas fa-th-large w-5"></i><span>Dashboard</span>
+                </button>
+                <div class="px-4 pt-4 pb-2 text-[10px] font-black uppercase text-slate-500 tracking-widest">Akademik</div>
+                <button onclick="showSection('announcements')" id="menu-announcements" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800 transition-all text-slate-400">
+                    <i class="fas fa-bullhorn w-5 text-yellow-400"></i><span>Duyurular</span>
+                </button>
+                <button onclick="showSection('grades')" id="menu-grades" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800 transition-all text-slate-400">
+                    <i class="fas fa-star w-5 text-green-400"></i><span>Notlarım</span>
+                </button>
+                <button onclick="showSection('enrollment')" id="menu-enrollment" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800 transition-all text-slate-400">
+                    <i class="fas fa-tasks w-5 text-red-400"></i><span>Ders Seçimi</span>
+                </button>
+            </nav>
+
+            <div class="p-6 border-t border-slate-800">
+                <button onclick="logout()" class="flex items-center gap-3 p-3 w-full text-red-400 hover:bg-red-500/10 rounded-2xl transition-all">
+                    <i class="fas fa-power-off"></i><span>Oturumu Kapat</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+            <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-10 shrink-0 z-10">
+                <div class="flex items-center gap-4 flex-1">
+                    <h2 id="pageTitle" class="text-xl font-black text-slate-800 uppercase tracking-widest italic">Dashboard</h2>
+                </div>
+                <div class="flex items-center gap-4">
+                    <p id="userNameDisplay" class="text-sm font-black text-slate-900 leading-tight">Öğrenci</p>
+                    <div id="userInitials" class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-black shadow-lg">ÖĞ</div>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-y-auto p-10">
+                <!-- SECTION: DASHBOARD -->
+                <div id="section-dashboard" class="section active">
+                    <div class="bg-gradient-to-r from-blue-600 to-indigo-700 p-10 rounded-[3rem] text-white shadow-2xl relative overflow-hidden mb-10">
+                        <div class="relative z-10">
+                            <h1 class="text-4xl font-black italic">Hoş Geldin, <span id="studentName"></span>!</h1>
+                            <p class="mt-4 text-blue-100 text-lg">Akademik işlemlerini sol menüden kolayca yönetebilirsin.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION: ANNOUNCEMENTS -->
+                <div id="section-announcements" class="section">
+                    <div class="flex justify-between items-center mb-8">
+                        <h1 class="text-3xl font-black italic">Sistem Duyuruları</h1>
+                    </div>
+                    <div id="announcementList" class="grid grid-cols-1 gap-6"></div>
+                </div>
+
+                <!-- SECTION: GRADES -->
+                <div id="section-grades" class="section">
+                    <h1 class="text-3xl font-black italic mb-8">Not Dökümü</h1>
+                    <div class="bg-white rounded-[2rem] shadow-xl overflow-hidden border border-slate-200">
+                        <table class="w-full text-left font-bold text-slate-700">
+                            <thead class="bg-slate-50 text-slate-400 text-[10px] uppercase font-black tracking-widest border-b">
+                                <tr>
+                                    <th class="px-8 py-5">Ders Kodu</th>
+                                    <th class="px-8 py-5">Ders Adı</th>
+                                    <th class="px-8 py-5 text-center">Vize</th>
+                                    <th class="px-8 py-5 text-center">Final</th>
+                                    <th class="px-8 py-5 text-center">Ortalama</th>
+                                    <th class="px-8 py-5 text-center">Harf Notu</th>
+                                </tr>
+                            </thead>
+                            <tbody id="gradesTableBody" class="divide-y">
+                                <!-- Notlar buraya gelecek -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- SECTION: ENROLLMENT -->
+                <div id="section-enrollment" class="section">
+                    <h1 class="text-3xl font-black italic mb-8">Ders Seçim Ekranı</h1>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                        <div>
+                            <h2 class="text-xl font-bold mb-4">Alabileceğin Dersler</h2>
+                            <div id="availableCoursesList" class="space-y-3">
+                                <!-- Alınabilecek dersler buraya gelecek -->
+                            </div>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold mb-4">Seçilen Dersler</h2>
+                            <div id="selectedCoursesList" class="space-y-3">
+                                <!-- Seçilen dersler buraya gelecek -->
+                            </div>
+                            <button id="enrollButton" class="mt-6 w-full bg-green-600 text-white py-3 rounded-xl font-bold hover:bg-green-700 transition-all shadow-lg">Seçimi Tamamla</button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8080';
+        const token = localStorage.getItem('token');
+        const username = localStorage.getItem('username');
+        let studentData = {};
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!token || !username) {
+                window.location.href = 'index.html';
+                return;
+            }
+            document.getElementById('userNameDisplay').innerText = username;
+
+            try {
+                // Öğrenci bilgilerini çek
+                const student = await apiRequest(`/student/by-username?username=${username}`);
+                if (student) {
+                    studentData = student;
+                    document.getElementById('studentName').innerText = student.firstName;
+                    const initials = (student.firstName?.[0] || '') + (student.lastName?.[0] || '');
+                    document.getElementById('userInitials').innerText = initials.toUpperCase();
+                }
+            } catch (e) {
+                console.error("Öğrenci bilgileri alınamadı:", e);
+            }
+
+            showSection('dashboard');
+        });
+
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('section-' + id).classList.add('active');
+            document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active-menu'));
+            document.getElementById('menu-' + id).classList.add('active-menu');
+            document.getElementById('pageTitle').innerText = id.toUpperCase();
+
+            if (id === 'announcements') loadAnnouncements();
+            if (id === 'grades') loadGrades();
+            if (id === 'enrollment') loadEnrollmentPage();
+        }
+
+        async function apiRequest(endpoint, method = 'GET', data = null) {
+            const options = { method, headers: { 'Authorization': 'Bearer ' + token } };
+            if (data) {
+                options.headers['Content-Type'] = 'application/json';
+                options.body = JSON.stringify(data);
+            }
+            const res = await fetch(`${API_URL}${endpoint}`, options);
+            if (!res.ok) {
+                const errText = await res.text();
+                alert(`Hata: ${errText}`);
+                return null;
+            }
+            return res.status !== 204 ? res.json() : true;
+        }
+
+        async function loadAnnouncements() {
+            const list = document.getElementById('announcementList');
+            list.innerHTML = '<p>Yükleniyor...</p>';
+            const announcements = await apiRequest('/announcement/all');
+            if (!announcements || announcements.length === 0) {
+                list.innerHTML = '<p>Gösterilecek duyuru yok.</p>';
+                return;
+            }
+            list.innerHTML = announcements.map(a => `
+                <div class="bg-white p-6 rounded-2xl shadow-md border">
+                    <h3 class="text-lg font-bold text-blue-600">${a.title}</h3>
+                    <p class="text-xs text-slate-400 mt-1">${new Date(a.publishDate).toLocaleString()}</p>
+                    <p class="text-slate-600 mt-3">${a.content}</p>
+                </div>
+            `).join('');
+        }
+
+        async function loadGrades() {
+            const tableBody = document.getElementById('gradesTableBody');
+            tableBody.innerHTML = '<tr><td colspan="6" class="text-center p-4">Yükleniyor...</td></tr>';
+
+            // Bu endpoint'in backend'de olması gerekiyor: /grade/student/{studentId}
+            const grades = await apiRequest(`/grade/student/${studentData.id}`);
+
+            if (!grades || grades.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" class="text-center p-4">Henüz notunuz bulunmuyor.</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = grades.map(g => `
+                <tr class="hover:bg-slate-50">
+                    <td class="px-8 py-4 font-mono text-blue-600">${g.courseCode || '---'}</td>
+                    <td class="px-8 py-4">${g.courseName || '---'}</td>
+                    <td class="px-8 py-4 text-center">${g.midterm || '-'}</td>
+                    <td class="px-8 py-4 text-center">${g.finalExam || '-'}</td>
+                    <td class="px-8 py-4 text-center font-black">${g.average || '-'}</td>
+                    <td class="px-8 py-4 text-center font-black text-green-600">${g.letterGrade || '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        async function loadEnrollmentPage() {
+            const availableList = document.getElementById('availableCoursesList');
+            const selectedList = document.getElementById('selectedCoursesList');
+            availableList.innerHTML = '<p>Yükleniyor...</p>';
+            selectedList.innerHTML = '<p>Yükleniyor...</p>';
+
+            // Bu endpoint'lerin backend'de olması gerekiyor
+            const availableCourses = await apiRequest(`/enrollment/available-courses/${studentData.department.id}`);
+            const enrolledCourses = await apiRequest(`/enrollment/student/${studentData.id}`);
+
+            if (availableCourses) {
+                availableList.innerHTML = availableCourses.map(c => `
+                    <div class="bg-white p-4 rounded-lg border flex justify-between items-center">
+                        <div>
+                            <p class="font-bold">${c.course.name}</p>
+                            <p class="text-xs text-slate-500">${c.teacher.firstName} ${c.teacher.lastName} | Kontenjan: ${c.course.quota}</p>
+                        </div>
+                        <button onclick="selectCourse(${c.id}, '${c.course.name}')" class="bg-blue-500 text-white w-8 h-8 rounded-full">+</button>
+                    </div>
+                `).join('');
+            }
+
+            if (enrolledCourses) {
+                selectedList.innerHTML = enrolledCourses.map(e => `
+                     <div id="selected-${e.courseSection.id}" class="bg-green-100 p-4 rounded-lg border border-green-300 flex justify-between items-center">
+                        <p class="font-bold text-green-800">${e.courseSection.course.name}</p>
+                        <button onclick="deselectCourse(${e.courseSection.id})" class="text-red-500 font-bold">X</button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        let selectedCourseIds = new Set();
+
+        function selectCourse(courseSectionId, courseName) {
+            if (selectedCourseIds.has(courseSectionId)) return;
+            selectedCourseIds.add(courseSectionId);
+            const selectedList = document.getElementById('selectedCoursesList');
+            const courseDiv = document.createElement('div');
+            courseDiv.id = `selected-${courseSectionId}`;
+            courseDiv.className = "bg-blue-100 p-4 rounded-lg border border-blue-300 flex justify-between items-center";
+            courseDiv.innerHTML = `<p class="font-bold text-blue-800">${courseName}</p> <button onclick="deselectCourse(${courseSectionId})" class="text-red-500 font-bold">X</button>`;
+            selectedList.appendChild(courseDiv);
+        }
+
+        function deselectCourse(courseSectionId) {
+            selectedCourseIds.delete(courseSectionId);
+            const courseDiv = document.getElementById(`selected-${courseSectionId}`);
+            if (courseDiv) courseDiv.remove();
+        }
+
+        document.getElementById('enrollButton').addEventListener('click', async () => {
+            if (selectedCourseIds.size === 0) {
+                alert("Lütfen en az bir ders seçin.");
+                return;
+            }
+            const data = {
+                studentId: studentData.id,
+                courseSectionIds: Array.from(selectedCourseIds)
+            };
+
+            // Bu endpoint'in backend'de olması gerekiyor: /enrollment/batch
+            const result = await apiRequest('/enrollment/batch', 'POST', data);
+            if (result) {
+                alert("Ders seçimi başarıyla tamamlandı!");
+                loadEnrollmentPage();
+            }
+        });
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

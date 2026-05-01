@@ -54,6 +54,7 @@ public class RefreshTokenServiceImpl implements IRefreshTokenService {
         String accessToken = jwtService.generateToken(refreshToken.getUser());
         RefreshToken saveRefreshToken = refreshTokenRepository.save(createRefreshToken(refreshToken.getUser()));
 
-        return  new AuthResponse(accessToken,saveRefreshToken.getRefreshToken());
+        // Rol bilgisini ekleyerek hatayı giderdik
+        return new AuthResponse(accessToken, saveRefreshToken.getRefreshToken(), refreshToken.getUser().getRole().name());
     }
 }

@@ -3,20 +3,19 @@ package com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.controller.Impl;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.controller.IGradeController;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoGrade;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoGradeIU;
-import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.service.Impl.GradeServiceImpl;
+import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.service.IGradeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-
-
 @RequestMapping("/grade")
 @RestController
+@CrossOrigin(origins = "*")
 public class GradeControllerImpl implements IGradeController {
 
     @Autowired
-    private GradeServiceImpl gradeService;
+    private IGradeService gradeService;
 
     @PostMapping("/add")
     @Override
@@ -34,7 +33,6 @@ public class GradeControllerImpl implements IGradeController {
     @Override
     public void gradeDelete(@PathVariable Long id) {
         gradeService.gradeDelete(id);
-
     }
 
     @GetMapping("/all")
@@ -43,10 +41,25 @@ public class GradeControllerImpl implements IGradeController {
         return  gradeService.getAllGrades();
     }
 
-
     @GetMapping("/{id}")
     @Override
     public DtoGrade findByGradeId(@PathVariable Long id) {
         return gradeService.findByGradeId(id);
+    }
+
+    @GetMapping("/course-section/{courseSectionId}/student/{studentId}")
+    @Override
+    public List<DtoGrade> getGradesByCourseSectionAndStudent(@PathVariable Long courseSectionId, @PathVariable Long studentId) {
+        return gradeService.getGradesByCourseSectionAndStudent(courseSectionId, studentId);
+    }
+
+    @PutMapping("/course-section/{courseSectionId}/student/{studentId}/update-grade")
+    @Override
+    public DtoGrade updateStudentGrade(
+            @PathVariable Long courseSectionId,
+            @PathVariable Long studentId,
+            @RequestParam String examType,
+            @RequestParam Double gradeValue) {
+        return gradeService.updateStudentGrade(courseSectionId, studentId, examType, gradeValue);
     }
 }
