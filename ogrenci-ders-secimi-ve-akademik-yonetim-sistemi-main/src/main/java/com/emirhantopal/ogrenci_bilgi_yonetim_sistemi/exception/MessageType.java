@@ -41,8 +41,9 @@ public enum MessageType {
 
     // Assignment related messages
     INVALID_ASSIGNMENT_ID("1026", "ÖDEV (ASSIGNMENT) ID BULUNAMADI"),
-    ASSIGNMENT_LIST_IS_EMPTY("1027", "ÖDEV LİSTESİ BOŞ.");
+    ASSIGNMENT_LIST_IS_EMPTY("1027", "ÖDEV LİSTESİ BOŞ."),
 
+    INVALID_DATE_FORMAT("1028", "Tarih formatı hatalı.");
 
 
     private final String code;

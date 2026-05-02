@@ -86,7 +86,7 @@
                 staffTab.classList.remove('tab-active');
                 staffTab.classList.add('text-slate-400');
 
-                usernameInput.type = 'text';
+                usernameInput.type = 'text'; // Öğrenci numarası da artık string olabilir
                 usernameInput.placeholder = 'Örn: 445909';
                 usernameLabel.innerText = 'Öğrenci Numarası';
                 userIcon.className = 'fas fa-user-graduate text-lg';
@@ -106,14 +106,21 @@
             e.preventDefault();
             const username = document.getElementById('username').value.toString().trim();
             const password = document.getElementById('password').value;
-            const loginType = document.getElementById('loginType').value;
+            const loginType = document.getElementById('loginType').value; // loginType'ı alıyoruz
             const errorDiv = document.getElementById('errorMessage');
+
+            // Öğrenci girişi için sayısal kontrolü kaldırıldı, backend zaten User tablosunda username'i string tutuyor.
+            // if (loginType === 'STUDENT' && !/^\d+$/.test(username)) {
+            //     errorDiv.innerText = 'Öğrenci girişi için sadece sayısal değer girebilirsiniz!';
+            //     errorDiv.classList.remove('hidden');
+            //     return;
+            // }
 
             try {
                 const response = await fetch('http://localhost:8080/authenticate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
+                    body: JSON.stringify({ username, password, loginType }) // loginType'ı body'ye ekliyoruz
                 });
 
                 const data = await response.json();
@@ -124,11 +131,11 @@
                     localStorage.setItem('userRole', data.role);
 
                     if (data.role === 'STUDENT') {
-                        window.location.href = 'student-dashboard.html';
+                        window.location.href = 'student-dashboard.html'; // Öğrenci paneline yönlendir
                     } else if (data.role === 'TEACHER') {
-                        window.location.href = 'teacher-dashboard.html';
+                        window.location.href = 'teacher-dashboard.html'; // Öğretmen paneline yönlendir
                     } else {
-                        window.location.href = 'dashboard.html';
+                        window.location.href = 'dashboard.html'; // Diğer roller (ADMIN, USER) için admin paneli
                     }
                 } else {
                     errorDiv.innerText = 'KİMLİK DOĞRULAMA BAŞARISIZ! BİLGİLERİNİZİ KONTROL EDİN.';

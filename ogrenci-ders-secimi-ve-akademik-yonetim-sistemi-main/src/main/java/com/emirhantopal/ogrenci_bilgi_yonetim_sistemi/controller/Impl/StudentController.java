@@ -9,15 +9,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/student")
 @CrossOrigin(origins = "*")
 public class StudentController implements IStudentController {
 
-    @Autowired
-    private IStudentService studentService;
+    private final IStudentService studentService;
 
+    @Autowired
+    public StudentController(IStudentService studentService) {
+        this.studentService = studentService;
+    }
 
     @PostMapping("/add")
     @Override
@@ -51,7 +55,16 @@ public class StudentController implements IStudentController {
 
     @GetMapping("/by-username")
     @Override
-    public DtoStudent getStudentByUsername(@RequestParam String username) {
+    public DtoStudent getStudentByUsername(@RequestParam(name = "username") String username) {
         return studentService.findByUsername(username);
+    }
+
+    @PutMapping("/update-profile/{id}")
+    @Override
+    public DtoStudent updateStudentProfile(@PathVariable(name = "id") Long id, @RequestBody Map<String, String> payload) {
+        String email = payload.get("email");
+        String telNumber = payload.get("telNumber");
+        String newPassword = payload.get("newPassword");
+        return studentService.updateStudentProfile(id, email, telNumber, newPassword);
     }
 }

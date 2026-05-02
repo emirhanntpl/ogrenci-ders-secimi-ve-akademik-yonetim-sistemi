@@ -3,8 +3,8 @@ package com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.service.Impl;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoCourseSection;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoExam;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoExamIU;
-import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoCourse; // Import eklendi
-import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoTeacher; // Import eklendi
+import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoCourse;
+import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoTeacher;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.exception.BaseException;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.exception.MessageType;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.model.CourseSection;
@@ -20,26 +20,34 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class ExamService implements IExamService {
 
-    @Autowired
-    private ExamRepository examRepository;
+    private final ExamRepository examRepository;
+    private final CourseSectionRepository courseSectionRepository;
 
     @Autowired
-    private CourseSectionRepository courseSectionRepository;
+    public ExamService(ExamRepository examRepository, CourseSectionRepository courseSectionRepository) {
+        this.examRepository = examRepository;
+        this.courseSectionRepository = courseSectionRepository;
+    }
 
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+    private final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     @Override
     @Transactional
     public DtoExam addExam(DtoExamIU dtoExamIU) {
         Exam exam = new Exam();
         BeanUtils.copyProperties(dtoExamIU, exam);
-        exam.setExamDate(LocalDateTime.parse(dtoExamIU.getExamDate(), formatter));
+        try {
+            exam.setExamDate(LocalDateTime.parse(dtoExamIU.getExamDate(), formatter));
+        } catch (DateTimeParseException e) {
+            throw new BaseException(MessageType.INVALID_DATE_FORMAT, HttpStatus.BAD_REQUEST);
+        }
 
         CourseSection courseSection = courseSectionRepository.findById(dtoExamIU.getCourseSectionId())
                 .orElseThrow(() -> new BaseException(MessageType.INVALID_COURSE_SECTION_ID, HttpStatus.BAD_REQUEST));
@@ -56,7 +64,11 @@ public class ExamService implements IExamService {
                 .orElseThrow(() -> new BaseException(MessageType.INVALID_EXAM_ID, HttpStatus.BAD_REQUEST));
 
         exam.setExamName(dtoExamIU.getExamName());
-        exam.setExamDate(LocalDateTime.parse(dtoExamIU.getExamDate(), formatter));
+        try {
+            exam.setExamDate(LocalDateTime.parse(dtoExamIU.getExamDate(), formatter));
+        } catch (DateTimeParseException e) {
+            throw new BaseException(MessageType.INVALID_DATE_FORMAT, HttpStatus.BAD_REQUEST);
+        }
         exam.setClassroom(dtoExamIU.getClassroom());
 
         CourseSection courseSection = courseSectionRepository.findById(dtoExamIU.getCourseSectionId())

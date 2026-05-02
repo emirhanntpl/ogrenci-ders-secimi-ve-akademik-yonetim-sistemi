@@ -33,6 +33,8 @@ public class GradeServiceImpl implements IGradeService {
     public DtoGrade gradeAdd(DtoGradeIU dtoGradeIU) {
         Grade grade = new Grade();
         BeanUtils.copyProperties(dtoGradeIU, grade);
+        // Calculate average, letter grade and pass status
+        calculateAndSetGradeDetails(grade);
         Grade savedGrade = gradeRepository.save(grade);
         return convertToDto(savedGrade);
     }
@@ -45,7 +47,8 @@ public class GradeServiceImpl implements IGradeService {
         
         grade.setMidTerm(dtoGradeIU.getMidTerm());
         grade.setFinalExam(dtoGradeIU.getFinalExam());
-        grade.setAverage(calculateAverage(grade));
+        // Calculate average, letter grade and pass status
+        calculateAndSetGradeDetails(grade);
 
         Grade savedGrade = gradeRepository.save(grade);
         return convertToDto(savedGrade);
@@ -74,24 +77,36 @@ public class GradeServiceImpl implements IGradeService {
 
     @Override
     public List<DtoGrade> getGradesByCourseSectionAndStudent(Long courseSectionId, Long studentId) {
-        List<Grade> grades = gradeRepository.findByEnrollment_CourseSection_IdAndEnrollment_Student_Id(courseSectionId, studentId);
+        // Find enrollment first
+        List<Enrollment> enrollments = enrollmentRepository.findByCourseSection_Id(courseSectionId);
+        Enrollment enrollment = enrollments.stream()
+                .filter(e -> e.getStudent().getId().equals(studentId))
+                .findFirst()
+                .orElse(null);
+                
+        if (enrollment == null) {
+            return new ArrayList<>();
+        }
+        
+        List<Grade> grades = gradeRepository.findByEnrollment(enrollment);
         return grades.stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
     @Override
     @Transactional
     public DtoGrade updateStudentGrade(Long courseSectionId, Long studentId, String examType, Double gradeValue) {
-        List<Grade> grades = gradeRepository.findByEnrollment_CourseSection_IdAndEnrollment_Student_Id(courseSectionId, studentId);
+        // Find enrollment first
+        List<Enrollment> enrollments = enrollmentRepository.findByCourseSection_Id(courseSectionId);
+        Enrollment enrollment = enrollments.stream()
+                .filter(e -> e.getStudent().getId().equals(studentId))
+                .findFirst()
+                .orElseThrow(() -> new BaseException(MessageType.INVALID_ENROLLMENT_ID, HttpStatus.BAD_REQUEST));
+
+        List<Grade> grades = gradeRepository.findByEnrollment(enrollment);
         Grade grade;
         
         if (grades.isEmpty()) {
             grade = new Grade();
-            // Enrollment bulup set etmemiz lazım
-            List<Enrollment> enrollments = enrollmentRepository.findByCourseSection_Id(courseSectionId);
-            Enrollment enrollment = enrollments.stream()
-                    .filter(e -> e.getStudent().getId().equals(studentId))
-                    .findFirst()
-                    .orElseThrow(() -> new BaseException(MessageType.INVALID_ENROLLMENT_ID, HttpStatus.BAD_REQUEST));
             grade.setEnrollment(enrollment);
         } else {
             grade = grades.get(0);
@@ -103,21 +118,63 @@ public class GradeServiceImpl implements IGradeService {
             grade.setFinalExam(gradeValue);
         }
         
-        grade.setAverage(calculateAverage(grade));
+        // Calculate average, letter grade and pass status
+        calculateAndSetGradeDetails(grade);
         Grade savedGrade = gradeRepository.save(grade);
         return convertToDto(savedGrade);
     }
 
-    private Double calculateAverage(Grade grade) {
+    private void calculateAndSetGradeDetails(Grade grade) {
         Double midterm = grade.getMidTerm() != null ? grade.getMidTerm() : 0.0;
         Double finalExam = grade.getFinalExam() != null ? grade.getFinalExam() : 0.0;
-        return (midterm * 0.4) + (finalExam * 0.6);
+        Double average;
+        String letterGrade;
+        String passStatus;
+
+        // Final notu 45'in altında ise doğrudan KALDI
+        if (finalExam < 45.0) {
+            average = (midterm * 0.4) + (finalExam * 0.6); // Ortalama yine de hesaplanır
+            letterGrade = "FF";
+            passStatus = "KALDI";
+        } else {
+            average = (midterm * 0.4) + (finalExam * 0.6);
+            letterGrade = calculateLetterGrade(average);
+            passStatus = (average >= 50.0) ? "GEÇTİ" : "KALDI";
+        }
+
+        grade.setAverage(average);
+        grade.setLetterGrade(letterGrade);
+        grade.setPassStatus(passStatus);
+    }
+
+    private String calculateLetterGrade(Double average) {
+        if (average >= 90) {
+            return "AA";
+        } else if (average >= 85) {
+            return "BA";
+        } else if (average >= 80) {
+            return "BB";
+        } else if (average >= 75) {
+            return "CB";
+        } else if (average >= 70) {
+            return "CC";
+        } else if (average >= 60) {
+            return "DC";
+        } else if (average >= 50) {
+            return "DD";
+        } else if (average >= 40) {
+            return "FD";
+        } else {
+            return "FF";
+        }
     }
 
     private DtoGrade convertToDto(Grade grade) {
         DtoGrade dto = new DtoGrade();
         BeanUtils.copyProperties(grade, dto);
         dto.setId(grade.getId());
+        dto.setLetterGrade(grade.getLetterGrade()); // Yeni eklendi
+        dto.setPassStatus(grade.getPassStatus());   // Yeni eklendi
         return dto;
     }
 }

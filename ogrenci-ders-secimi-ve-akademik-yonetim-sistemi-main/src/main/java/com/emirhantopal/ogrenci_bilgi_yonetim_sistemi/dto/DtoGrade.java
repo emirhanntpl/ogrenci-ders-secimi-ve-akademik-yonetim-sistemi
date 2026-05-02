@@ -12,4 +12,6 @@ public class DtoGrade extends DtoBaseEntity {
     private Double midTerm;
     private Double finalExam;
     private Double average;
+    private String letterGrade; // Yeni eklendi
+    private String passStatus;  // Yeni eklendi
 }

@@ -19,5 +19,5 @@ public interface IGradeService {
 
     List<DtoGrade> getGradesByCourseSectionAndStudent(Long courseSectionId, Long studentId);
 
-    DtoGrade updateStudentGrade(Long courseSectionId, Long studentId, String examName, Double gradeValue);
+    DtoGrade updateStudentGrade(Long courseSectionId, Long studentId, String examType, Double gradeValue);
 }

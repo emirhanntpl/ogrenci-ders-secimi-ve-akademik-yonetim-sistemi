@@ -11,6 +11,6 @@ public interface IStudentService {
     void studentDelete(Long id);
     List<DtoStudent> getAllStudents();
     DtoStudent findByStudentId(Long id);
-
-
+    DtoStudent findByUsername(String username);
+    DtoStudent updateStudentProfile(Long id, String email, String telNumber, String newPassword);
 }

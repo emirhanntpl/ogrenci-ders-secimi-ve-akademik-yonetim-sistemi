@@ -574,8 +574,20 @@
             e.preventDefault();
             const id = document.getElementById('studentEditId').value;
             const num = document.getElementById('sNumber').value.toString();
-            const data = { firstName: document.getElementById('sFirstName').value, lastName: document.getElementById('sLastName').value, studentNumber: num, email: document.getElementById('sEmail').value, telNumber: document.getElementById('sTel').value, departmentId: parseInt(document.getElementById('sDeptId').value) };
-            if (await apiRequest(id ? `/student/update/${id}` : '/student/add', id ? 'PUT' : 'POST', data)) { closeModal('studentModal'); loadStudents(); }
+
+            // userId bulma kısmı tamamen kaldırıldı!
+            const data = {
+                firstName: document.getElementById('sFirstName').value,
+                lastName: document.getElementById('sLastName').value,
+                studentNumber: num,
+                email: document.getElementById('sEmail').value,
+                telNumber: document.getElementById('sTel').value,
+                departmentId: parseInt(document.getElementById('sDeptId').value)
+            };
+            if (await apiRequest(id ? `/student/update/${id}` : '/student/add', id ? 'PUT' : 'POST', data)) {
+                closeModal('studentModal');
+                loadStudents();
+            }
         };
 
         // --- TEACHERS ---
@@ -603,6 +615,7 @@
             document.getElementById('tFirstName').value = data?.firstName || '';
             document.getElementById('tLastName').value = data?.lastName || '';
             document.getElementById('tDeptId').value = data?.department?.id || '';
+            // Data'dan user.username okumak yerine registrationNumber okuyacağız
             document.getElementById('tNumber').value = data?.registrationNumber || data?.user?.username || '';
             openModal('teacherModal');
         }
@@ -611,8 +624,18 @@
             e.preventDefault();
             const id = document.getElementById('teacherEditId').value;
             const num = document.getElementById('tNumber').value.toString();
-            const data = { firstName: document.getElementById('tFirstName').value, lastName: document.getElementById('tLastName').value, departmentId: parseInt(document.getElementById('tDeptId').value), registrationNumber: num };
-            if (await apiRequest(id ? `/teacher/update/${id}` : '/teacher/add', id ? 'PUT' : 'POST', data)) { closeModal('teacherModal'); loadTeachers(); }
+
+            // userId bulma kısmı tamamen kaldırıldı!
+            const data = {
+                firstName: document.getElementById('tFirstName').value,
+                lastName: document.getElementById('tLastName').value,
+                departmentId: parseInt(document.getElementById('tDeptId').value),
+                registrationNumber: num
+            };
+            if (await apiRequest(id ? `/teacher/update/${id}` : '/teacher/add', id ? 'PUT' : 'POST', data)) {
+                closeModal('teacherModal');
+                loadTeachers();
+            }
         };
 
         // --- COURSES ---

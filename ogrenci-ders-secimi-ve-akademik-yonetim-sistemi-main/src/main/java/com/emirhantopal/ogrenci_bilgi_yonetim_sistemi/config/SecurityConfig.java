@@ -41,10 +41,13 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(request ->
                         request.requestMatchers(WHITE_LIST_URL).permitAll()
-                                .requestMatchers("/faculty/**", "/department/**", "/semester/**", "/classroom/**", "/announcement/**").hasAuthority("ADMIN")
+                                .requestMatchers("/faculty/**", "/department/**", "/semester/**", "/classroom/**").hasAuthority("ADMIN")
+                                .requestMatchers("/announcement/all").hasAnyAuthority("ADMIN", "TEACHER", "STUDENT")
+                                .requestMatchers("/announcement/**").hasAnyAuthority("ADMIN", "TEACHER") // Öğretmen de duyuru ekleyebilsin
                                 .requestMatchers("/teacher/**", "/course/**", "/coursesection/**").hasAnyAuthority("ADMIN", "TEACHER")
-                                .requestMatchers("/student/**").hasAnyAuthority("ADMIN", "TEACHER")
+                                .requestMatchers("/student/**").hasAnyAuthority("ADMIN", "TEACHER", "STUDENT")
                                 .requestMatchers("/grade/**").hasAnyAuthority("ADMIN", "TEACHER", "STUDENT")
+                                .requestMatchers("/exam/**", "/assignment/**").hasAnyAuthority("ADMIN", "TEACHER") // Sınav ve Ödev yönetimi
                                 .requestMatchers("/enrollment/**").hasAnyAuthority("ADMIN", "STUDENT")
                                 .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -21,7 +21,7 @@ public class OgrenciBilgiYonetimSistemiApplication {
         return args -> {
             if (userRepository.findByUsername("admin").isEmpty()) {
                 User admin = new User();
-                admin.setUsername("admin");
+                admin.setUsername(  "admin");
                 admin.setPassword(passwordEncoder.encode("admin"));
                 admin.setRole(Role.ADMIN);
                 userRepository.save(admin);

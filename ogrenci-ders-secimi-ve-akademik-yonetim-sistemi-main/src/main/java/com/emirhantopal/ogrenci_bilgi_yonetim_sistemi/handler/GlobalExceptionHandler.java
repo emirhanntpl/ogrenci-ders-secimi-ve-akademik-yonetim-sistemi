@@ -54,8 +54,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(java.lang.Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(java.lang.Exception ex) {
+        // Hatanın detaylarını görmek için konsola log atıyoruz
+        ex.printStackTrace();
+        
         ErrorResponse errorResponse = new ErrorResponse(
-                "An unexpected error occurred",
+                "An unexpected error occurred: " + ex.getMessage(),
                 "9999",
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 LocalDateTime.now()

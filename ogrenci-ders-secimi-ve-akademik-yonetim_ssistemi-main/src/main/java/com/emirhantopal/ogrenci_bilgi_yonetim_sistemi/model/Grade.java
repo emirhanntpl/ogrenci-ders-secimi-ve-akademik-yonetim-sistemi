@@ -30,6 +30,6 @@ public class Grade extends BaseEntity {
 
     private Double average;
 
-    private String letterGrade; // Tekrar eklendi
-    private String passStatus;  // Tekrar eklendi
+    private String letterGrade; // Yeni eklendi
+    private String passStatus;  // Yeni eklendi
 }

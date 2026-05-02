@@ -8,10 +8,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.util.List;
 
 public interface IExamController {
-    DtoExam addExam(DtoExamIU dtoExamIU);
-    DtoExam updateExam(Long id, DtoExamIU dtoExamIU);
-    void deleteExam(Long id);
-    DtoExam getExamById(Long id);
+    DtoExam addExam(@RequestBody DtoExamIU dtoExamIU);
+    DtoExam updateExam(@PathVariable("id") Long id, @RequestBody DtoExamIU dtoExamIU);
+    void deleteExam(@PathVariable("id") Long id);
+    DtoExam getExamById(@PathVariable("id") Long id);
     List<DtoExam> getAllExams();
-    List<DtoExam> getExamsByCourseSection(Long courseSectionId);
+    List<DtoExam> getExamsByCourseSection(@PathVariable("courseSectionId") Long courseSectionId);
 }

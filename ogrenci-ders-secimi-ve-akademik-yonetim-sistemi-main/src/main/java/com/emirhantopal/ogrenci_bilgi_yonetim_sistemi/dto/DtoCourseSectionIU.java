@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DtoCourseSectionIU extends DtoBaseEntity {
+public class DtoCourseSectionIU { // DtoBaseEntity kalıtımı kaldırıldı
 
     private Long courseId;
     

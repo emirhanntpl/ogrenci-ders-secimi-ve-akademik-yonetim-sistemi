@@ -52,7 +52,6 @@ public class StudentServiceImpl implements IStudentService {
     @Transactional
     public DtoStudent studentAdd(DtoStudentIU dtoIU) {
         
-        // UNIQUE KONTROLLERİ: Aynı numara, email veya telefon var mı?
         if (studentRepository.findByStudentNumber(dtoIU.getStudentNumber()).isPresent()) {
             throw new RuntimeException("Bu öğrenci numarası (" + dtoIU.getStudentNumber() + ") ile kayıtlı başka bir öğrenci var!");
         }
@@ -76,19 +75,15 @@ public class StudentServiceImpl implements IStudentService {
             Department department = departmentRepository.findById(dtoIU.getDepartmentId())
                     .orElseThrow(() -> new BaseException(MessageType.INVALID_DEPARTMENT_ID, HttpStatus.BAD_REQUEST));
             student.setDepartment(department);
-        } else {
-            student.setDepartment(null);
         }
 
-        // OTOMATİK KULLANICI OLUŞTURMA VEYA BAĞLAMA MANTIĞI
-        String username = dtoIU.getStudentNumber(); // Öğrenci no'yu username olarak kullanacağız
+        String username = dtoIU.getStudentNumber(); 
         
         Optional<User> existingUser = userRepository.findByUsername(username);
         User user;
         if(existingUser.isPresent()){
             user = existingUser.get();
-            // Eğer bu kullanıcı hesabı (user) zaten başka bir öğrenciye bağlıysa:
-            final Long userId = user.getId(); // Lambda için final değişken
+            final Long userId = user.getId(); 
             Optional<Student> existingStudentWithThisUser = studentRepository.findAll().stream()
                 .filter(s -> s.getUser() != null && s.getUser().getId().equals(userId))
                 .findFirst();
@@ -96,10 +91,9 @@ public class StudentServiceImpl implements IStudentService {
                 throw new RuntimeException("Bu kullanıcı hesabı (" + username + ") zaten başka bir öğrenciye tanımlı!");
             }
         } else {
-            // Kullanıcı yoksa, otomatik olarak yeni bir STUDENT rolünde kullanıcı oluştur
             user = new User();
             user.setUsername(username);
-            user.setPassword(passwordEncoder.encode(username)); // Şifre varsayılan olarak Öğrenci No ile aynı
+            user.setPassword(passwordEncoder.encode(username)); 
             user.setRole(Role.STUDENT);
             user = userRepository.save(user);
         }
@@ -115,7 +109,6 @@ public class StudentServiceImpl implements IStudentService {
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new BaseException(MessageType.INVALID_STUDENT_ID, HttpStatus.BAD_REQUEST));
 
-        // UNIQUE KONTROLLERİ (Kendisi hariç başka birinde bu veriler var mı?)
         Optional<Student> existByNumber = studentRepository.findByStudentNumber(dtoIU.getStudentNumber());
         if (existByNumber.isPresent() && !existByNumber.get().getId().equals(id)) {
             throw new RuntimeException("Bu öğrenci numarası başka bir öğrenci tarafından kullanılıyor!");
@@ -147,7 +140,6 @@ public class StudentServiceImpl implements IStudentService {
             student.setDepartment(null);
         }
 
-        // Güncellemede öğrenci no (username) değişiyorsa
         String newUsername = dtoIU.getStudentNumber();
         if (student.getUser() == null || !student.getUser().getUsername().equals(newUsername)) {
              Optional<User> existingUser = userRepository.findByUsername(newUsername);
@@ -157,7 +149,7 @@ public class StudentServiceImpl implements IStudentService {
              } else {
                  user = new User();
                  user.setUsername(newUsername);
-                 user.setPassword(passwordEncoder.encode(newUsername)); // Varsayılan şifre
+                 user.setPassword(passwordEncoder.encode(newUsername)); 
                  user.setRole(Role.STUDENT);
                  user = userRepository.save(user);
              }
@@ -174,30 +166,24 @@ public class StudentServiceImpl implements IStudentService {
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new BaseException(MessageType.INVALID_STUDENT_ID, HttpStatus.BAD_REQUEST));
 
-        // 1. Öğrencinin ders kayıtlarını sil
         List<Enrollment> enrollments = enrollmentRepository.findByStudent(student);
         if (enrollments != null && !enrollments.isEmpty()) {
             enrollmentRepository.deleteAll(enrollments);
         }
 
-        // 2. Öğrencinin kullanıcı hesabını ve refresh tokenlarını sil
         User user = student.getUser();
         if (user != null) {
-            // User'a bağlı refresh tokenları sil
             List<RefreshToken> refreshTokens = refreshTokenRepository.findByUser(user);
             if (refreshTokens != null && !refreshTokens.isEmpty()) {
                 refreshTokenRepository.deleteAll(refreshTokens);
             }
             
-            // Öğrenci referansını kopar
             student.setUser(null);
             studentRepository.save(student);
             
-            // Kullanıcıyı sil
             userRepository.delete(user);
         }
 
-        // 3. Öğrenciyi sil
         studentRepository.delete(student);
     }
 
@@ -216,6 +202,45 @@ public class StudentServiceImpl implements IStudentService {
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new BaseException(MessageType.INVALID_STUDENT_ID, HttpStatus.BAD_REQUEST));
         return convertToDto(student);
+    }
+
+    @Override
+    public DtoStudent findByUsername(String username) {
+        Student student = studentRepository.findByUser_Username(username)
+                .orElseThrow(() -> new BaseException(MessageType.INVALID_STUDENT_ID, HttpStatus.BAD_REQUEST));
+        return convertToDto(student);
+    }
+
+    @Override
+    @Transactional
+    public DtoStudent updateStudentProfile(Long id, String email, String telNumber, String newPassword) {
+        Student student = studentRepository.findById(id)
+                .orElseThrow(() -> new BaseException(MessageType.INVALID_STUDENT_ID, HttpStatus.BAD_REQUEST));
+
+        if (email != null && !email.trim().isEmpty()) {
+            Optional<Student> existByEmail = studentRepository.findByEmail(email);
+            if (existByEmail.isPresent() && !existByEmail.get().getId().equals(id)) {
+                throw new RuntimeException("Bu e-posta adresi başka bir öğrenci tarafından kullanılıyor!");
+            }
+            student.setEmail(email);
+        }
+
+        if (telNumber != null && !telNumber.trim().isEmpty()) {
+            Optional<Student> existByTel = studentRepository.findByTelNumber(telNumber);
+            if (existByTel.isPresent() && !existByTel.get().getId().equals(id)) {
+                throw new RuntimeException("Bu telefon numarası başka bir öğrenci tarafından kullanılıyor!");
+            }
+            student.setTelNumber(telNumber);
+        }
+
+        if (newPassword != null && !newPassword.trim().isEmpty()) {
+            if (student.getUser() != null) {
+                student.getUser().setPassword(passwordEncoder.encode(newPassword));
+            }
+        }
+
+        Student updatedStudent = studentRepository.save(student);
+        return convertToDto(updatedStudent);
     }
 
     private DtoStudent convertToDto(Student student) {

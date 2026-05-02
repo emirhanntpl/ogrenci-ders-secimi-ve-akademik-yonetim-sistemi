@@ -16,26 +16,35 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class AssignmentService implements IAssignmentService {
 
-    @Autowired
-    private AssignmentRepository assignmentRepository;
+    private final AssignmentRepository assignmentRepository;
+    private final CourseSectionRepository courseSectionRepository;
 
     @Autowired
-    private CourseSectionRepository courseSectionRepository;
+    public AssignmentService(AssignmentRepository assignmentRepository, CourseSectionRepository courseSectionRepository) {
+        this.assignmentRepository = assignmentRepository;
+        this.courseSectionRepository = courseSectionRepository;
+    }
 
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+    private final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     @Override
     @Transactional
     public DtoAssignment addAssignment(DtoAssignmentIU dtoAssignmentIU) {
         Assignment assignment = new Assignment();
         BeanUtils.copyProperties(dtoAssignmentIU, assignment);
-        assignment.setDueDate(LocalDateTime.parse(dtoAssignmentIU.getDueDate(), formatter));
+        
+        try {
+            assignment.setDueDate(LocalDateTime.parse(dtoAssignmentIU.getDueDate(), formatter));
+        } catch (DateTimeParseException e) {
+            throw new BaseException(MessageType.INVALID_DATE_FORMAT, HttpStatus.BAD_REQUEST);
+        }
 
         CourseSection courseSection = courseSectionRepository.findById(dtoAssignmentIU.getCourseSectionId())
                 .orElseThrow(() -> new BaseException(MessageType.INVALID_COURSE_SECTION_ID, HttpStatus.BAD_REQUEST));
@@ -53,7 +62,12 @@ public class AssignmentService implements IAssignmentService {
 
         assignment.setTitle(dtoAssignmentIU.getTitle());
         assignment.setDescription(dtoAssignmentIU.getDescription());
-        assignment.setDueDate(LocalDateTime.parse(dtoAssignmentIU.getDueDate(), formatter));
+        
+        try {
+            assignment.setDueDate(LocalDateTime.parse(dtoAssignmentIU.getDueDate(), formatter));
+        } catch (DateTimeParseException e) {
+            throw new BaseException(MessageType.INVALID_DATE_FORMAT, HttpStatus.BAD_REQUEST);
+        }
 
         CourseSection courseSection = courseSectionRepository.findById(dtoAssignmentIU.getCourseSectionId())
                 .orElseThrow(() -> new BaseException(MessageType.INVALID_COURSE_SECTION_ID, HttpStatus.BAD_REQUEST));

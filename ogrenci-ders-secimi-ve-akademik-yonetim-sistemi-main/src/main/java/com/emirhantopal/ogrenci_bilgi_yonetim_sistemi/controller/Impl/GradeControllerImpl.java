@@ -3,6 +3,7 @@ package com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.controller.Impl;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.controller.IGradeController;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoGrade;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoGradeIU;
+import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.GradeUpdateRequest; // Yeni eklendi
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.service.IGradeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -58,8 +59,7 @@ public class GradeControllerImpl implements IGradeController {
     public DtoGrade updateStudentGrade(
             @PathVariable Long courseSectionId,
             @PathVariable Long studentId,
-            @RequestParam String examType,
-            @RequestParam Double gradeValue) {
-        return gradeService.updateStudentGrade(courseSectionId, studentId, examType, gradeValue);
+            @RequestBody GradeUpdateRequest request) { // Değiştirildi: @RequestBody ile GradeUpdateRequest alınıyor
+        return gradeService.updateStudentGrade(courseSectionId, studentId, request.getExamType(), request.getGradeValue()); // DTO'dan değerler alınıyor
     }
 }
