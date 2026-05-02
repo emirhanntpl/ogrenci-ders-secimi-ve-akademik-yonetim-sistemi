@@ -6,6 +6,10 @@
     <title>KTÜ BYS - Öğrenci Paneli</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.min.css">
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         body { font-family: 'Inter', sans-serif; }
@@ -251,6 +255,9 @@
         </div>
     </div>
 
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.all.min.js"></script>
+
     <script>
         const API_URL = 'http://localhost:8080';
         const token = localStorage.getItem('token');
@@ -258,6 +265,19 @@
         const userRole = localStorage.getItem('userRole');
 
         let studentData = null;
+
+        // Özelleştirilmiş Toast (Sağ üstten çıkan bildirim)
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
 
         document.addEventListener('DOMContentLoaded', async () => {
             if (!token || userRole !== 'STUDENT') {
@@ -280,18 +300,40 @@
             document.getElementById('currentDate').innerText = now.toLocaleDateString('tr-TR', dateOptions);
         }
 
-        async function apiRequest(endpoint, method = 'GET', data = null) {
+        async function apiRequest(endpoint, method = 'GET', data = null, showSuccessToast = false, successMsg = 'İşlem başarılı') {
             const options = { method, headers: { 'Authorization': 'Bearer ' + token } };
             if (data) {
                 options.headers['Content-Type'] = 'application/json';
                 options.body = JSON.stringify(data);
             }
-            const res = await fetch(`${API_URL}${endpoint}`, options);
-            if (!res.ok) {
-                const errText = await res.text();
-                throw new Error(errText || 'Bir hata oluştu');
+
+            try {
+                const res = await fetch(`${API_URL}${endpoint}`, options);
+                if (!res.ok) {
+                    const errText = await res.text();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Hata!',
+                        text: errText || 'Bir hata oluştu',
+                        confirmButtonColor: '#f97316'
+                    });
+                    return null;
+                }
+
+                if (showSuccessToast) {
+                    Toast.fire({ icon: 'success', title: successMsg });
+                }
+
+                return res.status !== 204 && res.status !== 200 ? res.json().catch(() => true) : true;
+            } catch(e) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Bağlantı Hatası',
+                    text: 'Sunucuya ulaşılamıyor. Lütfen internet bağlantınızı kontrol edin.',
+                    confirmButtonColor: '#f97316'
+                });
+                return null;
             }
-            return res.status !== 204 ? res.json() : true;
         }
 
         async function fetchStudentData() {
@@ -520,22 +562,24 @@
                 newPassword: newPassword
             };
 
-            try {
-                const updatedStudent = await apiRequest(`/student/update-profile/${studentData.id}`, 'PUT', payload);
-
-                if (updatedStudent) {
-                    alert("Profiliniz başarıyla güncellendi!");
-                    closeModal('profileModal');
-                    await fetchStudentData();
-                }
-            } catch (err) {
-                alert("Güncelleme başarısız: " + err.message);
+            if (await apiRequest(`/student/update-profile/${studentData.id}`, 'PUT', payload, true, 'Profiliniz başarıyla güncellendi!')) {
+                closeModal('profileModal');
+                await fetchStudentData();
             }
         });
 
         function logout() {
-            localStorage.clear();
-            window.location.href = 'index.html';
+            Swal.fire({
+                title: 'Çıkış Yapılıyor...',
+                text: 'Lütfen bekleyin.',
+                icon: 'info',
+                timer: 1000,
+                showConfirmButton: false,
+                willClose: () => {
+                    localStorage.clear();
+                    window.location.href = 'index.html';
+                }
+            });
         }
 
         async function loadAssignments() {

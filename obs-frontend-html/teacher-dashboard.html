@@ -6,6 +6,10 @@
     <title>KTÜ BYS - Öğretmen Paneli</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.min.css">
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         body { font-family: 'Inter', sans-serif; }
@@ -293,12 +297,28 @@
         </div>
     </div>
 
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.all.min.js"></script>
+
     <script>
         const API_URL = 'http://localhost:8080';
         const token = localStorage.getItem('token');
         const username = localStorage.getItem('username');
         let currentTeacher = null;
         let teacherCourses = [];
+
+        // Özelleştirilmiş Toast (Sağ üstten çıkan bildirim)
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
 
         document.addEventListener('DOMContentLoaded', async () => {
             if (!token || localStorage.getItem('userRole') !== 'TEACHER') {
@@ -320,18 +340,40 @@
             document.getElementById('currentDate').innerText = now.toLocaleDateString('tr-TR', dateOptions);
         }
 
-        async function apiRequest(endpoint, method = 'GET', data = null) {
+        async function apiRequest(endpoint, method = 'GET', data = null, showSuccessToast = false, successMsg = 'İşlem başarılı') {
             const options = { method, headers: { 'Authorization': 'Bearer ' + token } };
             if (data) {
                 options.headers['Content-Type'] = 'application/json';
                 options.body = JSON.stringify(data);
             }
-            const res = await fetch(`${API_URL}${endpoint}`, options);
-            if (!res.ok) {
-                const errText = await res.text();
-                throw new Error(errText || 'İşlem başarısız!');
+
+            try {
+                const res = await fetch(`${API_URL}${endpoint}`, options);
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({ message: 'Sunucu ile iletişim kurulamadı' }));
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Hata!',
+                        text: err.message || 'Bir hata oluştu',
+                        confirmButtonColor: '#059669'
+                    });
+                    return null;
+                }
+
+                if (showSuccessToast) {
+                    Toast.fire({ icon: 'success', title: successMsg });
+                }
+
+                return res.status !== 204 && res.status !== 200 ? res.json().catch(() => true) : true;
+            } catch(e) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Bağlantı Hatası',
+                    text: 'Sunucuya ulaşılamıyor. Lütfen internet bağlantınızı kontrol edin.',
+                    confirmButtonColor: '#059669'
+                });
+                return null;
             }
-            return res.status !== 204 && res.status !== 200 ? res.json().catch(() => true) : true;
         }
 
         async function loadTeacherInfo() {
@@ -514,95 +556,77 @@
             const type = document.getElementById('gradeExamType').value;
             const val = document.getElementById('gradeValue').value;
 
-            try {
-                const gradeData = { examType: type, gradeValue: parseFloat(val) };
-                await apiRequest(`/grade/course-section/${csid}/student/${sid}/update-grade`, 'PUT', gradeData);
+            const gradeData = { examType: type, gradeValue: parseFloat(val) };
+            if (await apiRequest(`/grade/course-section/${csid}/student/${sid}/update-grade`, 'PUT', gradeData, true, 'Not başarıyla kaydedildi')) {
                 closeModal('gradeModal');
                 loadMyStudents();
-            } catch(e) {
-                alert("Not sistemi backend entegrasyonu yapılamadı.");
             }
         };
 
         // --- EXAM & ASSIGNMENT & ANNOUNCEMENT (CRUD) ---
         async function loadExams() {
-            try {
-                const response = await fetch(`${API_URL}/exam/all`, { headers: { 'Authorization': 'Bearer ' + token } });
-                if(response.ok) {
-                    const exams = await response.json();
-                    if(exams && Array.isArray(exams)) {
-                        document.getElementById('examList').innerHTML = exams.filter(e => teacherCourses.some(tc => tc.id === e.courseSection?.id)).map(e => `
-                            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow relative overflow-hidden group">
-                                <div class="absolute top-0 right-0 w-16 h-16 bg-amber-50 rounded-bl-full -mr-2 -mt-2 transition-transform group-hover:scale-110"></div>
-                                <div class="relative z-10">
-                                    <div class="flex justify-between items-start mb-2">
-                                        <span class="text-[10px] font-black text-amber-600 bg-amber-50 border border-amber-100 px-2 py-1 rounded uppercase tracking-wider">${e.courseSection?.course?.code || '-'}</span>
-                                        <button onclick="deleteData('exam', ${e.id})" class="text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"><i class="fas fa-trash"></i></button>
-                                    </div>
-                                    <h3 class="text-xl font-black italic text-slate-800 mb-1">${e.examName}</h3>
-                                    <p class="text-xs text-slate-500 font-bold mb-4 line-clamp-1">${e.courseSection?.course?.name}</p>
-
-                                    <div class="space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                        <div class="flex items-center text-sm font-bold text-slate-600"><i class="far fa-calendar-alt w-5 text-amber-500 mr-2"></i> ${new Date(e.examDate).toLocaleString('tr-TR', {dateStyle:'short', timeStyle:'short'})}</div>
-                                        <div class="flex items-center text-sm font-bold text-slate-600"><i class="fas fa-door-open w-5 text-amber-500 mr-2"></i> ${e.classroom}</div>
-                                    </div>
-                                </div>
+            const exams = await apiRequest('/exam/all');
+            if(exams && Array.isArray(exams)) {
+                document.getElementById('examList').innerHTML = exams.filter(e => teacherCourses.some(tc => tc.id === e.courseSection?.id)).map(e => `
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-amber-50 rounded-bl-full -mr-2 -mt-2 transition-transform group-hover:scale-110"></div>
+                        <div class="relative z-10">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="text-[10px] font-black text-amber-600 bg-amber-50 border border-amber-100 px-2 py-1 rounded uppercase tracking-wider">${e.courseSection?.course?.code || '-'}</span>
+                                <button onclick="deleteData('exam', ${e.id})" class="text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"><i class="fas fa-trash"></i></button>
                             </div>
-                        `).join('');
-                    }
-                }
-            } catch(e) {}
+                            <h3 class="text-xl font-black italic text-slate-800 mb-1">${e.examName}</h3>
+                            <p class="text-xs text-slate-500 font-bold mb-4 line-clamp-1">${e.courseSection?.course?.name}</p>
+
+                            <div class="space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                <div class="flex items-center text-sm font-bold text-slate-600"><i class="far fa-calendar-alt w-5 text-amber-500 mr-2"></i> ${new Date(e.examDate).toLocaleString('tr-TR', {dateStyle:'short', timeStyle:'short'})}</div>
+                                <div class="flex items-center text-sm font-bold text-slate-600"><i class="fas fa-door-open w-5 text-amber-500 mr-2"></i> ${e.classroom}</div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
         }
 
         async function loadAssignments() {
-            try {
-                const response = await fetch(`${API_URL}/assignment/all`, { headers: { 'Authorization': 'Bearer ' + token } });
-                if(response.ok) {
-                    const list = await response.json();
-                    if(list && Array.isArray(list)) {
-                        document.getElementById('assignmentList').innerHTML = list.filter(a => teacherCourses.some(tc => tc.id === a.courseSection?.id)).map(a => `
-                            <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow relative group">
-                                <div class="flex justify-between items-start mb-2">
-                                    <span class="text-[10px] font-black text-cyan-600 bg-cyan-50 border border-cyan-100 px-2 py-1 rounded uppercase tracking-wider">${a.courseSection?.course?.code || '-'}</span>
-                                    <button onclick="deleteData('assignment', ${a.id})" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-colors opacity-0 group-hover:opacity-100 flex items-center justify-center"><i class="fas fa-trash text-xs"></i></button>
-                                </div>
-                                <h3 class="text-xl font-black italic text-slate-800">${a.title}</h3>
-                                <p class="text-xs text-slate-500 font-bold mb-4">${a.courseSection?.course?.name}</p>
+            const list = await apiRequest('/assignment/all');
+            if(list && Array.isArray(list)) {
+                document.getElementById('assignmentList').innerHTML = list.filter(a => teacherCourses.some(tc => tc.id === a.courseSection?.id)).map(a => `
+                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow relative group">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-[10px] font-black text-cyan-600 bg-cyan-50 border border-cyan-100 px-2 py-1 rounded uppercase tracking-wider">${a.courseSection?.course?.code || '-'}</span>
+                            <button onclick="deleteData('assignment', ${a.id})" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-colors opacity-0 group-hover:opacity-100 flex items-center justify-center"><i class="fas fa-trash text-xs"></i></button>
+                        </div>
+                        <h3 class="text-xl font-black italic text-slate-800">${a.title}</h3>
+                        <p class="text-xs text-slate-500 font-bold mb-4">${a.courseSection?.course?.name}</p>
 
-                                <p class="text-sm text-slate-600 font-medium mb-6 line-clamp-3 bg-slate-50 p-4 rounded-xl border border-slate-100">${a.description}</p>
+                        <p class="text-sm text-slate-600 font-medium mb-6 line-clamp-3 bg-slate-50 p-4 rounded-xl border border-slate-100">${a.description}</p>
 
-                                <div class="flex items-center gap-2 text-xs font-bold text-rose-500 bg-rose-50 px-3 py-2 rounded-lg inline-flex border border-rose-100">
-                                    <i class="fas fa-hourglass-half"></i> Son Teslim: ${new Date(a.dueDate).toLocaleString('tr-TR', {dateStyle:'short', timeStyle:'short'})}
-                                </div>
-                            </div>
-                        `).join('');
-                    }
-                }
-            } catch (e) {}
+                        <div class="flex items-center gap-2 text-xs font-bold text-rose-500 bg-rose-50 px-3 py-2 rounded-lg inline-flex border border-rose-100">
+                            <i class="fas fa-hourglass-half"></i> Son Teslim: ${new Date(a.dueDate).toLocaleString('tr-TR', {dateStyle:'short', timeStyle:'short'})}
+                        </div>
+                    </div>
+                `).join('');
+            }
         }
 
         async function loadAnnouncements() {
-            try {
-                const response = await fetch(`${API_URL}/announcement/all`, { headers: { 'Authorization': 'Bearer ' + token } });
-                if(response.ok) {
-                    const list = await response.json();
-                    const authorName = `${currentTeacher.firstName} ${currentTeacher.lastName}`;
-                    const myAnnouncements = (list || []).filter(a => a.author === authorName);
+            const list = await apiRequest('/announcement/all');
+            const authorName = `${currentTeacher.firstName} ${currentTeacher.lastName}`;
+            const myAnnouncements = (list || []).filter(a => a.author === authorName);
 
-                    document.getElementById('teacherAnnouncementList').innerHTML = myAnnouncements.map(a => `
-                        <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow group">
-                            <div class="flex justify-between items-start mb-4">
-                                <div>
-                                    <h3 class="text-xl font-black italic text-emerald-600">${a.title}</h3>
-                                    <p class="text-xs font-bold text-slate-400 mt-1"><i class="far fa-clock mr-1"></i>${new Date(a.publishDate).toLocaleString()}</p>
-                                </div>
-                                <button onclick="deleteData('announcement', ${a.id})" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-colors opacity-0 group-hover:opacity-100 flex items-center justify-center"><i class="fas fa-trash text-xs"></i></button>
-                            </div>
-                            <p class="text-slate-600 font-medium whitespace-pre-wrap leading-relaxed">${a.content}</p>
+            document.getElementById('teacherAnnouncementList').innerHTML = myAnnouncements.map(a => `
+                <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow group">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-xl font-black italic text-emerald-600">${a.title}</h3>
+                            <p class="text-xs font-bold text-slate-400 mt-1"><i class="far fa-clock mr-1"></i>${new Date(a.publishDate).toLocaleString()}</p>
                         </div>
-                    `).join('') || '<div class="col-span-full p-8 text-center text-slate-500 font-bold bg-white rounded-3xl border border-dashed border-slate-200"><i class="fas fa-comment-slash text-3xl mb-3 text-slate-300 block"></i>Henüz yayınladığınız bir duyuru bulunmamaktadır.</div>';
-                }
-            } catch(e) {}
+                        <button onclick="deleteData('announcement', ${a.id})" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-colors opacity-0 group-hover:opacity-100 flex items-center justify-center"><i class="fas fa-trash text-xs"></i></button>
+                    </div>
+                    <p class="text-slate-600 font-medium whitespace-pre-wrap leading-relaxed">${a.content}</p>
+                </div>
+            `).join('') || '<div class="col-span-full p-8 text-center text-slate-500 font-bold bg-white rounded-3xl border border-dashed border-slate-200"><i class="fas fa-comment-slash text-3xl mb-3 text-slate-300 block"></i>Henüz yayınladığınız bir duyuru bulunmamaktadır.</div>';
         }
 
         function openModal(id) {
@@ -629,7 +653,7 @@
             let dateInput = document.getElementById('examDate').value;
             if (dateInput.length === 16) dateInput += ':00';
             const data = { examName: document.getElementById('examName').value, examDate: dateInput, classroom: document.getElementById('examClassroom').value, courseSectionId: parseInt(document.getElementById('examCourse').value) };
-            if(await apiRequest('/exam/add', 'POST', data)) { closeModal('examModal'); loadExams(); }
+            if(await apiRequest('/exam/add', 'POST', data, true, 'Sınav başarıyla tanımlandı')) { closeModal('examModal'); loadExams(); }
         };
 
         document.getElementById('assignmentForm').onsubmit = async (e) => {
@@ -637,25 +661,48 @@
             let dateInput = document.getElementById('assignmentDueDate').value;
             if (dateInput.length === 16) dateInput += ':00';
             const data = { title: document.getElementById('assignmentTitle').value, description: document.getElementById('assignmentDesc').value, dueDate: dateInput, courseSectionId: parseInt(document.getElementById('assignmentCourse').value) };
-            if(await apiRequest('/assignment/add', 'POST', data)) { closeModal('assignmentModal'); loadAssignments(); }
+            if(await apiRequest('/assignment/add', 'POST', data, true, 'Ödev başarıyla verildi')) { closeModal('assignmentModal'); loadAssignments(); }
         };
 
         document.getElementById('announcementForm').onsubmit = async (e) => {
             e.preventDefault();
             const authorName = `${currentTeacher.firstName} ${currentTeacher.lastName}`;
             const data = { title: document.getElementById('annTitle').value, content: document.getElementById('annContent').value, author: authorName };
-            if(await apiRequest('/announcement/add', 'POST', data)) { closeModal('announcementModal'); loadAnnouncements(); }
+            if(await apiRequest('/announcement/add', 'POST', data, true, 'Duyuru başarıyla yayınlandı')) { closeModal('announcementModal'); loadAnnouncements(); }
         };
 
         async function deleteData(type, id) {
-            if (!confirm('Bu kaydı silmek istediğinizden emin misiniz?')) return;
-            try {
-                await apiRequest(`/${type}/delete/${id}`, 'DELETE');
-                showSection(document.querySelector('.section.active').id.split('-')[1]);
-            } catch(e) {}
+            const result = await Swal.fire({
+                title: 'Emin misiniz?',
+                text: "Bu işlem geri alınamaz ve kalıcı olarak silinecektir!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#94a3b8',
+                confirmButtonText: 'Evet, sil!',
+                cancelButtonText: 'İptal'
+            });
+
+            if (result.isConfirmed) {
+                if (await apiRequest(`/${type}/delete/${id}`, 'DELETE', null, true, 'Kayıt başarıyla silindi')) {
+                    showSection(document.querySelector('.section.active').id.split('-')[1]);
+                }
+            }
         }
 
-        function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+        function logout() {
+            Swal.fire({
+                title: 'Çıkış Yapılıyor...',
+                text: 'Lütfen bekleyin.',
+                icon: 'info',
+                timer: 1000,
+                showConfirmButton: false,
+                willClose: () => {
+                    localStorage.clear();
+                    window.location.href = 'index.html';
+                }
+            });
+        }
     </script>
 </body>
 </html>

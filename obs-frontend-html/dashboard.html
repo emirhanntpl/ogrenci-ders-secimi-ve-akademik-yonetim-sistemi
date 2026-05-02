@@ -6,6 +6,10 @@
     <title>KTÜ BYS - Full Yönetim Paneli</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.min.css">
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         body { font-family: 'Inter', sans-serif; }
@@ -525,10 +529,26 @@
         </div>
     </div>
 
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.all.min.js"></script>
+
     <script>
         const API_URL = 'http://localhost:8080';
         const token = localStorage.getItem('token');
         let allData = { students: [], courses: [], teachers: [], faculties: [], classrooms: [], semesters: [], departments: [], announcements: [] };
+
+        // Özelleştirilmiş Toast (Sağ üstten çıkan bildirim)
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
 
         document.addEventListener('DOMContentLoaded', () => {
             if (!token) { window.location.href = 'index.html'; return; }
@@ -590,22 +610,57 @@
             if (loaders[id]) loaders[id]();
         }
 
-        async function apiRequest(endpoint, method = 'GET', data = null) {
+        async function apiRequest(endpoint, method = 'GET', data = null, showSuccessToast = false, successMsg = 'İşlem başarılı') {
             const options = { method, headers: { 'Authorization': 'Bearer ' + token } };
             if (data) { options.headers['Content-Type'] = 'application/json'; options.body = JSON.stringify(data); }
-            const res = await fetch(`${API_URL}${endpoint}`, options);
-            if (!res.ok) {
-                const err = await res.json().catch(() => ({ message: 'Bir hata oluştu' }));
-                alert(err.message || 'Bir hata oluştu');
+
+            try {
+                const res = await fetch(`${API_URL}${endpoint}`, options);
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({ message: 'Sunucu ile iletişim kurulamadı' }));
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Hata!',
+                        text: err.message || 'Bir hata oluştu',
+                        confirmButtonColor: '#3b82f6'
+                    });
+                    return null;
+                }
+
+                if (showSuccessToast) {
+                    Toast.fire({ icon: 'success', title: successMsg });
+                }
+
+                return res.status !== 204 ? res.json() : true;
+            } catch(e) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Bağlantı Hatası',
+                    text: 'Sunucuya ulaşılamıyor. Lütfen internet bağlantınızı kontrol edin.',
+                    confirmButtonColor: '#3b82f6'
+                });
                 return null;
             }
-            return res.status !== 204 ? res.json() : true;
         }
 
         async function deleteData(type, id) {
-            if (!confirm('Bu kaydı silmek istediğinize emin misiniz?')) return;
-            const endpoint = type === 'enrollment' ? `/enrollment/drop/${id}` : `/${type}/delete/${id}`;
-            if (await apiRequest(endpoint, 'DELETE')) showSection(document.querySelector('.section.active').id.split('-')[1]);
+            const result = await Swal.fire({
+                title: 'Emin misiniz?',
+                text: "Bu işlem geri alınamaz ve kalıcı olarak silinecektir!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#94a3b8',
+                confirmButtonText: 'Evet, sil!',
+                cancelButtonText: 'İptal'
+            });
+
+            if (result.isConfirmed) {
+                const endpoint = type === 'enrollment' ? `/enrollment/drop/${id}` : `/${type}/delete/${id}`;
+                if (await apiRequest(endpoint, 'DELETE', null, true, 'Kayıt başarıyla silindi')) {
+                    showSection(document.querySelector('.section.active').id.split('-')[1]);
+                }
+            }
         }
 
 
@@ -646,7 +701,9 @@
             e.preventDefault();
             const id = document.getElementById('announcementEditId').value;
             const data = { title: document.getElementById('annTitle').value, content: document.getElementById('annContent').value, author: document.getElementById('annAuthor').value };
-            if (await apiRequest(id ? `/announcement/update/${id}` : '/announcement/add', id ? 'PUT' : 'POST', data)) { closeModal('announcementModal'); loadAnnouncements(); }
+            if (await apiRequest(id ? `/announcement/update/${id}` : '/announcement/add', id ? 'PUT' : 'POST', data, true, id ? 'Duyuru güncellendi' : 'Duyuru yayınlandı')) {
+                closeModal('announcementModal'); loadAnnouncements();
+            }
         };
 
         // --- FACULTIES ---
@@ -700,7 +757,9 @@
                 year_of_establishment: document.getElementById('fYearOfEstablishment').value,
                 secretary: document.getElementById('fSecretary').value
             };
-            if (await apiRequest(id ? `/faculty/update/${id}` : '/faculty/add', id ? 'PUT' : 'POST', data)) { closeModal('facultyModal'); loadFaculties(); }
+            if (await apiRequest(id ? `/faculty/update/${id}` : '/faculty/add', id ? 'PUT' : 'POST', data, true, id ? 'Fakülte güncellendi' : 'Yeni fakülte eklendi')) {
+                closeModal('facultyModal'); loadFaculties();
+            }
         };
 
         // --- DEPARTMENTS ---
@@ -740,7 +799,9 @@
             e.preventDefault();
             const id = document.getElementById('departmentEditId').value;
             const data = { name: document.getElementById('dName').value, code: document.getElementById('dCode').value, facultyId: parseInt(document.getElementById('dFacultyId').value) };
-            if (await apiRequest(id ? `/department/update/${id}` : '/department/add', id ? 'PUT' : 'POST', data)) { closeModal('departmentModal'); loadDepartments(); }
+            if (await apiRequest(id ? `/department/update/${id}` : '/department/add', id ? 'PUT' : 'POST', data, true, id ? 'Departman güncellendi' : 'Yeni departman eklendi')) {
+                closeModal('departmentModal'); loadDepartments();
+            }
         };
 
         // --- STUDENTS ---
@@ -801,7 +862,7 @@
                 telNumber: document.getElementById('sTel').value,
                 departmentId: parseInt(document.getElementById('sDeptId').value)
             };
-            if (await apiRequest(id ? `/student/update/${id}` : '/student/add', id ? 'PUT' : 'POST', data)) {
+            if (await apiRequest(id ? `/student/update/${id}` : '/student/add', id ? 'PUT' : 'POST', data, true, id ? 'Öğrenci bilgileri güncellendi' : 'Öğrenci sisteme eklendi')) {
                 closeModal('studentModal');
                 loadStudents();
             }
@@ -853,7 +914,7 @@
                 departmentId: parseInt(document.getElementById('tDeptId').value),
                 registrationNumber: num
             };
-            if (await apiRequest(id ? `/teacher/update/${id}` : '/teacher/add', id ? 'PUT' : 'POST', data)) {
+            if (await apiRequest(id ? `/teacher/update/${id}` : '/teacher/add', id ? 'PUT' : 'POST', data, true, id ? 'Hoca bilgileri güncellendi' : 'Yeni hoca eklendi')) {
                 closeModal('teacherModal');
                 loadTeachers();
             }
@@ -910,7 +971,9 @@
             e.preventDefault();
             const id = document.getElementById('courseEditId').value;
             const data = { code: document.getElementById('cCode').value, name: document.getElementById('cName').value, credit: document.getElementById('cCredit').value, akts: parseInt(document.getElementById('cAkts').value), quota: parseInt(document.getElementById('cQuota').value) };
-            if (await apiRequest(id ? `/course/update/${id}` : '/course/add', id ? 'PUT' : 'POST', data)) { closeModal('courseModal'); loadCourses(); }
+            if (await apiRequest(id ? `/course/update/${id}` : '/course/add', id ? 'PUT' : 'POST', data, true, id ? 'Ders güncellendi' : 'Ders eklendi')) {
+                closeModal('courseModal'); loadCourses();
+            }
         };
 
         // --- CLASSROOMS ---
@@ -941,7 +1004,9 @@
             e.preventDefault();
             const id = document.getElementById('classroomEditId').value;
             const data = { roomNumber: document.getElementById('crNumber').value, capacity: parseInt(document.getElementById('crCapacity').value) };
-            if (await apiRequest(id ? `/classroom/update/${id}` : '/classroom/add', id ? 'PUT' : 'POST', data)) { closeModal('classroomModal'); loadClassrooms(); }
+            if (await apiRequest(id ? `/classroom/update/${id}` : '/classroom/add', id ? 'PUT' : 'POST', data, true, id ? 'Derslik güncellendi' : 'Derslik eklendi')) {
+                closeModal('classroomModal'); loadClassrooms();
+            }
         };
 
         // --- SEMESTERS ---
@@ -978,7 +1043,9 @@
             e.preventDefault();
             const id = document.getElementById('semesterEditId').value;
             const data = { term: document.getElementById('semTerm').value, isActive: document.getElementById('semActive').checked };
-            if (await apiRequest(id ? `/semester/update/${id}` : '/semester/add', id ? 'PUT' : 'POST', data)) { closeModal('semesterModal'); loadSemesters(); }
+            if (await apiRequest(id ? `/semester/update/${id}` : '/semester/add', id ? 'PUT' : 'POST', data, true, id ? 'Dönem güncellendi' : 'Dönem eklendi')) {
+                closeModal('semesterModal'); loadSemesters();
+            }
         };
 
         // --- SECTIONS & ENROLLMENTS ---
@@ -1050,8 +1117,21 @@
             openModal('enrollmentModal');
         }
 
-        document.getElementById('sectionForm').onsubmit = async (e) => { e.preventDefault(); const data = { courseId: parseInt(document.getElementById('secCourse').value), teacherId: parseInt(document.getElementById('secTeacher').value), classroomId: parseInt(document.getElementById('secClassroom').value), semesterId: parseInt(document.getElementById('secSemester').value) }; if (await apiRequest('/coursesection/add', 'POST', data)) { closeModal('sectionModal'); loadSections(); } };
-        document.getElementById('enrollmentForm').onsubmit = async (e) => { e.preventDefault(); const data = { studentId: parseInt(document.getElementById('enrStudent').value), courseSectionId: parseInt(document.getElementById('enrSection').value) }; if (await apiRequest('/enrollment/enroll', 'POST', data)) { closeModal('enrollmentModal'); loadEnrollments(); } };
+        document.getElementById('sectionForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const data = { courseId: parseInt(document.getElementById('secCourse').value), teacherId: parseInt(document.getElementById('secTeacher').value), classroomId: parseInt(document.getElementById('secClassroom').value), semesterId: parseInt(document.getElementById('secSemester').value) };
+            if (await apiRequest('/coursesection/add', 'POST', data, true, 'Ders şubesi başarıyla oluşturuldu')) {
+                closeModal('sectionModal'); loadSections();
+            }
+        };
+
+        document.getElementById('enrollmentForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const data = { studentId: parseInt(document.getElementById('enrStudent').value), courseSectionId: parseInt(document.getElementById('enrSection').value) };
+            if (await apiRequest('/enrollment/enroll', 'POST', data, true, 'Öğrenci derse başarıyla kaydedildi')) {
+                closeModal('enrollmentModal'); loadEnrollments();
+            }
+        };
 
         function openModal(id) {
             const modal = document.getElementById(id);
@@ -1071,7 +1151,20 @@
                 modal.classList.remove('flex');
             }, 200);
         }
-        function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+
+        function logout() {
+            Swal.fire({
+                title: 'Çıkış Yapılıyor...',
+                text: 'Lütfen bekleyin.',
+                icon: 'info',
+                timer: 1000,
+                showConfirmButton: false,
+                willClose: () => {
+                    localStorage.clear();
+                    window.location.href = 'index.html';
+                }
+            });
+        }
     </script>
 </body>
 </html>
