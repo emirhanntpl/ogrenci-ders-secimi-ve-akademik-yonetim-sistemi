@@ -9,10 +9,46 @@
 
     <!-- SweetAlert2 CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: 'Inter', sans-serif; transition: background-color 0.3s, color 0.3s; }
+
+        /* Dark Mode Variables */
+        :root {
+            --bg-body: #f0fdf4;
+            --bg-sidebar: #064e3b;
+            --bg-card: #ffffff;
+            --text-main: #064e3b;
+            --text-muted: #64748b;
+            --border-color: #d1fae5;
+        }
+
+        body.dark-mode {
+            --bg-body: #022c22;
+            --bg-sidebar: #020617;
+            --bg-card: #064e3b;
+            --text-main: #f0fdf4;
+            --text-muted: #9ca3af;
+            --border-color: #065f46;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+        }
+
+        body.dark-mode .bg-white { background-color: var(--bg-card) !important; }
+        body.dark-mode .bg-slate-50 { background-color: var(--bg-body) !important; }
+        body.dark-mode .text-slate-800, body.dark-mode .text-slate-900, body.dark-mode .text-emerald-900 { color: var(--text-main) !important; }
+        body.dark-mode .text-slate-500, body.dark-mode .text-slate-600 { color: var(--text-muted) !important; }
+        body.dark-mode .border-slate-100, body.dark-mode .border-slate-200, body.dark-mode .border-emerald-100 { border-color: var(--border-color) !important; }
+        body.dark-mode th, body.dark-mode td { border-color: var(--border-color) !important; }
+        body.dark-mode input, body.dark-mode select, body.dark-mode textarea {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            border-color: var(--border-color);
+        }
+
         .active-menu {
             background: linear-gradient(to right, #059669, #047857) !important;
             color: white !important;
@@ -31,12 +67,14 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        body.dark-mode ::-webkit-scrollbar-thumb { background: #475569; }
+        body.dark-mode ::-webkit-scrollbar-thumb:hover { background: #64748b; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 h-screen overflow-hidden flex">
+<body class="bg-[#f0fdf4] text-slate-800 h-screen overflow-hidden flex transition-colors duration-300">
 
     <!-- Sidebar -->
-    <aside class="w-72 bg-[#064e3b] text-emerald-100 flex flex-col shrink-0 shadow-2xl z-20 relative">
+    <aside class="w-72 bg-[#064e3b] text-emerald-100 flex flex-col shrink-0 shadow-2xl z-20 relative transition-colors duration-300" style="background-color: var(--bg-sidebar);">
         <!-- Dekoratif Arkaplan -->
         <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
 
@@ -51,6 +89,9 @@
         </div>
 
         <nav class="flex-1 p-4 space-y-1 mt-4 overflow-y-auto relative z-10">
+            <button onclick="showSection('dashboard')" id="menu-dashboard" class="menu-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">
+                <i class="fas fa-chart-pie w-5"></i><span>Özet & Grafikler</span>
+            </button>
             <button onclick="showSection('my-courses')" id="menu-my-courses" class="menu-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">
                 <i class="fas fa-book-open w-5"></i><span>Derslerim</span>
             </button>
@@ -80,25 +121,30 @@
     </aside>
 
     <!-- Main Content -->
-    <div class="flex-1 flex flex-col min-w-0 bg-slate-50">
+    <div class="flex-1 flex flex-col min-w-0 bg-[#f0fdf4] transition-colors duration-300" style="background-color: var(--bg-body);">
         <!-- Header -->
-        <header class="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-10 shrink-0 z-10 sticky top-0">
+        <header class="h-20 bg-white/80 backdrop-blur-md border-b border-emerald-100 flex items-center justify-between px-10 shrink-0 z-10 sticky top-0 transition-colors duration-300" style="background-color: var(--bg-card); border-color: var(--border-color);">
             <div class="flex items-center gap-4 flex-1">
-                <h2 id="pageTitle" class="text-2xl font-black text-slate-800 uppercase tracking-wider italic">Derslerim</h2>
+                <h2 id="pageTitle" class="text-2xl font-black text-emerald-900 uppercase tracking-wider italic">Dashboard</h2>
             </div>
             <div class="flex items-center gap-6">
+                <!-- Tema Değiştirme Butonu -->
+                <button onclick="toggleTheme()" class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center hover:bg-emerald-100 transition-colors dark:bg-emerald-900 dark:text-emerald-400 dark:hover:bg-emerald-800" title="Gece/Gündüz Modu">
+                    <i id="themeIcon" class="fas fa-moon"></i>
+                </button>
+
                 <!-- Saat ve Tarih Alanı -->
-                <div class="hidden md:flex flex-col items-end border-r border-slate-200 pr-6">
+                <div class="hidden md:flex flex-col items-end border-r border-emerald-100 pr-6 transition-colors duration-300" style="border-color: var(--border-color);">
                     <span id="currentDate" class="text-xs font-bold text-slate-400 uppercase tracking-wider">--.--.----</span>
-                    <span id="currentTime" class="text-lg font-black text-slate-700 italic">--:--:--</span>
+                    <span id="currentTime" class="text-lg font-black text-emerald-900 italic transition-colors duration-300">--:--:--</span>
                 </div>
 
                 <div class="flex items-center gap-4">
                     <div class="text-right">
-                        <p id="teacherNameDisplay" class="text-sm font-black text-slate-900 leading-tight">Yükleniyor...</p>
+                        <p id="teacherNameDisplay" class="text-sm font-black text-slate-900 leading-tight transition-colors duration-300">Yükleniyor...</p>
                         <p class="text-[10px] uppercase font-bold text-slate-400">Öğretim Üyesi</p>
                     </div>
-                    <div class="w-11 h-11 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-black shadow-lg shadow-emerald-500/30 border-2 border-white">
+                    <div class="w-11 h-11 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-black shadow-lg shadow-emerald-500/30 border-2 border-white dark:border-slate-800">
                         <i class="fas fa-user-tie"></i>
                     </div>
                 </div>
@@ -106,10 +152,47 @@
         </header>
 
         <main class="flex-1 overflow-y-auto p-8 lg:p-10">
+            <!-- SECTION: DASHBOARD & CHARTS -->
+            <div id="section-dashboard" class="section active">
+                <div class="bg-gradient-to-r from-emerald-600 to-teal-700 p-10 rounded-[2rem] text-white shadow-2xl shadow-emerald-500/20 relative overflow-hidden mb-10">
+                    <div class="absolute top-0 right-0 opacity-10 transform translate-x-1/4 -translate-y-1/4">
+                        <i class="fas fa-chart-line text-[20rem]"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <h1 class="text-4xl lg:text-5xl font-black italic tracking-tight">Performans Özeti</h1>
+                        <p class="mt-4 text-emerald-100 text-lg max-w-2xl">Öğrencilerinizin genel başarı durumunu ve not dağılımlarını buradan inceleyebilirsiniz.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-emerald-100 transition-colors duration-300">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-black italic text-emerald-900 transition-colors duration-300">Sınıf Geçme Oranı</h3>
+                            <select id="chartCourseFilter" onchange="loadCharts()" class="text-xs p-2 rounded-lg border border-emerald-200 outline-none font-bold bg-white text-emerald-800 focus:ring-2 focus:ring-emerald-500/20">
+                                <option value="">Ders Seçiniz</option>
+                            </select>
+                        </div>
+                        <div class="h-64 flex items-center justify-center">
+                            <canvas id="passFailChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-emerald-100 transition-colors duration-300">
+                        <h3 class="text-lg font-black italic text-emerald-900 mb-4 transition-colors duration-300">Harf Notu Dağılımı</h3>
+                        <div class="h-64 flex items-center justify-center">
+                            <canvas id="gradeDistributionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- SECTION: MY COURSES -->
-            <div id="section-my-courses" class="section active">
+            <div id="section-my-courses" class="section">
                 <div class="flex justify-between items-center mb-8">
-                    <h1 class="text-3xl font-black italic text-slate-800">Verdiğim Dersler</h1>
+                    <h1 class="text-3xl font-black italic text-emerald-900 transition-colors duration-300">Verdiğim Dersler</h1>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-emerald-400"><i class="fas fa-search"></i></span>
+                        <input type="text" id="searchCourse" onkeyup="filterCards('searchCourse', 'courseList')" placeholder="Ders Ara..." class="pl-10 pr-4 py-3 rounded-xl border border-emerald-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none font-medium text-sm transition-colors duration-300 bg-white text-slate-800 w-64">
+                    </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="courseList"></div>
             </div>
@@ -117,11 +200,15 @@
             <!-- SECTION: MY STUDENTS -->
             <div id="section-my-students" class="section">
                 <div class="flex justify-between items-center mb-8">
-                    <h1 class="text-3xl font-black italic text-slate-800">Öğrencilerim & Not Girişi</h1>
+                    <h1 class="text-3xl font-black italic text-emerald-900 transition-colors duration-300">Öğrencilerim & Not Girişi</h1>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-emerald-400"><i class="fas fa-search"></i></span>
+                        <input type="text" id="searchStudent" onkeyup="filterTable('searchStudent', 'studentTableBody')" placeholder="Öğrenci Ara..." class="pl-10 pr-4 py-3 rounded-xl border border-emerald-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none font-medium text-sm transition-colors duration-300 bg-white text-slate-800 w-64">
+                    </div>
                 </div>
-                <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-wrap gap-4 justify-between items-center">
-                        <select id="studentCourseFilter" onchange="loadMyStudents()" class="p-3 rounded-xl border border-slate-200 outline-none font-bold text-slate-700 bg-white min-w-[300px] shadow-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+                <div class="bg-white rounded-3xl shadow-sm border border-emerald-100 overflow-hidden transition-colors duration-300">
+                    <div class="p-6 border-b border-emerald-50 bg-emerald-50/30 flex flex-wrap gap-4 justify-between items-center transition-colors duration-300" style="background-color: var(--bg-card); border-color: var(--border-color);">
+                        <select id="studentCourseFilter" onchange="loadMyStudents()" class="p-3 rounded-xl border border-emerald-200 outline-none font-bold text-emerald-800 bg-white min-w-[300px] shadow-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
                             <option value="">Ders Şubesi Seçiniz...</option>
                         </select>
                         <div class="text-sm text-slate-500 font-medium">
@@ -130,7 +217,7 @@
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
-                            <thead class="bg-slate-50 text-slate-500 text-[10px] uppercase font-black tracking-wider border-b border-slate-200">
+                            <thead class="bg-emerald-50 text-emerald-700 text-[10px] uppercase font-black tracking-wider border-b border-emerald-100 transition-colors duration-300" style="background-color: var(--bg-body); border-color: var(--border-color);">
                                 <tr>
                                     <th class="px-6 py-4">Öğrenci No</th>
                                     <th class="px-6 py-4">Ad Soyad</th>
@@ -142,7 +229,7 @@
                                     <th class="px-6 py-4 text-center">İşlem</th>
                                 </tr>
                             </thead>
-                            <tbody id="studentTableBody" class="divide-y divide-slate-100 text-sm font-medium text-slate-700"></tbody>
+                            <tbody id="studentTableBody" class="divide-y divide-emerald-50 text-sm font-medium transition-colors duration-300"></tbody>
                         </table>
                     </div>
                 </div>
@@ -151,7 +238,7 @@
             <!-- SECTION: EXAMS -->
             <div id="section-exams" class="section">
                 <div class="flex justify-between items-center mb-8">
-                    <h1 class="text-3xl font-black italic text-slate-800">Sınav Takvimi</h1>
+                    <h1 class="text-3xl font-black italic text-emerald-900 transition-colors duration-300">Sınav Takvimi</h1>
                     <button onclick="openExamModal()" class="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2">
                         <i class="fas fa-calendar-plus"></i> Sınav Ekle
                     </button>
@@ -162,7 +249,7 @@
             <!-- SECTION: ASSIGNMENTS -->
             <div id="section-assignments" class="section">
                 <div class="flex justify-between items-center mb-8">
-                    <h1 class="text-3xl font-black italic text-slate-800">Ödev Yönetimi</h1>
+                    <h1 class="text-3xl font-black italic text-emerald-900 transition-colors duration-300">Ödev Yönetimi</h1>
                     <button onclick="openAssignmentModal()" class="bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2">
                         <i class="fas fa-plus"></i> Ödev Ver
                     </button>
@@ -173,7 +260,7 @@
             <!-- SECTION: ANNOUNCEMENTS -->
             <div id="section-announcements" class="section">
                 <div class="flex justify-between items-center mb-8">
-                    <h1 class="text-3xl font-black italic text-slate-800">Duyurularım</h1>
+                    <h1 class="text-3xl font-black italic text-emerald-900 transition-colors duration-300">Duyurularım</h1>
                     <button onclick="openAnnouncementModal()" class="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2">
                         <i class="fas fa-bullhorn"></i> Yeni Duyuru
                     </button>
@@ -187,9 +274,9 @@
 
     <!-- Not Giriş Modalı -->
     <div id="gradeModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm transition-opacity">
-        <div class="bg-white rounded-3xl max-w-sm w-full p-8 shadow-2xl transform transition-transform scale-100">
-            <h3 class="text-2xl font-black mb-6 italic text-slate-800 text-center">Not Girişi</h3>
-            <div class="mb-6 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl text-center">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-8 shadow-2xl transform transition-transform scale-100 transition-colors duration-300">
+            <h3 class="text-2xl font-black mb-6 italic text-emerald-900 text-center transition-colors duration-300">Not Girişi</h3>
+            <div class="mb-6 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl text-center transition-colors duration-300">
                 <p id="gradeStudentName" class="text-emerald-800 font-bold text-lg"></p>
                 <p id="gradeCourseName" class="text-emerald-600 text-xs font-bold uppercase mt-1 tracking-wider"></p>
             </div>
@@ -205,7 +292,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Not Değeri (0-100)</label>
-                    <input type="number" id="gradeValue" placeholder="Örn: 85" required min="0" max="100" step="0.01" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none font-medium text-xl text-center tracking-widest">
+                    <input type="number" id="gradeValue" placeholder="Örn: 85" required min="0" max="100" step="0.01" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none font-medium text-xl text-center tracking-widest bg-white">
                 </div>
                 <div class="pt-2 flex gap-3">
                     <button type="button" onclick="closeModal('gradeModal')" class="flex-1 bg-slate-100 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-200 transition-colors">İptal</button>
@@ -217,8 +304,8 @@
 
     <!-- Sınav Modalı -->
     <div id="examModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm transition-opacity">
-        <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl transform transition-transform scale-100">
-            <h3 id="examModalTitle" class="text-2xl font-black mb-6 italic text-slate-800">Sınav Tanımla</h3>
+        <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl transform transition-transform scale-100 transition-colors duration-300">
+            <h3 id="examModalTitle" class="text-2xl font-black mb-6 italic text-emerald-900 transition-colors duration-300">Sınav Tanımla</h3>
             <form id="examForm" class="space-y-4">
                 <input type="hidden" id="examEditId">
                 <div>
@@ -227,15 +314,15 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Sınav Adı</label>
-                    <input type="text" id="examName" placeholder="Örn: Vize, Final, Mazeret" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none font-medium">
+                    <input type="text" id="examName" placeholder="Örn: Vize, Final, Mazeret" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none font-medium bg-white">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Tarih & Saat</label>
-                    <input type="datetime-local" id="examDate" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none font-medium">
+                    <input type="datetime-local" id="examDate" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none font-medium bg-white">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Derslik / Sınıf</label>
-                    <input type="text" id="examClassroom" placeholder="Örn: D-101, Amfi-1" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none font-medium">
+                    <input type="text" id="examClassroom" placeholder="Örn: D-101, Amfi-1" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none font-medium bg-white">
                 </div>
                 <div class="pt-4 flex gap-3">
                     <button type="button" onclick="closeModal('examModal')" class="flex-1 bg-slate-100 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-200 transition-colors">İptal</button>
@@ -247,8 +334,8 @@
 
     <!-- Ödev Modalı -->
     <div id="assignmentModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm transition-opacity">
-        <div class="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl transform transition-transform scale-100">
-            <h3 id="assignmentModalTitle" class="text-2xl font-black mb-6 italic text-slate-800">Ödev Ver</h3>
+        <div class="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl transform transition-transform scale-100 transition-colors duration-300">
+            <h3 id="assignmentModalTitle" class="text-2xl font-black mb-6 italic text-emerald-900 transition-colors duration-300">Ödev Ver</h3>
             <form id="assignmentForm" class="space-y-4">
                 <input type="hidden" id="assignmentEditId">
                 <div>
@@ -257,15 +344,15 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Ödev Başlığı</label>
-                    <input type="text" id="assignmentTitle" placeholder="Örn: Proje Taslak Raporu" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none font-medium">
+                    <input type="text" id="assignmentTitle" placeholder="Örn: Proje Taslak Raporu" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none font-medium bg-white">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Açıklama</label>
-                    <textarea id="assignmentDesc" placeholder="Ödevin detayları ve beklentiler..." required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none font-medium h-32 resize-none"></textarea>
+                    <textarea id="assignmentDesc" placeholder="Ödevin detayları ve beklentiler..." required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none font-medium h-32 resize-none bg-white"></textarea>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Son Teslim Tarihi</label>
-                    <input type="datetime-local" id="assignmentDueDate" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none font-medium">
+                    <input type="datetime-local" id="assignmentDueDate" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none font-medium bg-white">
                 </div>
                 <div class="pt-4 flex gap-3">
                     <button type="button" onclick="closeModal('assignmentModal')" class="flex-1 bg-slate-100 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-200 transition-colors">İptal</button>
@@ -277,17 +364,17 @@
 
     <!-- Duyuru Modalı -->
     <div id="announcementModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm transition-opacity">
-        <div class="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl transform transition-transform scale-100">
-            <h3 id="announcementModalTitle" class="text-2xl font-black mb-6 italic text-slate-800">Duyuru Yayınla</h3>
+        <div class="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl transform transition-transform scale-100 transition-colors duration-300">
+            <h3 id="announcementModalTitle" class="text-2xl font-black mb-6 italic text-emerald-900 transition-colors duration-300">Duyuru Yayınla</h3>
             <form id="announcementForm" class="space-y-4">
                 <input type="hidden" id="announcementEditId">
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Başlık</label>
-                    <input type="text" id="annTitle" placeholder="Örn: Ders Saati Değişikliği" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none font-medium">
+                    <input type="text" id="annTitle" placeholder="Örn: Ders Saati Değişikliği" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none font-medium bg-white">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">İçerik</label>
-                    <textarea id="annContent" placeholder="Öğrencilere iletmek istediğiniz mesaj..." required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none font-medium h-32 resize-none"></textarea>
+                    <textarea id="annContent" placeholder="Öğrencilere iletmek istediğiniz mesaj..." required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none font-medium h-32 resize-none bg-white"></textarea>
                 </div>
                 <div class="pt-4 flex gap-3">
                     <button type="button" onclick="closeModal('announcementModal')" class="flex-1 bg-slate-100 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-200 transition-colors">İptal</button>
@@ -307,6 +394,30 @@
         let currentTeacher = null;
         let teacherCourses = [];
 
+        let passFailChartInstance = null;
+        let gradeDistChartInstance = null;
+
+        // Dark Mode Logic
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const icon = document.getElementById('themeIcon');
+            const isDark = document.body.classList.contains('dark-mode');
+
+            if (isDark) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                localStorage.setItem('theme', 'light');
+            }
+
+            // Re-render charts if they exist
+            if (passFailChartInstance) passFailChartInstance.update();
+            if (gradeDistChartInstance) gradeDistChartInstance.update();
+        }
+
         // Özelleştirilmiş Toast (Sağ üstten çıkan bildirim)
         const Toast = Swal.mixin({
             toast: true,
@@ -325,8 +436,13 @@
                 window.location.href = 'index.html';
                 return;
             }
+
+            if (localStorage.getItem('theme') === 'dark') {
+                toggleTheme();
+            }
+
             await loadTeacherInfo();
-            showSection('my-courses');
+            showSection('dashboard');
             updateDateTime();
             setInterval(updateDateTime, 1000);
         });
@@ -350,11 +466,11 @@
             try {
                 const res = await fetch(`${API_URL}${endpoint}`, options);
                 if (!res.ok) {
-                    const err = await res.json().catch(() => ({ message: 'Sunucu ile iletişim kurulamadı' }));
+                    const errText = await res.text();
                     Swal.fire({
                         icon: 'error',
                         title: 'Hata!',
-                        text: err.message || 'Bir hata oluştu',
+                        text: errText || 'Bir hata oluştu',
                         confirmButtonColor: '#059669'
                     });
                     return null;
@@ -376,6 +492,50 @@
             }
         }
 
+        function filterTable(inputId, tableId) {
+            const input = document.getElementById(inputId);
+            const filter = input.value.toUpperCase();
+            const table = document.getElementById(tableId);
+            const tr = table.getElementsByTagName("tr");
+
+            for (let i = 0; i < tr.length; i++) {
+                let tdName = tr[i].getElementsByTagName("td")[1];
+                let tdNo = tr[i].getElementsByTagName("td")[0];
+
+                if (tdName || tdNo) {
+                    let txtValueName = tdName?.textContent || tdName?.innerText || "";
+                    let txtValueNo = tdNo?.textContent || tdNo?.innerText || "";
+                    if (txtValueName.toUpperCase().indexOf(filter) > -1 || txtValueNo.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+
+        function filterCards(inputId, containerId) {
+            const input = document.getElementById(inputId);
+            const filter = input.value.toUpperCase();
+            const container = document.getElementById(containerId);
+            const cards = container.children;
+
+            for (let i = 0; i < cards.length; i++) {
+                let title = cards[i].querySelector('h4') || cards[i].querySelector('h3');
+                let code = cards[i].querySelector('span');
+
+                if (title || code) {
+                    let txtValueTitle = title?.textContent || title?.innerText || "";
+                    let txtValueCode = code?.textContent || code?.innerText || "";
+                    if (txtValueTitle.toUpperCase().indexOf(filter) > -1 || txtValueCode.toUpperCase().indexOf(filter) > -1) {
+                        cards[i].style.display = "";
+                    } else {
+                        cards[i].style.display = "none";
+                    }
+                }
+            }
+        }
+
         async function loadTeacherInfo() {
             try {
                 const response = await fetch(`${API_URL}/teacher/by-username?username=${username}`, {
@@ -392,6 +552,7 @@
                      if(coursesRes.ok) {
                          teacherCourses = await coursesRes.json();
                          populateCourseFilters();
+                         loadCharts(); // Initial load for charts
                      }
                 }
             } catch(e) {
@@ -404,6 +565,9 @@
             document.getElementById('studentCourseFilter').innerHTML = '<option value="">Ders Şubesi Seçiniz...</option>' + options;
             document.getElementById('examCourse').innerHTML = '<option value="">Ders Seçin</option>' + options;
             document.getElementById('assignmentCourse').innerHTML = '<option value="">Ders Seçin</option>' + options;
+
+            // For Dashboard Charts
+            document.getElementById('chartCourseFilter').innerHTML = '<option value="">Tüm Derslerim</option>' + options;
         }
 
         function showSection(id) {
@@ -413,6 +577,7 @@
             document.getElementById('menu-' + id).classList.add('active-menu');
 
             const titles = {
+                'dashboard': 'Özet ve İstatistikler',
                 'my-courses': 'Verdiğim Dersler',
                 'my-students': 'Öğrenciler ve Notlar',
                 'exams': 'Sınav Takvimi',
@@ -421,15 +586,112 @@
             };
             document.getElementById('pageTitle').innerText = titles[id] || id.toUpperCase().replace('-', ' ');
 
+            if (id === 'dashboard') loadCharts();
             if (id === 'my-courses') loadMyCourses();
             if (id === 'announcements') loadAnnouncements();
             if (id === 'exams') loadExams();
             if (id === 'assignments') loadAssignments();
+
+            document.querySelectorAll('input[type="text"][onkeyup]').forEach(inp => {inp.value = ''; inp.dispatchEvent(new Event('keyup'))});
+        }
+
+        // --- CHARTS (DASHBOARD) ---
+        async function loadCharts() {
+            const sectionId = document.getElementById('chartCourseFilter').value;
+            let passCount = 0;
+            let failCount = 0;
+            let gradeDist = { 'AA':0, 'BA':0, 'BB':0, 'CB':0, 'CC':0, 'DC':0, 'DD':0, 'FD':0, 'FF':0 };
+
+            try {
+                // If a specific section is selected
+                let sectionsToFetch = sectionId ? [{id: sectionId}] : teacherCourses;
+
+                for (const section of sectionsToFetch) {
+                    const studentsRes = await fetch(`${API_URL}/teacher/course-section/${section.id}/students`, { headers: { 'Authorization': 'Bearer ' + token } });
+                    if (!studentsRes.ok) continue;
+
+                    const students = await studentsRes.json();
+                    for (const student of students) {
+                        try {
+                            const gradeRes = await fetch(`${API_URL}/grade/course-section/${section.id}/student/${student.id}`, { headers: { 'Authorization': 'Bearer ' + token } });
+                            if (gradeRes.ok) {
+                                const grades = await gradeRes.json();
+                                if (grades && grades.length > 0) {
+                                    const g = grades[0];
+                                    if (g.passStatus === 'GEÇTİ') passCount++;
+                                    if (g.passStatus === 'KALDI') failCount++;
+                                    if (g.letterGrade && gradeDist[g.letterGrade] !== undefined) {
+                                        gradeDist[g.letterGrade]++;
+                                    }
+                                }
+                            }
+                        } catch(e) {}
+                    }
+                }
+
+                renderCharts(passCount, failCount, gradeDist);
+
+            } catch (e) { console.error(e); }
+        }
+
+        function renderCharts(pass, fail, dist) {
+            Chart.defaults.font.family = 'Inter';
+            const getTextColor = () => document.body.classList.contains('dark-mode') ? '#f0fdf4' : '#064e3b';
+
+            // 1. Pass/Fail Donut Chart
+            const ctxPassFail = document.getElementById('passFailChart').getContext('2d');
+            if (passFailChartInstance) passFailChartInstance.destroy();
+            passFailChartInstance = new Chart(ctxPassFail, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Geçenler', 'Kalanlar'],
+                    datasets: [{
+                        data: [pass, fail],
+                        backgroundColor: ['#10b981', '#ef4444'], // Emerald, Red
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: getTextColor } }
+                    }
+                }
+            });
+
+            // 2. Grade Distribution Bar Chart
+            const ctxDist = document.getElementById('gradeDistributionChart').getContext('2d');
+            if (gradeDistChartInstance) gradeDistChartInstance.destroy();
+            gradeDistChartInstance = new Chart(ctxDist, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(dist),
+                    datasets: [{
+                        label: 'Öğrenci Sayısı',
+                        data: Object.values(dist),
+                        backgroundColor: '#0ea5e9', // Sky blue
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1, color: getTextColor }, grid: { color: 'rgba(148, 163, 184, 0.1)' } },
+                        x: { ticks: { color: getTextColor }, grid: { display: false } }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
         }
 
         async function loadMyCourses() {
             document.getElementById('courseList').innerHTML = teacherCourses.map(c => `
-                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow relative overflow-hidden group">
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-emerald-100 hover:shadow-md transition-shadow relative overflow-hidden group">
                     <div class="absolute right-0 bottom-0 opacity-5 text-emerald-500 transform translate-x-4 translate-y-4">
                         <i class="fas fa-book-open text-8xl"></i>
                     </div>
@@ -440,7 +702,7 @@
                         <h3 class="text-xl font-black italic text-slate-800 mb-2 leading-tight">${c.course?.name}</h3>
                         <p class="text-xs font-bold text-slate-500 uppercase tracking-wider bg-slate-50 inline-block px-2 py-1 rounded">Dönem: ${c.semester?.term || '-'}</p>
 
-                        <div class="mt-6 pt-4 border-t border-slate-100">
+                        <div class="mt-6 pt-4 border-t border-emerald-50">
                             <button onclick="viewStudents(${c.id})" class="w-full bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white py-3 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2">
                                 <i class="fas fa-users"></i> Öğrencileri Gör
                             </button>
@@ -504,13 +766,13 @@
                             const passClass = passStatus === 'GEÇTİ' ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : (passStatus === 'KALDI' ? 'text-red-600 bg-red-50 border-red-100' : 'text-slate-500 bg-slate-50 border-slate-200');
 
                             tbody.innerHTML += `
-                                <tr class="hover:bg-slate-50 border-b border-slate-100 transition-colors group">
+                                <tr class="hover:bg-slate-50 border-b border-emerald-50 transition-colors group">
                                     <td class="px-6 py-4">
                                         <span class="bg-slate-100 text-slate-600 font-black italic px-3 py-1 rounded-lg">${s.studentNumber}</span>
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-3">
-                                            <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-black">${s.firstName[0]}${s.lastName[0]}</div>
+                                            <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs font-black">${s.firstName[0]}${s.lastName[0]}</div>
                                             <span class="font-bold text-slate-800">${s.firstName} ${s.lastName}</span>
                                         </div>
                                     </td>
@@ -528,12 +790,10 @@
                                     </td>
                                 </tr>
                             `;
-                        } catch(e) {
-                             // Hata durumunda boş satır
-                        }
+                        } catch(e) {}
                     }
                 }
-            } catch(e) { console.error("Öğrenci yüklenirken hata", e); }
+            } catch(e) {}
         }
 
         // --- GRADE FUNCTIONS ---
@@ -557,7 +817,7 @@
             const val = document.getElementById('gradeValue').value;
 
             const gradeData = { examType: type, gradeValue: parseFloat(val) };
-            if (await apiRequest(`/grade/course-section/${csid}/student/${sid}/update-grade`, 'PUT', gradeData, true, 'Not başarıyla kaydedildi')) {
+            if (await apiRequest(`/grade/course-section/${csid}/student/${sid}/update-grade`, 'PUT', gradeData, true, 'Not başarıyla kaydedildi! E-posta gönderiliyor...')) {
                 closeModal('gradeModal');
                 loadMyStudents();
             }
@@ -653,7 +913,7 @@
             let dateInput = document.getElementById('examDate').value;
             if (dateInput.length === 16) dateInput += ':00';
             const data = { examName: document.getElementById('examName').value, examDate: dateInput, classroom: document.getElementById('examClassroom').value, courseSectionId: parseInt(document.getElementById('examCourse').value) };
-            if(await apiRequest('/exam/add', 'POST', data, true, 'Sınav başarıyla tanımlandı')) { closeModal('examModal'); loadExams(); }
+            if(await apiRequest('/exam/add', 'POST', data, true, 'Sınav tanımlandı ve öğrencilere e-posta gönderiliyor')) { closeModal('examModal'); loadExams(); }
         };
 
         document.getElementById('assignmentForm').onsubmit = async (e) => {
@@ -661,14 +921,14 @@
             let dateInput = document.getElementById('assignmentDueDate').value;
             if (dateInput.length === 16) dateInput += ':00';
             const data = { title: document.getElementById('assignmentTitle').value, description: document.getElementById('assignmentDesc').value, dueDate: dateInput, courseSectionId: parseInt(document.getElementById('assignmentCourse').value) };
-            if(await apiRequest('/assignment/add', 'POST', data, true, 'Ödev başarıyla verildi')) { closeModal('assignmentModal'); loadAssignments(); }
+            if(await apiRequest('/assignment/add', 'POST', data, true, 'Ödev verildi ve öğrencilere e-posta gönderiliyor')) { closeModal('assignmentModal'); loadAssignments(); }
         };
 
         document.getElementById('announcementForm').onsubmit = async (e) => {
             e.preventDefault();
             const authorName = `${currentTeacher.firstName} ${currentTeacher.lastName}`;
             const data = { title: document.getElementById('annTitle').value, content: document.getElementById('annContent').value, author: authorName };
-            if(await apiRequest('/announcement/add', 'POST', data, true, 'Duyuru başarıyla yayınlandı')) { closeModal('announcementModal'); loadAnnouncements(); }
+            if(await apiRequest('/announcement/add', 'POST', data, true, 'Duyuru yayınlandı ve öğrencilere e-posta gönderiliyor')) { closeModal('announcementModal'); loadAnnouncements(); }
         };
 
         async function deleteData(type, id) {
@@ -686,6 +946,7 @@
             if (result.isConfirmed) {
                 if (await apiRequest(`/${type}/delete/${id}`, 'DELETE', null, true, 'Kayıt başarıyla silindi')) {
                     showSection(document.querySelector('.section.active').id.split('-')[1]);
+                    if(type === 'exam' || type === 'assignment') loadCharts(); // Update charts if needed
                 }
             }
         }
