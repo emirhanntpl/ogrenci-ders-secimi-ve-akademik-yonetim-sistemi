@@ -103,13 +103,21 @@
             <div class="flex items-center gap-4 flex-1">
                 <h2 id="pageTitle" class="text-2xl font-black text-slate-800 uppercase tracking-wider italic">Dashboard</h2>
             </div>
-            <div class="flex items-center gap-4">
-                <div class="text-right">
-                    <p id="userNameDisplay" class="text-sm font-black text-slate-900 leading-tight">Admin</p>
-                    <p class="text-[10px] uppercase font-bold text-slate-400">Sistem Yöneticisi</p>
+            <div class="flex items-center gap-6">
+                <!-- Saat ve Tarih Alanı -->
+                <div class="hidden md:flex flex-col items-end border-r border-slate-200 pr-6">
+                    <span id="currentDate" class="text-xs font-bold text-slate-400 uppercase tracking-wider">--.--.----</span>
+                    <span id="currentTime" class="text-lg font-black text-slate-700 italic">--:--:--</span>
                 </div>
-                <div class="w-11 h-11 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black shadow-lg shadow-blue-500/30 border-2 border-white">
-                    <i class="fas fa-user-shield"></i>
+
+                <div class="flex items-center gap-4">
+                    <div class="text-right">
+                        <p id="userNameDisplay" class="text-sm font-black text-slate-900 leading-tight">Admin</p>
+                        <p class="text-[10px] uppercase font-bold text-slate-400">Sistem Yöneticisi</p>
+                    </div>
+                    <div class="w-11 h-11 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black shadow-lg shadow-blue-500/30 border-2 border-white">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
                 </div>
             </div>
         </header>
@@ -527,7 +535,18 @@
             document.getElementById('userNameDisplay').innerText = localStorage.getItem('username');
             showSection('dashboard');
             loadStats();
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
         });
+
+        function updateDateTime() {
+            const now = new Date();
+            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            const dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric' };
+
+            document.getElementById('currentTime').innerText = now.toLocaleTimeString('tr-TR', timeOptions);
+            document.getElementById('currentDate').innerText = now.toLocaleDateString('tr-TR', dateOptions);
+        }
 
         async function loadStats() {
             try {
