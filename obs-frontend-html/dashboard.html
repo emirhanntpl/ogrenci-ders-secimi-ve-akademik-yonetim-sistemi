@@ -7,351 +7,513 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .active-menu { background-color: #2563eb !important; color: white !important; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3); }
-        .section { display: none; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .active-menu {
+            background: linear-gradient(to right, #2563eb, #1d4ed8) !important;
+            color: white !important;
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4);
+            transform: translateX(4px);
+        }
+        .menu-btn { transition: all 0.3s ease; }
+        .menu-btn:hover:not(.active-menu) { background-color: rgba(255,255,255,0.05); transform: translateX(4px); }
+        .section { display: none; animation: fadeIn 0.4s ease-out forwards; }
         .section.active { display: block; }
-        select { appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 1.5em 1.5em; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        select { appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1.5em 1.5em; }
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="bg-[#f8fafc] font-sans antialiased overflow-hidden text-slate-900">
-    <div class="flex h-screen">
-        <!-- Sidebar -->
-        <aside class="w-72 bg-[#0f172a] text-white flex flex-col shrink-0 shadow-2xl z-20 overflow-y-auto font-medium text-sm">
-            <div class="p-8 border-b border-slate-800 flex items-center gap-3">
-                <i class="fas fa-graduation-cap text-blue-500 text-3xl"></i>
-                <span class="text-2xl font-black tracking-tighter italic text-white">KTÜ BYS</span>
+<body class="bg-slate-50 text-slate-800 h-screen overflow-hidden flex">
+
+    <!-- Sidebar -->
+    <aside class="w-72 bg-[#0f172a] text-slate-300 flex flex-col shrink-0 shadow-2xl z-20 relative">
+        <!-- Dekoratif Arkaplan -->
+        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
+
+        <div class="p-8 border-b border-slate-800/50 flex items-center gap-4 relative z-10">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                <i class="fas fa-university text-white text-xl"></i>
             </div>
-
-            <nav class="flex-1 p-4 space-y-1 mt-4">
-                <button onclick="showSection('dashboard')" id="menu-dashboard" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800 transition-all text-slate-400">
-                    <i class="fas fa-th-large w-5"></i><span>Dashboard</span>
-                </button>
-                <div class="px-4 pt-4 pb-2 text-[10px] font-black uppercase text-slate-500 tracking-widest">Sistem Yönetimi</div>
-                <button onclick="showSection('announcements')" id="menu-announcements" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800 transition-all text-slate-400">
-                    <i class="fas fa-bullhorn w-5 text-yellow-400"></i><span>Duyurular</span>
-                </button>
-                <button onclick="showSection('faculties')" id="menu-faculties" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800 transition-all text-slate-400">
-                    <i class="fas fa-university w-5"></i><span>Fakülteler</span>
-                </button>
-                <button onclick="showSection('departments')" id="menu-departments" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800 transition-all text-slate-400">
-                    <i class="fas fa-building w-5"></i><span>Departmanlar</span>
-                </button>
-                <button onclick="showSection('classrooms')" id="menu-classrooms" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800 transition-all text-slate-400">
-                    <i class="fas fa-door-open w-5"></i><span>Derslikler</span>
-                </button>
-                <button onclick="showSection('semesters')" id="menu-semesters" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800 transition-all text-slate-400">
-                    <i class="fas fa-calendar-alt w-5"></i><span>Dönemler</span>
-                </button>
-
-                <div class="px-4 pt-4 pb-2 text-[10px] font-black uppercase text-slate-500 tracking-widest">Kişiler & Dersler</div>
-                <button onclick="showSection('students')" id="menu-students" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800 transition-all text-slate-400">
-                    <i class="fas fa-user-graduate w-5"></i><span>Öğrenciler</span>
-                </button>
-                <button onclick="showSection('teachers')" id="menu-teachers" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800 transition-all text-slate-400">
-                    <i class="fas fa-chalkboard-teacher w-5"></i><span>Hocalar</span>
-                </button>
-                <button onclick="showSection('courses')" id="menu-courses" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800 transition-all text-slate-400">
-                    <i class="fas fa-book w-5"></i><span>Dersler</span>
-                </button>
-
-                <div class="px-4 pt-4 pb-2 text-[10px] font-black uppercase text-slate-500 tracking-widest text-blue-500">Operasyonel</div>
-                <button onclick="showSection('sections')" id="menu-sections" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800 transition-all text-slate-400 font-bold">
-                    <i class="fas fa-layer-group w-5"></i><span>Ders Şubeleri</span>
-                </button>
-                <button onclick="showSection('enrollments')" id="menu-enrollments" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800 transition-all text-slate-400 font-bold">
-                    <i class="fas fa-user-plus w-5"></i><span>Ders Kayıtları</span>
-                </button>
-            </nav>
-
-            <div class="p-6 border-t border-slate-800">
-                <button onclick="logout()" class="flex items-center gap-3 p-3 w-full text-red-400 hover:bg-red-500/10 rounded-2xl transition-all">
-                    <i class="fas fa-power-off"></i><span>Oturumu Kapat</span>
-                </button>
+            <div>
+                <span class="text-2xl font-black tracking-tighter italic text-white block">KTÜ BYS</span>
+                <span class="text-[10px] uppercase tracking-widest font-bold text-blue-400">Yönetim</span>
             </div>
-        </aside>
+        </div>
 
-        <!-- Main Content -->
-        <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
-            <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-10 shrink-0 z-10">
-                <div class="flex items-center gap-4 flex-1">
-                    <h2 id="pageTitle" class="text-xl font-black text-slate-800 uppercase tracking-widest italic">Dashboard</h2>
-                </div>
-                <div class="flex items-center gap-4">
+        <nav class="flex-1 p-4 space-y-1 mt-4 overflow-y-auto relative z-10">
+            <button onclick="showSection('dashboard')" id="menu-dashboard" class="menu-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">
+                <i class="fas fa-chart-pie w-5"></i><span>Dashboard</span>
+            </button>
+
+            <div class="px-4 pt-6 pb-2 text-[10px] font-black uppercase text-slate-500 tracking-widest">Sistem Yönetimi</div>
+            <button onclick="showSection('announcements')" id="menu-announcements" class="menu-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">
+                <i class="fas fa-bullhorn w-5 text-yellow-500"></i><span>Duyurular</span>
+            </button>
+            <button onclick="showSection('faculties')" id="menu-faculties" class="menu-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">
+                <i class="fas fa-landmark w-5 text-indigo-400"></i><span>Fakülteler</span>
+            </button>
+            <button onclick="showSection('departments')" id="menu-departments" class="menu-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">
+                <i class="fas fa-building w-5 text-teal-400"></i><span>Departmanlar</span>
+            </button>
+            <button onclick="showSection('classrooms')" id="menu-classrooms" class="menu-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">
+                <i class="fas fa-door-open w-5 text-orange-400"></i><span>Derslikler</span>
+            </button>
+            <button onclick="showSection('semesters')" id="menu-semesters" class="menu-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">
+                <i class="fas fa-calendar-alt w-5 text-purple-400"></i><span>Dönemler</span>
+            </button>
+
+            <div class="px-4 pt-6 pb-2 text-[10px] font-black uppercase text-slate-500 tracking-widest">Kişiler & Dersler</div>
+            <button onclick="showSection('students')" id="menu-students" class="menu-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">
+                <i class="fas fa-user-graduate w-5 text-emerald-400"></i><span>Öğrenciler</span>
+            </button>
+            <button onclick="showSection('teachers')" id="menu-teachers" class="menu-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">
+                <i class="fas fa-chalkboard-teacher w-5 text-cyan-400"></i><span>Hocalar</span>
+            </button>
+            <button onclick="showSection('courses')" id="menu-courses" class="menu-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">
+                <i class="fas fa-book w-5 text-rose-400"></i><span>Dersler</span>
+            </button>
+
+            <div class="px-4 pt-6 pb-2 text-[10px] font-black uppercase text-blue-400 tracking-widest">Operasyonel</div>
+            <button onclick="showSection('sections')" id="menu-sections" class="menu-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">
+                <i class="fas fa-layer-group w-5"></i><span>Ders Şubeleri</span>
+            </button>
+            <button onclick="showSection('enrollments')" id="menu-enrollments" class="menu-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">
+                <i class="fas fa-user-plus w-5"></i><span>Ders Kayıtları</span>
+            </button>
+        </nav>
+
+        <div class="p-6 border-t border-slate-800/50 relative z-10">
+            <button onclick="logout()" class="flex items-center justify-center gap-2 p-3 w-full text-red-400 font-bold hover:bg-red-500/10 hover:text-red-300 rounded-xl transition-all border border-transparent hover:border-red-500/20">
+                <i class="fas fa-sign-out-alt"></i><span>Sistemden Çık</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col min-w-0 bg-slate-50">
+        <!-- Header -->
+        <header class="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-10 shrink-0 z-10 sticky top-0">
+            <div class="flex items-center gap-4 flex-1">
+                <h2 id="pageTitle" class="text-2xl font-black text-slate-800 uppercase tracking-wider italic">Dashboard</h2>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="text-right">
                     <p id="userNameDisplay" class="text-sm font-black text-slate-900 leading-tight">Admin</p>
-                    <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-black shadow-lg">ET</div>
+                    <p class="text-[10px] uppercase font-bold text-slate-400">Sistem Yöneticisi</p>
                 </div>
-            </header>
+                <div class="w-11 h-11 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black shadow-lg shadow-blue-500/30 border-2 border-white">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+            </div>
+        </header>
 
-            <main class="flex-1 overflow-y-auto p-10">
-                <!-- SECTION: DASHBOARD -->
-                <div id="section-dashboard" class="section active">
-                    <div class="bg-gradient-to-r from-blue-600 to-indigo-700 p-10 rounded-[3rem] text-white shadow-2xl relative overflow-hidden mb-10">
-                        <div class="relative z-10">
-                            <h1 class="text-4xl font-black italic">Sisteme Tam Erişim Sağlandı!</h1>
-                            <p class="mt-4 text-blue-100 text-lg">Tüm akademik ve idari işlemleri sol menüden gerçekleştirebilirsin.</p>
+        <main class="flex-1 overflow-y-auto p-8 lg:p-10">
+            <!-- SECTION: DASHBOARD -->
+            <div id="section-dashboard" class="section active">
+                <div class="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 p-10 rounded-[2rem] text-white shadow-2xl shadow-blue-500/20 relative overflow-hidden mb-10">
+                    <div class="absolute top-0 right-0 opacity-10 transform translate-x-1/4 -translate-y-1/4">
+                        <i class="fas fa-shield-alt text-[20rem]"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full mb-4 inline-block backdrop-blur-sm">Sistem Aktif</span>
+                        <h1 class="text-4xl lg:text-5xl font-black italic tracking-tight">Sisteme Tam Erişim Sağlandı!</h1>
+                        <p class="mt-4 text-blue-100 text-lg max-w-2xl">Tüm akademik, idari ve operasyonel işlemleri sol menüden hızlıca gerçekleştirebilir, sistem istatistiklerini buradan takip edebilirsiniz.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="glass-card p-6 rounded-3xl shadow-lg hover:-translate-y-1 transition-transform duration-300">
+                        <div class="flex justify-between items-start">
+                            <div><p class="text-slate-400 text-xs font-black uppercase tracking-wider">Toplam Öğrenci</p><h3 id="stat-students" class="text-4xl font-black mt-2 text-slate-800">0</h3></div>
+                            <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-500 flex items-center justify-center text-xl"><i class="fas fa-user-graduate"></i></div>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                        <div class="bg-white p-6 rounded-3xl shadow-xl border border-slate-100"><p class="text-slate-400 text-xs font-black uppercase">Öğrenci</p><h3 id="stat-students" class="text-3xl font-black mt-1">0</h3></div>
-                        <div class="bg-white p-6 rounded-3xl shadow-xl border border-slate-100"><p class="text-slate-400 text-xs font-black uppercase">Hoca</p><h3 id="stat-teachers" class="text-3xl font-black mt-1">0</h3></div>
-                        <div class="bg-white p-6 rounded-3xl shadow-xl border border-slate-100"><p class="text-slate-400 text-xs font-black uppercase">Ders</p><h3 id="stat-courses" class="text-3xl font-black mt-1">0</h3></div>
-                        <div class="bg-white p-6 rounded-3xl shadow-xl border border-slate-100"><p class="text-slate-400 text-xs font-black uppercase">Fakülte</p><h3 id="stat-faculties" class="text-3xl font-black mt-1">0</h3></div>
+                    <div class="glass-card p-6 rounded-3xl shadow-lg hover:-translate-y-1 transition-transform duration-300">
+                        <div class="flex justify-between items-start">
+                            <div><p class="text-slate-400 text-xs font-black uppercase tracking-wider">Akademisyen</p><h3 id="stat-teachers" class="text-4xl font-black mt-2 text-slate-800">0</h3></div>
+                            <div class="w-12 h-12 rounded-2xl bg-cyan-100 text-cyan-500 flex items-center justify-center text-xl"><i class="fas fa-chalkboard-teacher"></i></div>
+                        </div>
+                    </div>
+                    <div class="glass-card p-6 rounded-3xl shadow-lg hover:-translate-y-1 transition-transform duration-300">
+                        <div class="flex justify-between items-start">
+                            <div><p class="text-slate-400 text-xs font-black uppercase tracking-wider">Aktif Dersler</p><h3 id="stat-courses" class="text-4xl font-black mt-2 text-slate-800">0</h3></div>
+                            <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-500 flex items-center justify-center text-xl"><i class="fas fa-book"></i></div>
+                        </div>
+                    </div>
+                    <div class="glass-card p-6 rounded-3xl shadow-lg hover:-translate-y-1 transition-transform duration-300">
+                        <div class="flex justify-between items-start">
+                            <div><p class="text-slate-400 text-xs font-black uppercase tracking-wider">Fakülteler</p><h3 id="stat-faculties" class="text-4xl font-black mt-2 text-slate-800">0</h3></div>
+                            <div class="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-500 flex items-center justify-center text-xl"><i class="fas fa-university"></i></div>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- SECTION: ANNOUNCEMENTS -->
-                <div id="section-announcements" class="section">
-                    <div class="flex justify-between items-center mb-8">
-                        <h1 class="text-3xl font-black italic">Duyuru Yönetimi</h1>
-                        <button onclick="openAnnouncementModal()" class="bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold shadow-xl">+ Yeni Duyuru</button>
-                    </div>
-                    <div id="announcementList" class="grid grid-cols-1 gap-6"></div>
+            <!-- SECTION: ANNOUNCEMENTS -->
+            <div id="section-announcements" class="section">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-3xl font-black italic text-slate-800">Duyuru Yönetimi</h1>
+                    <button onclick="openAnnouncementModal()" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2">
+                        <i class="fas fa-plus"></i> Yeni Duyuru
+                    </button>
                 </div>
+                <div id="announcementList" class="grid grid-cols-1 lg:grid-cols-2 gap-6"></div>
+            </div>
 
-                <!-- SECTION: STUDENTS -->
-                <div id="section-students" class="section">
-                    <div class="flex justify-between items-center mb-8">
-                        <h1 class="text-3xl font-black italic">Öğrenci Yönetimi</h1>
-                        <button onclick="openStudentModal()" class="bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold shadow-xl">+ Öğrenci Ekle</button>
-                    </div>
-                    <div class="bg-white rounded-[2rem] shadow-xl overflow-hidden">
-                        <table class="w-full text-left font-bold text-slate-700">
-                            <thead class="bg-slate-50 text-slate-400 text-[10px] uppercase font-black tracking-widest border-b">
-                                <tr><th class="px-8 py-5">Öğrenci No</th><th class="px-8 py-5">Ad Soyad</th><th class="px-8 py-5">Bölüm</th><th class="px-8 py-5">Telefon</th><th class="px-8 py-5 text-center">İşlem</th></tr>
+            <!-- SECTION: STUDENTS -->
+            <div id="section-students" class="section">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-3xl font-black italic text-slate-800">Öğrenci Yönetimi</h1>
+                    <button onclick="openStudentModal()" class="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2">
+                        <i class="fas fa-user-plus"></i> Öğrenci Ekle
+                    </button>
+                </div>
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-slate-50 text-slate-500 text-[10px] uppercase font-black tracking-wider border-b border-slate-200">
+                                <tr><th class="px-6 py-4">No</th><th class="px-6 py-4">Öğrenci</th><th class="px-6 py-4">Departman</th><th class="px-6 py-4">İletişim</th><th class="px-6 py-4 text-center">İşlem</th></tr>
                             </thead>
-                            <tbody id="studentTableBody" class="divide-y"></tbody>
+                            <tbody id="studentTableBody" class="divide-y divide-slate-100 text-sm font-medium"></tbody>
                         </table>
                     </div>
                 </div>
+            </div>
 
-                <!-- SECTION: FACULTIES, TEACHERS, COURSES -->
-                <div id="section-faculties" class="section">
-                    <div class="flex justify-between items-center mb-8"><h1 class="text-3xl font-black italic text-slate-800">Fakülteler</h1><button onclick="openFacultyModal()" class="bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-xl">+ Yeni Fakülte</button></div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="facultyCards"></div>
+            <!-- SECTION: FACULTIES -->
+            <div id="section-faculties" class="section">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-3xl font-black italic text-slate-800">Fakülteler</h1>
+                    <button onclick="openFacultyModal()" class="bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2">
+                        <i class="fas fa-plus"></i> Fakülte Ekle
+                    </button>
                 </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="facultyCards"></div>
+            </div>
 
-                <!-- SECTION: DEPARTMENTS -->
-                <div id="section-departments" class="section">
-                    <div class="flex justify-between items-center mb-8">
-                        <h1 class="text-3xl font-black italic text-slate-800">Departmanlar</h1>
-                        <button onclick="openDepartmentModal()" class="bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-xl">+ Yeni Departman</button>
-                    </div>
-                    <div id="departmentCards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            <!-- SECTION: DEPARTMENTS -->
+            <div id="section-departments" class="section">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-3xl font-black italic text-slate-800">Departmanlar</h1>
+                    <button onclick="openDepartmentModal()" class="bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2">
+                        <i class="fas fa-plus"></i> Departman Ekle
+                    </button>
                 </div>
+                <div id="departmentCards" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+            </div>
 
-                <div id="section-teachers" class="section">
-                    <div class="flex justify-between items-center mb-8"><h1 class="text-3xl font-black italic text-slate-800">Akademisyenler</h1><button onclick="openTeacherModal()" class="bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold shadow-xl">+ Yeni Hoca</button></div>
-                    <div id="teacherList" class="grid grid-cols-1 gap-4"></div>
+            <!-- SECTION: TEACHERS -->
+            <div id="section-teachers" class="section">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-3xl font-black italic text-slate-800">Akademisyenler</h1>
+                    <button onclick="openTeacherModal()" class="bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2">
+                        <i class="fas fa-user-tie"></i> Hoca Ekle
+                    </button>
                 </div>
+                <div id="teacherList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+            </div>
 
-                <div id="section-courses" class="section">
-                    <div class="flex justify-between items-center mb-8"><h1 class="text-3xl font-black italic text-slate-800">Ders Kataloğu</h1><button onclick="openCourseModal()" class="bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-xl shadow-blue-500/30">+ Yeni Ders</button></div>
-                    <div id="courseList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            <!-- SECTION: COURSES -->
+            <div id="section-courses" class="section">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-3xl font-black italic text-slate-800">Ders Kataloğu</h1>
+                    <button onclick="openCourseModal()" class="bg-gradient-to-r from-rose-500 to-pink-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2">
+                        <i class="fas fa-book-medical"></i> Ders Ekle
+                    </button>
                 </div>
+                <div id="courseList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+            </div>
 
-                <!-- SECTION: SECTIONS (Ders Şubeleri) -->
-                <div id="section-sections" class="section">
-                    <div class="flex justify-between items-center mb-8">
-                        <h1 class="text-3xl font-black italic">Ders Şubeleri</h1>
-                        <button onclick="openSectionModal()" class="bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold shadow-xl">+ Şube Oluştur</button>
-                    </div>
-                    <div class="bg-white rounded-[2rem] shadow-xl overflow-hidden">
-                        <table class="w-full text-left font-bold text-slate-700">
-                            <thead class="bg-slate-50 text-slate-400 text-[10px] uppercase font-black tracking-widest border-b">
-                                <tr><th class="px-8 py-5">Ders</th><th class="px-8 py-5">Öğretmen</th><th class="px-8 py-5">Sınıf / Dönem</th><th class="px-8 py-5 text-center">İşlem</th></tr>
+            <!-- SECTION: SECTIONS -->
+            <div id="section-sections" class="section">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-3xl font-black italic text-slate-800">Ders Şubeleri</h1>
+                    <button onclick="openSectionModal()" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2">
+                        <i class="fas fa-layer-group"></i> Şube Oluştur
+                    </button>
+                </div>
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-slate-50 text-slate-500 text-[10px] uppercase font-black tracking-wider border-b border-slate-200">
+                                <tr><th class="px-6 py-4">Ders Adı</th><th class="px-6 py-4">Öğretmen</th><th class="px-6 py-4">Derslik / Dönem</th><th class="px-6 py-4 text-center">İşlem</th></tr>
                             </thead>
-                            <tbody id="sectionsTableBody" class="divide-y"></tbody>
+                            <tbody id="sectionsTableBody" class="divide-y divide-slate-100 text-sm font-medium"></tbody>
                         </table>
                     </div>
                 </div>
+            </div>
 
-                <!-- SECTION: ENROLLMENTS (Ders Kayıtları) -->
-                <div id="section-enrollments" class="section">
-                    <div class="flex justify-between items-center mb-8">
-                        <h1 class="text-3xl font-black italic">Ders Kayıtları</h1>
-                        <button onclick="openEnrollmentModal()" class="bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold shadow-xl">+ Öğrenci Kaydet</button>
-                    </div>
-                    <div class="bg-white rounded-[2rem] shadow-xl overflow-hidden">
-                        <table class="w-full text-left font-bold text-slate-700">
-                            <thead class="bg-slate-50 text-slate-400 text-[10px] uppercase font-black tracking-widest border-b">
-                                <tr><th class="px-8 py-5">Öğrenci No</th><th class="px-8 py-5">Öğrenci Adı</th><th class="px-8 py-5">Kayıtlı Ders</th><th class="px-8 py-5 text-center">İşlem</th></tr>
+            <!-- SECTION: ENROLLMENTS -->
+            <div id="section-enrollments" class="section">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-3xl font-black italic text-slate-800">Ders Kayıtları</h1>
+                    <button onclick="openEnrollmentModal()" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2">
+                        <i class="fas fa-user-plus"></i> Öğrenci Kaydet
+                    </button>
+                </div>
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-slate-50 text-slate-500 text-[10px] uppercase font-black tracking-wider border-b border-slate-200">
+                                <tr><th class="px-6 py-4">Öğrenci No</th><th class="px-6 py-4">Ad Soyad</th><th class="px-6 py-4">Kayıtlı Ders</th><th class="px-6 py-4 text-center">İşlem</th></tr>
                             </thead>
-                            <tbody id="enrollmentsTableBody" class="divide-y"></tbody>
+                            <tbody id="enrollmentsTableBody" class="divide-y divide-slate-100 text-sm font-medium"></tbody>
                         </table>
                     </div>
                 </div>
+            </div>
 
-                <!-- SECTION: CLASSROOMS & SEMESTERS -->
-                <div id="section-classrooms" class="section">
-                    <div class="flex justify-between items-center mb-8"><h1 class="text-3xl font-black italic">Derslikler</h1><button onclick="openClassroomModal()" class="bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold shadow-xl">+ Yeni Derslik</button></div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="classroomCards"></div>
+            <!-- SECTION: CLASSROOMS & SEMESTERS -->
+            <div id="section-classrooms" class="section">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-3xl font-black italic text-slate-800">Derslikler</h1>
+                    <button onclick="openClassroomModal()" class="bg-gradient-to-r from-orange-500 to-amber-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2">
+                        <i class="fas fa-door-open"></i> Derslik Ekle
+                    </button>
                 </div>
-                <div id="section-semesters" class="section">
-                    <div class="flex justify-between items-center mb-8"><h1 class="text-3xl font-black italic">Dönemler</h1><button onclick="openSemesterModal()" class="bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold shadow-xl">+ Yeni Dönem</button></div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="semesterList"></div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="classroomCards"></div>
+            </div>
+            <div id="section-semesters" class="section">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-3xl font-black italic text-slate-800">Dönemler</h1>
+                    <button onclick="openSemesterModal()" class="bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2">
+                        <i class="fas fa-calendar-plus"></i> Dönem Ekle
+                    </button>
                 </div>
-            </main>
-        </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="semesterList"></div>
+            </div>
+        </main>
     </div>
 
+    <!-- MODALS (Slightly improved styling) -->
 
-    <!-- MODAL: ANNOUNCEMENT -->
-    <div id="announcementModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-[2.5rem] max-w-lg w-full p-10 font-bold shadow-2xl">
-            <h3 id="announcementModalTitle" class="text-2xl font-black mb-6 italic">Duyuru Kaydı</h3>
-            <form id="announcementForm" class="space-y-4">
+    <div id="announcementModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl transform transition-transform scale-100">
+            <h3 id="announcementModalTitle" class="text-2xl font-black mb-6 italic text-slate-800">Duyuru Kaydı</h3>
+            <form id="announcementForm" class="space-y-5">
                 <input type="hidden" id="announcementEditId">
-                <input type="text" id="annTitle" placeholder="Duyuru Başlığı" required class="p-4 border w-full rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10">
-                <textarea id="annContent" placeholder="Duyuru İçeriği" required class="p-4 border w-full rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10 h-32"></textarea>
-                <input type="text" id="annAuthor" placeholder="Yazar" class="p-4 border w-full rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10">
-                <button type="submit" class="w-full bg-blue-600 text-white py-4 rounded-2xl italic font-black uppercase shadow-xl mt-4">Kaydet</button>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Başlık</label>
+                    <input type="text" id="annTitle" placeholder="Örn: Final Sınavları Hakkında" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium text-slate-700">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">İçerik</label>
+                    <textarea id="annContent" placeholder="Mesajınız..." required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium text-slate-700 h-32 resize-none"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Yazar (Opsiyonel)</label>
+                    <input type="text" id="annAuthor" placeholder="Örn: Rektörlük" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium text-slate-700">
+                </div>
+                <div class="pt-2 flex gap-3">
+                    <button type="button" onclick="closeModal('announcementModal')" class="flex-1 bg-slate-100 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-200 transition-colors">İptal</button>
+                    <button type="submit" class="flex-1 bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all">Kaydet</button>
+                </div>
             </form>
-            <button onclick="closeModal('announcementModal')" class="mt-4 text-slate-400 font-bold w-full text-center">Kapat</button>
         </div>
     </div>
 
-    <!-- MODAL: ADD/EDIT STUDENT -->
+    <!-- STUDENT MODAL -->
     <div id="studentModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-[2.5rem] max-w-lg w-full p-8 overflow-y-auto max-h-[90vh] shadow-2xl">
-            <h3 id="studentModalTitle" class="text-2xl font-black italic mb-6">Öğrenci Kaydı</h3>
+        <div class="bg-white rounded-3xl max-w-xl w-full p-8 overflow-y-auto max-h-[90vh] shadow-2xl">
+            <h3 id="studentModalTitle" class="text-2xl font-black italic mb-6 text-slate-800">Öğrenci Kaydı</h3>
             <form id="studentForm" class="space-y-4">
                 <input type="hidden" id="studentEditId">
                 <div class="grid grid-cols-2 gap-4">
-                    <input type="text" id="sFirstName" placeholder="Ad" required class="p-4 rounded-2xl border border-slate-200 w-full font-bold outline-none focus:ring-4 focus:ring-blue-500/10">
-                    <input type="text" id="sLastName" placeholder="Soyad" required class="p-4 rounded-2xl border border-slate-200 w-full font-bold outline-none focus:ring-4 focus:ring-blue-500/10">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Ad</label>
+                        <input type="text" id="sFirstName" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none font-medium">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Soyad</label>
+                        <input type="text" id="sLastName" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none font-medium">
+                    </div>
                 </div>
-                <input type="text" id="sNumber" placeholder="Öğrenci Numarası (Örn: 445909)" required class="p-4 rounded-2xl border border-slate-200 w-full font-bold outline-none focus:ring-4 focus:ring-blue-500/10">
-                <input type="email" id="sEmail" placeholder="E-posta" required class="p-4 rounded-2xl border border-slate-200 w-full font-bold outline-none focus:ring-4 focus:ring-blue-500/10">
-                <input type="text" id="sTel" placeholder="Telefon Numarası" class="p-4 rounded-2xl border border-slate-200 w-full font-bold outline-none focus:ring-4 focus:ring-blue-500/10">
-                <select id="sDeptId" required class="p-4 rounded-2xl border border-slate-200 w-full font-bold outline-none bg-slate-50 focus:ring-4 focus:ring-blue-500/10"></select>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-black italic uppercase transition-all shadow-lg mt-4">Kaydet</button>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Öğrenci No</label>
+                    <input type="text" id="sNumber" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none font-medium">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">E-Posta</label>
+                    <input type="email" id="sEmail" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none font-medium">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Telefon</label>
+                    <input type="text" id="sTel" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none font-medium">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Departman</label>
+                    <select id="sDeptId" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none font-medium bg-white"></select>
+                </div>
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeModal('studentModal')" class="flex-1 bg-slate-100 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-200 transition-colors">İptal</button>
+                    <button type="submit" class="flex-1 bg-emerald-500 text-white font-bold py-4 rounded-xl hover:bg-emerald-600 shadow-lg shadow-emerald-500/30 transition-all">Kaydet</button>
+                </div>
             </form>
-            <button onclick="closeModal('studentModal')" class="mt-4 text-slate-400 font-bold w-full text-center">Kapat</button>
         </div>
     </div>
 
-    <!-- MODAL: ADD/EDIT TEACHER -->
+    <!-- Generic single column forms styling (Teacher, Course, etc) applied similarly -->
+    <!-- TEACHER MODAL -->
     <div id="teacherModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-[2.5rem] max-w-md w-full p-10 font-bold shadow-2xl">
-            <h3 id="teacherModalTitle" class="text-2xl font-black mb-6 italic">Hoca Kaydı</h3>
+        <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl">
+            <h3 id="teacherModalTitle" class="text-2xl font-black mb-6 italic text-slate-800">Hoca Kaydı</h3>
             <form id="teacherForm" class="space-y-4">
                 <input type="hidden" id="teacherEditId">
-                <input type="text" id="tFirstName" placeholder="Ad" required class="p-4 border w-full rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10">
-                <input type="text" id="tLastName" placeholder="Soyad" required class="p-4 border w-full rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10">
-                <select id="tDeptId" required class="p-4 rounded-2xl border border-slate-200 w-full font-bold outline-none bg-slate-50 focus:ring-4 focus:ring-blue-500/10"></select>
-                <input type="text" id="tNumber" placeholder="Sicil Numarası" required class="p-4 rounded-2xl border border-slate-200 w-full font-bold outline-none focus:ring-4 focus:ring-blue-500/10">
-                <button type="submit" class="w-full bg-blue-600 text-white py-4 rounded-2xl italic font-black uppercase shadow-xl mt-4">Kaydet</button>
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="text" id="tFirstName" placeholder="Ad" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none font-medium">
+                    <input type="text" id="tLastName" placeholder="Soyad" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none font-medium">
+                </div>
+                <select id="tDeptId" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none bg-white font-medium">
+                    <option value="">Departman Seçin</option>
+                </select>
+                <input type="text" id="tNumber" placeholder="Sicil Numarası" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none font-medium">
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeModal('teacherModal')" class="flex-1 bg-slate-100 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-200">İptal</button>
+                    <button type="submit" class="flex-1 bg-cyan-500 text-white font-bold py-4 rounded-xl hover:bg-cyan-600 shadow-lg shadow-cyan-500/30">Kaydet</button>
+                </div>
             </form>
-            <button onclick="closeModal('teacherModal')" class="mt-4 text-slate-400 font-bold w-full text-center">Kapat</button>
         </div>
     </div>
 
     <!-- COURSE MODAL -->
     <div id="courseModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-[2.5rem] max-w-md w-full p-10 shadow-2xl">
-            <h3 id="courseModalTitle" class="text-2xl font-black italic mb-6">Ders Bilgileri</h3>
+        <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl">
+            <h3 id="courseModalTitle" class="text-2xl font-black italic mb-6 text-slate-800">Ders Bilgileri</h3>
             <form id="courseForm" class="space-y-4">
                 <input type="hidden" id="courseEditId">
-                <input type="text" id="cCode" placeholder="Ders Kodu (Örn: YAZ101)" required class="p-4 rounded-2xl border w-full font-bold outline-none focus:ring-4 focus:ring-blue-500/10">
-                <input type="text" id="cName" placeholder="Ders Adı" required class="p-4 rounded-2xl border w-full font-bold outline-none focus:ring-4 focus:ring-blue-500/10">
+                <input type="text" id="cCode" placeholder="Ders Kodu (Örn: YAZ101)" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none font-medium">
+                <input type="text" id="cName" placeholder="Ders Adı" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none font-medium">
                 <div class="grid grid-cols-3 gap-4">
-                    <input type="text" id="cCredit" placeholder="Kredi" class="p-4 rounded-2xl border w-full font-bold outline-none focus:ring-4 focus:ring-blue-500/10">
-                    <input type="number" id="cAkts" placeholder="AKTS" class="p-4 rounded-2xl border w-full font-bold outline-none focus:ring-4 focus:ring-blue-500/10">
-                    <input type="number" id="cQuota" placeholder="Kota" class="p-4 rounded-2xl border w-full font-bold outline-none focus:ring-4 focus:ring-blue-500/10">
+                    <input type="text" id="cCredit" placeholder="Kredi" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none font-medium">
+                    <input type="number" id="cAkts" placeholder="AKTS" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none font-medium">
+                    <input type="number" id="cQuota" placeholder="Kota" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none font-medium">
                 </div>
-                <button type="submit" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl uppercase italic">Kaydet</button>
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeModal('courseModal')" class="flex-1 bg-slate-100 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-200">İptal</button>
+                    <button type="submit" class="flex-1 bg-rose-500 text-white font-bold py-4 rounded-xl hover:bg-rose-600 shadow-lg shadow-rose-500/30">Kaydet</button>
+                </div>
             </form>
-            <button onclick="closeModal('courseModal')" class="mt-4 text-slate-400 font-bold w-full">Kapat</button>
         </div>
     </div>
 
     <!-- FACULTY MODAL -->
     <div id="facultyModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-[2.5rem] max-w-md w-full p-10 font-bold shadow-2xl">
-            <h3 id="facultyModalTitle" class="text-2xl font-black mb-6 italic">Fakülte Kaydı</h3>
+        <div class="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <h3 id="facultyModalTitle" class="text-2xl font-black mb-6 italic text-slate-800">Fakülte Kaydı</h3>
             <form id="facultyForm" class="space-y-4">
                 <input type="hidden" id="facultyEditId">
-                <input type="text" id="fName" placeholder="Fakülte Adı" required class="p-4 border w-full rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10">
-                <input type="text" id="fAddress" placeholder="Adres" required class="p-4 border w-full rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10">
-                <input type="text" id="fDean" placeholder="Dekan" class="p-4 border w-full rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10">
-                <input type="text" id="fNumberOfPersonel" placeholder="Personel Sayısı" class="p-4 border w-full rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10">
-                <input type="text" id="fAvailable" placeholder="Mevcut Durum (Available)" class="p-4 border w-full rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10">
-                <input type="text" id="fYearOfEstablishment" placeholder="Kuruluş Yılı" class="p-4 border w-full rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10">
-                <input type="text" id="fSecretary" placeholder="Sekreter" class="p-4 border w-full rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10">
-                <button type="submit" class="w-full bg-blue-600 text-white py-4 rounded-2xl italic font-black uppercase shadow-xl mt-4">Kaydet</button>
+                <input type="text" id="fName" placeholder="Fakülte Adı" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none font-medium">
+                <input type="text" id="fAddress" placeholder="Adres" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none font-medium">
+                <input type="text" id="fDean" placeholder="Dekan" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none font-medium">
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="number" id="fNumberOfPersonel" placeholder="Personel Sayısı" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none font-medium">
+                    <input type="text" id="fAvailable" placeholder="Durum (Mevcut/Değil)" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none font-medium">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="text" id="fYearOfEstablishment" placeholder="Kuruluş Yılı" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none font-medium">
+                    <input type="text" id="fSecretary" placeholder="Sekreter" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none font-medium">
+                </div>
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeModal('facultyModal')" class="flex-1 bg-slate-100 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-200">İptal</button>
+                    <button type="submit" class="flex-1 bg-indigo-500 text-white font-bold py-4 rounded-xl hover:bg-indigo-600 shadow-lg shadow-indigo-500/30">Kaydet</button>
+                </div>
             </form>
-            <button onclick="closeModal('facultyModal')" class="mt-4 text-slate-400 font-bold w-full text-center">Kapat</button>
         </div>
     </div>
 
     <!-- DEPARTMENT MODAL -->
     <div id="departmentModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-[2.5rem] max-w-md w-full p-10 font-bold shadow-2xl">
-            <h3 id="departmentModalTitle" class="text-2xl font-black mb-6 italic">Departman Kaydı</h3>
+        <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl">
+            <h3 id="departmentModalTitle" class="text-2xl font-black mb-6 italic text-slate-800">Departman Kaydı</h3>
             <form id="departmentForm" class="space-y-4">
                 <input type="hidden" id="departmentEditId">
-                <input type="text" id="dName" placeholder="Departman Adı" required class="p-4 border w-full rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10">
-                <input type="text" id="dCode" placeholder="Departman Kodu" required class="p-4 border w-full rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10">
-                <select id="dFacultyId" required class="p-4 rounded-2xl border border-slate-200 w-full font-bold outline-none bg-slate-50 focus:ring-4 focus:ring-blue-500/10"></select>
-                <button type="submit" class="w-full bg-blue-600 text-white py-4 rounded-2xl italic font-black uppercase shadow-xl mt-4">Kaydet</button>
+                <input type="text" id="dName" placeholder="Departman Adı" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none font-medium">
+                <input type="text" id="dCode" placeholder="Departman Kodu" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none font-medium">
+                <select id="dFacultyId" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none bg-white font-medium">
+                    <option value="">Fakülte Seçin</option>
+                </select>
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeModal('departmentModal')" class="flex-1 bg-slate-100 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-200">İptal</button>
+                    <button type="submit" class="flex-1 bg-teal-500 text-white font-bold py-4 rounded-xl hover:bg-teal-600 shadow-lg shadow-teal-500/30">Kaydet</button>
+                </div>
             </form>
-            <button onclick="closeModal('departmentModal')" class="mt-4 text-slate-400 font-bold w-full text-center">Kapat</button>
         </div>
     </div>
 
     <!-- CLASSROOM MODAL -->
     <div id="classroomModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-[2.5rem] max-w-md w-full shadow-2xl p-10">
-            <h3 id="classroomModalTitle" class="text-2xl font-black italic mb-6">Derslik</h3>
+        <div class="bg-white rounded-3xl max-w-xs w-full shadow-2xl p-8">
+            <h3 id="classroomModalTitle" class="text-2xl font-black italic mb-6 text-slate-800">Derslik</h3>
             <form id="classroomForm" class="space-y-4">
                 <input type="hidden" id="classroomEditId">
-                <input type="text" id="crNumber" placeholder="Derslik No" required class="p-4 rounded-2xl border w-full font-bold outline-none focus:ring-4 focus:ring-blue-500/10">
-                <input type="number" id="crCapacity" placeholder="Kapasite" required class="p-4 rounded-2xl border w-full font-bold outline-none focus:ring-4 focus:ring-blue-500/10">
-                <button type="submit" class="w-full bg-blue-600 text-white py-4 rounded-2xl italic font-black uppercase">Kaydet</button>
+                <input type="text" id="crNumber" placeholder="Derslik No" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none font-medium">
+                <input type="number" id="crCapacity" placeholder="Kapasite" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none font-medium">
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeModal('classroomModal')" class="flex-1 bg-slate-100 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-200">İptal</button>
+                    <button type="submit" class="flex-1 bg-orange-500 text-white font-bold py-4 rounded-xl hover:bg-orange-600 shadow-lg shadow-orange-500/30">Kaydet</button>
+                </div>
             </form>
-            <button onclick="closeModal('classroomModal')" class="mt-4 text-slate-400 font-bold w-full text-center">Kapat</button>
         </div>
     </div>
 
     <!-- SEMESTER MODAL -->
     <div id="semesterModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-[2.5rem] max-w-md w-full shadow-2xl p-10">
-            <h3 id="semesterModalTitle" class="text-2xl font-black italic mb-6">Dönem</h3>
+        <div class="bg-white rounded-3xl max-w-xs w-full shadow-2xl p-8">
+            <h3 id="semesterModalTitle" class="text-2xl font-black italic mb-6 text-slate-800">Dönem</h3>
             <form id="semesterForm" class="space-y-4">
                 <input type="hidden" id="semesterEditId">
-                <input type="text" id="semTerm" placeholder="Dönem Adı" required class="p-4 rounded-2xl border w-full font-bold outline-none focus:ring-4 focus:ring-blue-500/10">
-                <label class="flex items-center gap-2 font-bold text-slate-600 ml-2"><input type="checkbox" id="semActive" class="w-5 h-5 rounded text-blue-600"> Aktif Dönem mi?</label>
-                <button type="submit" class="w-full bg-blue-600 text-white py-4 rounded-2xl italic font-black uppercase">Kaydet</button>
+                <input type="text" id="semTerm" placeholder="Dönem Adı (Örn: 2023-Güz)" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none font-medium">
+                <label class="flex items-center gap-3 font-bold text-slate-600 p-2 bg-slate-50 rounded-xl cursor-pointer">
+                    <input type="checkbox" id="semActive" class="w-5 h-5 rounded text-purple-600 focus:ring-purple-500/50">
+                    <span>Aktif Dönem mi?</span>
+                </label>
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeModal('semesterModal')" class="flex-1 bg-slate-100 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-200">İptal</button>
+                    <button type="submit" class="flex-1 bg-purple-500 text-white font-bold py-4 rounded-xl hover:bg-purple-600 shadow-lg shadow-purple-500/30">Kaydet</button>
+                </div>
             </form>
-            <button onclick="closeModal('semesterModal')" class="mt-4 text-slate-400 font-bold w-full text-center">Kapat</button>
         </div>
     </div>
 
     <!-- SECTION MODAL -->
     <div id="sectionModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-[2.5rem] max-w-md w-full shadow-2xl p-10">
-            <h3 class="text-2xl font-black italic mb-6">Şube Tanımla</h3>
+        <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl p-8">
+            <h3 class="text-2xl font-black italic mb-6 text-slate-800">Şube Tanımla</h3>
             <form id="sectionForm" class="space-y-4">
-                <select id="secCourse" required class="p-4 rounded-2xl border w-full font-bold outline-none bg-slate-50"></select>
-                <select id="secTeacher" required class="p-4 rounded-2xl border w-full font-bold outline-none bg-slate-50"></select>
-                <select id="secClassroom" required class="p-4 rounded-2xl border w-full font-bold outline-none bg-slate-50"></select>
-                <select id="secSemester" required class="p-4 rounded-2xl border w-full font-bold outline-none bg-slate-50"></select>
-                <button type="submit" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-xl uppercase italic">Şubeyi Aç</button>
+                <select id="secCourse" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none bg-white font-medium"><option value="">Ders Seçin</option></select>
+                <select id="secTeacher" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none bg-white font-medium"><option value="">Öğretmen Seçin</option></select>
+                <div class="grid grid-cols-2 gap-4">
+                    <select id="secClassroom" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none bg-white font-medium"><option value="">Derslik</option></select>
+                    <select id="secSemester" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none bg-white font-medium"><option value="">Dönem</option></select>
+                </div>
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeModal('sectionModal')" class="flex-1 bg-slate-100 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-200">İptal</button>
+                    <button type="submit" class="flex-1 bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-500/30">Oluştur</button>
+                </div>
             </form>
-            <button onclick="closeModal('sectionModal')" class="mt-4 text-slate-400 w-full font-bold">Vazgeç</button>
         </div>
     </div>
 
     <!-- ENROLLMENT MODAL -->
     <div id="enrollmentModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-[2.5rem] max-w-md w-full shadow-2xl p-10">
-            <h3 class="text-2xl font-black italic mb-6">Derse Kayıt Yap</h3>
+        <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl p-8">
+            <h3 class="text-2xl font-black italic mb-6 text-slate-800">Derse Öğrenci Kaydet</h3>
             <form id="enrollmentForm" class="space-y-4">
-                <select id="enrStudent" required class="p-4 rounded-2xl border w-full font-bold outline-none bg-slate-50"></select>
-                <select id="enrSection" required class="p-4 rounded-2xl border w-full font-bold outline-none bg-slate-50"></select>
-                <button type="submit" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-xl uppercase italic">Kaydı Onayla</button>
+                <select id="enrStudent" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none bg-white font-medium"><option value="">Öğrenci Seçin</option></select>
+                <select id="enrSection" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none bg-white font-medium"><option value="">Ders Şubesi Seçin</option></select>
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeModal('enrollmentModal')" class="flex-1 bg-slate-100 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-200">İptal</button>
+                    <button type="submit" class="flex-1 bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-500/30">Kaydet</button>
+                </div>
             </form>
-            <button onclick="closeModal('enrollmentModal')" class="mt-4 text-slate-400 w-full font-bold">Vazgeç</button>
         </div>
     </div>
 
@@ -387,7 +549,24 @@
             document.getElementById('section-' + id).classList.add('active');
             document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active-menu'));
             document.getElementById('menu-' + id).classList.add('active-menu');
-            document.getElementById('pageTitle').innerText = id.toUpperCase();
+
+            // Map the id to a more readable title
+            const titles = {
+                dashboard: 'Sistem Özeti',
+                announcements: 'Duyurular',
+                faculties: 'Fakülteler',
+                departments: 'Departmanlar',
+                classrooms: 'Derslikler',
+                semesters: 'Dönemler',
+                students: 'Öğrenci Yönetimi',
+                teachers: 'Akademik Kadro',
+                courses: 'Ders Kataloğu',
+                sections: 'Aktif Şubeler',
+                enrollments: 'Kayıt İşlemleri'
+            };
+
+            document.getElementById('pageTitle').innerText = titles[id] || id.toUpperCase();
+
             const loaders = { students: loadStudents, classrooms: loadClassrooms, semesters: loadSemesters, courses: loadCourses, teachers: loadTeachers, faculties: loadFaculties, departments: loadDepartments, sections: loadSections, enrollments: loadEnrollments, announcements: loadAnnouncements };
             if (loaders[id]) loaders[id]();
         }
@@ -405,7 +584,7 @@
         }
 
         async function deleteData(type, id) {
-            if (!confirm('Emin misiniz?')) return;
+            if (!confirm('Bu kaydı silmek istediğinize emin misiniz?')) return;
             const endpoint = type === 'enrollment' ? `/enrollment/drop/${id}` : `/${type}/delete/${id}`;
             if (await apiRequest(endpoint, 'DELETE')) showSection(document.querySelector('.section.active').id.split('-')[1]);
         }
@@ -415,21 +594,21 @@
         async function loadAnnouncements() {
             allData.announcements = await apiRequest('/announcement/all');
             document.getElementById('announcementList').innerHTML = (allData.announcements || []).map(a => `
-                <div class="bg-white p-8 rounded-[2rem] shadow-xl border">
+                <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
                     <div class="flex justify-between items-start mb-4">
                         <div>
                             <h3 class="text-xl font-black italic text-blue-600">${a.title}</h3>
-                            <p class="text-xs text-slate-400 mt-1">${new Date(a.publishDate).toLocaleString()}</p>
+                            <p class="text-xs font-bold text-slate-400 mt-1"><i class="far fa-clock mr-1"></i>${new Date(a.publishDate).toLocaleString()}</p>
                         </div>
-                        <div class="flex gap-3">
-                            <button onclick='openAnnouncementModal(${JSON.stringify(a)})' class="text-blue-400 hover:scale-125 transition-all"><i class="fas fa-edit"></i></button>
-                            <button onclick="deleteData('announcement', ${a.id})" class="text-red-400 hover:scale-125 transition-all"><i class="fas fa-trash"></i></button>
+                        <div class="flex gap-2">
+                            <button onclick='openAnnouncementModal(${JSON.stringify(a)})' class="w-8 h-8 rounded-lg bg-blue-50 text-blue-500 hover:bg-blue-500 hover:text-white transition-colors flex items-center justify-center"><i class="fas fa-pen text-sm"></i></button>
+                            <button onclick="deleteData('announcement', ${a.id})" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-colors flex items-center justify-center"><i class="fas fa-trash text-sm"></i></button>
                         </div>
                     </div>
-                    <p class="text-slate-600 font-medium whitespace-pre-wrap">${a.content}</p>
-                    <div class="mt-6 pt-4 border-t border-slate-100 flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xs font-black">${a.author ? a.author[0].toUpperCase() : '?'}</div>
-                        <span class="text-xs font-black uppercase text-slate-400">${a.author || 'Anonim'}</span>
+                    <p class="text-slate-600 font-medium whitespace-pre-wrap leading-relaxed">${a.content}</p>
+                    <div class="mt-6 pt-4 border-t border-slate-100 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-100 to-blue-200 text-blue-600 flex items-center justify-center text-xs font-black shadow-inner border border-white">${a.author ? a.author[0].toUpperCase() : '?'}</div>
+                        <span class="text-xs font-black uppercase text-slate-500">${a.author || 'Anonim'}</span>
                     </div>
                 </div>
             `).join('');
@@ -437,7 +616,7 @@
 
         function openAnnouncementModal(data = null) {
             document.getElementById('announcementEditId').value = data?.id || '';
-            document.getElementById('announcementModalTitle').innerText = data ? 'Duyuruyu Düzenle' : 'Yeni Duyuru';
+            document.getElementById('announcementModalTitle').innerText = data ? 'Duyuruyu Düzenle' : 'Yeni Duyuru Oluştur';
             document.getElementById('annTitle').value = data?.title || '';
             document.getElementById('annContent').value = data?.content || '';
             document.getElementById('annAuthor').value = data?.author || '';
@@ -455,20 +634,22 @@
         async function loadFaculties() {
             allData.faculties = await apiRequest('/faculty/getAll');
             document.getElementById('facultyCards').innerHTML = (allData.faculties || []).map(f => `
-                <div class="bg-white p-8 rounded-[2rem] shadow-xl border">
-                    <h3 class="text-xl font-black italic">${f.name}</h3>
-                    <p class="text-xs text-slate-400 mt-2">${f.address}</p>
-                    <div class="mt-4 text-sm font-bold text-slate-600 space-y-1">
-                        <p>Dekan: ${f.dean || '---'}</p>
-                        <p>Personel: ${f.numberOfPersonel || '---'}</p>
-                        <p>Durum: ${f.available || '---'}</p>
-                        <p>Kuruluş: ${f.year_of_establishment || '---'}</p>
-                        <p>Sekreter: ${f.secretary || '---'}</p>
-                    </div>
-                    <div class="mt-6 flex justify-between items-center">
-                        <div class="flex gap-3">
-                            <button onclick='openFacultyModal(${JSON.stringify(f)})' class="text-blue-400 hover:scale-125 transition-all"><i class="fas fa-edit"></i></button>
-                            <button onclick="deleteData('faculty', ${f.id})" class="text-red-400 hover:scale-125 transition-all"><i class="fas fa-trash"></i></button>
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-indigo-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                    <div class="relative z-10">
+                        <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center text-xl mb-4"><i class="fas fa-university"></i></div>
+                        <h3 class="text-xl font-black italic text-slate-800">${f.name}</h3>
+                        <p class="text-xs font-medium text-slate-500 mt-2 min-h-[2.5rem]"><i class="fas fa-map-marker-alt mr-1"></i>${f.address}</p>
+
+                        <div class="mt-5 space-y-2 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                            <div class="flex justify-between items-center"><span class="text-[10px] uppercase font-bold text-slate-400">Dekan</span><span class="text-xs font-black text-slate-700">${f.dean || '-'}</span></div>
+                            <div class="flex justify-between items-center"><span class="text-[10px] uppercase font-bold text-slate-400">Personel</span><span class="text-xs font-black text-slate-700">${f.numberOfPersonel || '-'}</span></div>
+                            <div class="flex justify-between items-center"><span class="text-[10px] uppercase font-bold text-slate-400">Kuruluş</span><span class="text-xs font-black text-slate-700">${f.year_of_establishment || '-'}</span></div>
+                        </div>
+
+                        <div class="mt-5 flex gap-2">
+                            <button onclick='openFacultyModal(${JSON.stringify(f)})' class="flex-1 bg-indigo-50 text-indigo-600 font-bold py-2 rounded-xl hover:bg-indigo-600 hover:text-white transition-colors text-sm">Düzenle</button>
+                            <button onclick="deleteData('faculty', ${f.id})" class="w-10 bg-red-50 text-red-500 font-bold py-2 rounded-xl hover:bg-red-500 hover:text-white transition-colors"><i class="fas fa-trash"></i></button>
                         </div>
                     </div>
                 </div>
@@ -477,7 +658,7 @@
 
         function openFacultyModal(data = null) {
             document.getElementById('facultyEditId').value = data?.id || '';
-            document.getElementById('facultyModalTitle').innerText = data ? 'Fakülteyi Düzenle' : 'Yeni Fakülte';
+            document.getElementById('facultyModalTitle').innerText = data ? 'Fakülteyi Düzenle' : 'Yeni Fakülte Ekle';
             document.getElementById('fName').value = data?.name || '';
             document.getElementById('fAddress').value = data?.address || '';
             document.getElementById('fDean').value = data?.dean || '';
@@ -507,14 +688,18 @@
         async function loadDepartments() {
             allData.departments = await apiRequest('/department/getAll');
             document.getElementById('departmentCards').innerHTML = (allData.departments || []).map(d => `
-                <div class="bg-white p-8 rounded-[2rem] shadow-xl border">
-                    <h3 class="text-xl font-black italic">${d.name}</h3>
-                    <p class="text-xs text-slate-400 mt-2">Kod: ${d.code || '---'}</p>
-                    <div class="mt-6 flex justify-between items-center">
-                        <span class="text-blue-600 font-black text-[10px] uppercase italic tracking-widest">Fakülte: ${d.faculty?.name || '---'}</span>
-                        <div class="flex gap-3">
-                            <button onclick='openDepartmentModal(${JSON.stringify(d)})' class="text-blue-400 hover:scale-125 transition-all"><i class="fas fa-edit"></i></button>
-                            <button onclick="deleteData('department', ${d.id})" class="text-red-400 hover:scale-125 transition-all"><i class="fas fa-trash"></i></button>
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-teal-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                    <div class="relative z-10">
+                        <div class="w-12 h-12 bg-teal-100 text-teal-600 rounded-2xl flex items-center justify-center text-xl mb-4"><i class="fas fa-building"></i></div>
+                        <h3 class="text-xl font-black italic text-slate-800">${d.name}</h3>
+                        <div class="mt-4 flex flex-col gap-2">
+                            <span class="inline-flex items-center gap-1.5 bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg text-xs font-bold w-fit"><i class="fas fa-hashtag text-slate-400"></i> ${d.code || 'KOD YOK'}</span>
+                            <span class="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider w-fit"><i class="fas fa-university opacity-70"></i> ${d.faculty?.name || 'Fakülte Yok'}</span>
+                        </div>
+                        <div class="mt-6 flex gap-2">
+                            <button onclick='openDepartmentModal(${JSON.stringify(d)})' class="flex-1 bg-teal-50 text-teal-600 font-bold py-2 rounded-xl hover:bg-teal-600 hover:text-white transition-colors text-sm">Düzenle</button>
+                            <button onclick="deleteData('department', ${d.id})" class="w-10 bg-red-50 text-red-500 font-bold py-2 rounded-xl hover:bg-red-500 hover:text-white transition-colors"><i class="fas fa-trash"></i></button>
                         </div>
                     </div>
                 </div>
@@ -543,14 +728,28 @@
         async function loadStudents() {
             allData.students = await apiRequest('/student/getAll');
             document.getElementById('studentTableBody').innerHTML = (allData.students || []).map(s => `
-                <tr class="hover:bg-slate-50 border-b">
-                    <td class="px-8 py-5 text-blue-600 italic font-black">${s.studentNumber}</td>
-                    <td class="px-8 py-5">${s.firstName} ${s.lastName}</td>
-                    <td class="px-8 py-5 text-slate-500">${s.department?.name || '---'}</td>
-                    <td class="px-8 py-5 text-slate-400">${s.telNumber || '---'}</td>
-                    <td class="px-8 py-5 text-center flex justify-center gap-4">
-                        <button onclick='openStudentModal(${JSON.stringify(s)})' class="text-blue-400"><i class="fas fa-edit"></i></button>
-                        <button onclick="deleteData('student', ${s.id})" class="text-red-400"><i class="fas fa-trash-alt"></i></button>
+                <tr class="hover:bg-slate-50 border-b border-slate-100 transition-colors group">
+                    <td class="px-6 py-4">
+                        <span class="bg-emerald-50 text-emerald-600 font-black italic px-3 py-1 rounded-lg border border-emerald-100">${s.studentNumber}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-black text-slate-500">${s.firstName[0]}${s.lastName[0]}</div>
+                            <span class="font-bold text-slate-800">${s.firstName} ${s.lastName}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-slate-500 font-medium">${s.department?.name || '-'}</td>
+                    <td class="px-6 py-4 text-slate-500 text-sm">
+                        <div class="flex flex-col">
+                            <span><i class="fas fa-envelope text-slate-300 w-4"></i> ${s.email || '-'}</span>
+                            <span><i class="fas fa-phone text-slate-300 w-4"></i> ${s.telNumber || '-'}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <div class="flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick='openStudentModal(${JSON.stringify(s)})' class="w-8 h-8 bg-emerald-50 text-emerald-500 rounded-lg hover:bg-emerald-500 hover:text-white transition-colors"><i class="fas fa-pen text-xs"></i></button>
+                            <button onclick="deleteData('student', ${s.id})" class="w-8 h-8 bg-red-50 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-colors"><i class="fas fa-trash text-xs"></i></button>
+                        </div>
                     </td>
                 </tr>
             `).join('');
@@ -560,7 +759,7 @@
             const depts = await apiRequest('/department/getAll');
             document.getElementById('sDeptId').innerHTML = '<option value="">Departman Seçin</option>' + (depts || []).map(d => `<option value="${d.id}">${d.name}</option>`).join('');
             document.getElementById('studentEditId').value = data?.id || '';
-            document.getElementById('studentModalTitle').innerText = data ? 'Öğrenciyi Düzenle' : 'Öğrenci Kaydı';
+            document.getElementById('studentModalTitle').innerText = data ? 'Öğrenciyi Düzenle' : 'Yeni Öğrenci Kaydı';
             document.getElementById('sFirstName').value = data?.firstName || '';
             document.getElementById('sLastName').value = data?.lastName || '';
             document.getElementById('sNumber').value = data?.studentNumber || '';
@@ -575,7 +774,6 @@
             const id = document.getElementById('studentEditId').value;
             const num = document.getElementById('sNumber').value.toString();
 
-            // userId bulma kısmı tamamen kaldırıldı!
             const data = {
                 firstName: document.getElementById('sFirstName').value,
                 lastName: document.getElementById('sLastName').value,
@@ -594,14 +792,20 @@
         async function loadTeachers() {
             allData.teachers = await apiRequest('/teacher/all');
             document.getElementById('teacherList').innerHTML = (allData.teachers || []).map(t => `
-                <div class="bg-white p-6 rounded-3xl border flex justify-between items-center mb-2 shadow-sm">
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 hover:shadow-md transition-all flex items-center justify-between group">
                     <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 font-black flex items-center justify-center">${t.firstName ? t.firstName[0] : '?'}${t.lastName ? t.lastName[0] : '?'}</div>
-                        <div><h4 class="font-black italic text-slate-800 uppercase">${t.firstName} ${t.lastName}</h4><p class="text-xs text-slate-400 font-bold">${t.department?.name || '---'}</p></div>
+                        <div class="w-14 h-14 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 text-white font-black flex items-center justify-center text-xl shadow-lg shadow-cyan-500/30">
+                            ${t.firstName ? t.firstName[0] : '?'}${t.lastName ? t.lastName[0] : '?'}
+                        </div>
+                        <div>
+                            <h4 class="font-black italic text-slate-800 text-lg">${t.firstName} ${t.lastName}</h4>
+                            <p class="text-xs text-slate-500 font-bold mt-1 bg-slate-100 px-2 py-0.5 rounded inline-block">${t.department?.name || 'Departman Yok'}</p>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase mt-1 tracking-wider">Sicil: ${t.registrationNumber || t.user?.username || '-'}</p>
+                        </div>
                     </div>
-                    <div class="flex gap-4">
-                        <button onclick='openTeacherModal(${JSON.stringify(t)})' class="text-blue-400"><i class="fas fa-edit text-lg"></i></button>
-                        <button onclick="deleteData('teacher', ${t.id})" class="text-red-400"><i class="fas fa-trash text-lg"></i></button>
+                    <div class="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onclick='openTeacherModal(${JSON.stringify(t)})' class="w-8 h-8 bg-cyan-50 text-cyan-600 rounded-lg hover:bg-cyan-500 hover:text-white transition-colors"><i class="fas fa-pen text-xs"></i></button>
+                        <button onclick="deleteData('teacher', ${t.id})" class="w-8 h-8 bg-red-50 text-red-500 rounded-lg hover:bg-red-500 hover:text-white transition-colors"><i class="fas fa-trash text-xs"></i></button>
                     </div>
                 </div>
             `).join('');
@@ -611,11 +815,10 @@
             const depts = await apiRequest('/department/getAll');
             document.getElementById('tDeptId').innerHTML = '<option value="">Departman Seçin</option>' + (depts || []).map(d => `<option value="${d.id}">${d.name}</option>`).join('');
             document.getElementById('teacherEditId').value = data?.id || '';
-            document.getElementById('teacherModalTitle').innerText = data ? 'Hocayı Düzenle' : 'Hoca Kaydı';
+            document.getElementById('teacherModalTitle').innerText = data ? 'Hocayı Düzenle' : 'Yeni Hoca Ekle';
             document.getElementById('tFirstName').value = data?.firstName || '';
             document.getElementById('tLastName').value = data?.lastName || '';
             document.getElementById('tDeptId').value = data?.department?.id || '';
-            // Data'dan user.username okumak yerine registrationNumber okuyacağız
             document.getElementById('tNumber').value = data?.registrationNumber || data?.user?.username || '';
             openModal('teacherModal');
         }
@@ -625,7 +828,6 @@
             const id = document.getElementById('teacherEditId').value;
             const num = document.getElementById('tNumber').value.toString();
 
-            // userId bulma kısmı tamamen kaldırıldı!
             const data = {
                 firstName: document.getElementById('tFirstName').value,
                 lastName: document.getElementById('tLastName').value,
@@ -642,11 +844,33 @@
         async function loadCourses() {
             allData.courses = await apiRequest('/course/all');
             document.getElementById('courseList').innerHTML = (allData.courses || []).map(c => `
-                <div class="flex items-center justify-between p-6 bg-white rounded-3xl border border-slate-100 shadow-sm">
-                    <div><span class="text-[10px] font-black text-blue-500 bg-blue-50 px-3 py-1 rounded-full uppercase italic">${c.code}</span><h4 class="text-lg font-black mt-2 italic text-slate-800">${c.name}</h4><p class="text-xs text-slate-400 mt-1 font-bold">Kredi: ${c.credit} | AKTS: ${c.akts}</p></div>
-                    <div class="flex gap-4">
-                        <button onclick='openCourseModal(${JSON.stringify(c)})' class="text-blue-400"><i class="fas fa-edit"></i></button>
-                        <button onclick="deleteData('course', ${c.id})" class="text-red-300"><i class="fas fa-trash"></i></button>
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow relative overflow-hidden group">
+                    <div class="absolute right-0 bottom-0 opacity-5 text-rose-500 transform translate-x-4 translate-y-4">
+                        <i class="fas fa-book text-8xl"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-xs font-black text-rose-600 bg-rose-50 border border-rose-100 px-3 py-1 rounded-lg uppercase tracking-wider">${c.code}</span>
+                            <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button onclick='openCourseModal(${JSON.stringify(c)})' class="text-slate-400 hover:text-rose-500 transition-colors"><i class="fas fa-pen"></i></button>
+                                <button onclick="deleteData('course', ${c.id})" class="text-slate-400 hover:text-red-500 transition-colors"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <h4 class="text-xl font-black italic text-slate-800 mb-4">${c.name}</h4>
+                        <div class="flex gap-4">
+                            <div class="bg-slate-50 px-3 py-2 rounded-xl flex-1 text-center border border-slate-100">
+                                <span class="block text-[10px] uppercase font-bold text-slate-400">Kredi</span>
+                                <span class="block text-lg font-black text-slate-700">${c.credit || '-'}</span>
+                            </div>
+                            <div class="bg-slate-50 px-3 py-2 rounded-xl flex-1 text-center border border-slate-100">
+                                <span class="block text-[10px] uppercase font-bold text-slate-400">AKTS</span>
+                                <span class="block text-lg font-black text-slate-700">${c.akts || '-'}</span>
+                            </div>
+                            <div class="bg-slate-50 px-3 py-2 rounded-xl flex-1 text-center border border-slate-100">
+                                <span class="block text-[10px] uppercase font-bold text-slate-400">Kota</span>
+                                <span class="block text-lg font-black text-slate-700">${c.quota || '-'}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             `).join('');
@@ -654,7 +878,7 @@
 
         function openCourseModal(data = null) {
             document.getElementById('courseEditId').value = data?.id || '';
-            document.getElementById('courseModalTitle').innerText = data ? 'Dersi Düzenle' : 'Ders Bilgileri';
+            document.getElementById('courseModalTitle').innerText = data ? 'Dersi Düzenle' : 'Yeni Ders Ekle';
             document.getElementById('cCode').value = data?.code || '';
             document.getElementById('cName').value = data?.name || '';
             document.getElementById('cCredit').value = data?.credit || '';
@@ -674,11 +898,13 @@
         async function loadClassrooms() {
             const data = await apiRequest('/classroom/all');
             document.getElementById('classroomCards').innerHTML = (data || []).map(c => `
-                <div class="bg-white p-6 rounded-3xl border flex justify-between items-center shadow-sm">
-                    <div><h4 class="text-xl font-black italic">${c.roomNumber}</h4><p class="text-xs text-slate-400 font-bold uppercase mt-1">Kapasite: ${c.capacity}</p></div>
-                    <div class="flex gap-4">
-                        <button onclick='openClassroomModal(${JSON.stringify(c)})' class="text-blue-400"><i class="fas fa-edit"></i></button>
-                        <button onclick="deleteData('classroom', ${c.id})" class="text-red-400"><i class="fas fa-trash"></i></button>
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:-translate-y-1 transition-transform group text-center relative overflow-hidden">
+                    <div class="w-16 h-16 mx-auto bg-orange-50 text-orange-500 rounded-full flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform"><i class="fas fa-chalkboard"></i></div>
+                    <h4 class="text-2xl font-black italic text-slate-800">${c.roomNumber}</h4>
+                    <p class="text-xs text-slate-500 font-bold uppercase mt-2 tracking-wider bg-slate-50 inline-block px-3 py-1 rounded-lg">Kapasite: ${c.capacity}</p>
+                    <div class="absolute top-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onclick='openClassroomModal(${JSON.stringify(c)})' class="text-slate-400 hover:text-orange-500"><i class="fas fa-pen"></i></button>
+                        <button onclick="deleteData('classroom', ${c.id})" class="text-slate-400 hover:text-red-500"><i class="fas fa-trash"></i></button>
                     </div>
                 </div>
             `).join('');
@@ -686,7 +912,7 @@
 
         function openClassroomModal(data = null) {
             document.getElementById('classroomEditId').value = data?.id || '';
-            document.getElementById('classroomModalTitle').innerText = data ? 'Dersliği Düzenle' : 'Derslik Ekle';
+            document.getElementById('classroomModalTitle').innerText = data ? 'Dersliği Düzenle' : 'Yeni Derslik';
             document.getElementById('crNumber').value = data?.roomNumber || '';
             document.getElementById('crCapacity').value = data?.capacity || '';
             openModal('classroomModal');
@@ -703,12 +929,19 @@
         async function loadSemesters() {
             const data = await apiRequest('/semester/all');
             document.getElementById('semesterList').innerHTML = (data || []).map(s => `
-                <div class="bg-white p-6 rounded-3xl border flex justify-between items-center shadow-sm">
-                    <span class="font-black italic">${s.term}</span>
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex justify-between items-center group">
                     <div class="flex items-center gap-4">
-                        <span class="${s.isActive ? 'text-green-500 bg-green-50' : 'text-slate-400 bg-slate-50'} px-3 py-1 rounded-full text-[10px] font-black uppercase">${s.isActive ? 'Aktif' : 'Pasif'}</span>
-                        <button onclick='openSemesterModal(${JSON.stringify(s)})' class="text-blue-400"><i class="fas fa-edit"></i></button>
-                        <button onclick="deleteData('semester', ${s.id})" class="text-red-400"><i class="fas fa-trash-alt"></i></button>
+                        <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center text-xl"><i class="fas fa-calendar-check"></i></div>
+                        <div>
+                            <h4 class="font-black italic text-xl text-slate-800">${s.term}</h4>
+                            <span class="${s.isActive ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : 'text-slate-500 bg-slate-100 border-slate-200'} border px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider mt-1 inline-block">
+                                ${s.isActive ? '<i class="fas fa-circle text-[8px] mr-1"></i> Aktif' : 'Pasif'}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onclick='openSemesterModal(${JSON.stringify(s)})' class="w-8 h-8 rounded-lg bg-slate-50 text-slate-500 hover:text-purple-600 hover:bg-purple-50 transition-colors"><i class="fas fa-pen text-sm"></i></button>
+                        <button onclick="deleteData('semester', ${s.id})" class="w-8 h-8 rounded-lg bg-slate-50 text-slate-500 hover:text-red-500 hover:bg-red-50 transition-colors"><i class="fas fa-trash text-sm"></i></button>
                     </div>
                 </div>
             `).join('');
@@ -716,7 +949,7 @@
 
         function openSemesterModal(data = null) {
             document.getElementById('semesterEditId').value = data?.id || '';
-            document.getElementById('semesterModalTitle').innerText = data ? 'Dönemi Düzenle' : 'Dönem Ekle';
+            document.getElementById('semesterModalTitle').innerText = data ? 'Dönemi Düzenle' : 'Yeni Dönem';
             document.getElementById('semTerm').value = data?.term || '';
             document.getElementById('semActive').checked = data?.isActive || false;
             openModal('semesterModal');
@@ -733,11 +966,28 @@
         async function loadSections() {
             const data = await apiRequest('/coursesection/all');
             document.getElementById('sectionsTableBody').innerHTML = (data || []).map(s => `
-                <tr class="hover:bg-slate-50 border-b">
-                    <td class="px-8 py-5 text-blue-600 uppercase font-black italic">${s.course?.name || '---'}</td>
-                    <td class="px-8 py-5">${s.teacher?.firstName} ${s.teacher?.lastName}</td>
-                    <td class="px-8 py-5 text-slate-400 text-xs">Sınıf: ${s.classroom?.roomNumber} | ${s.semester?.term}</td>
-                    <td class="px-8 py-5 text-center"><button onclick="deleteData('coursesection', ${s.id})" class="text-red-400"><i class="fas fa-trash"></i></button></td>
+                <tr class="hover:bg-blue-50/50 border-b border-slate-100 transition-colors group">
+                    <td class="px-6 py-4">
+                        <div class="flex flex-col">
+                            <span class="text-blue-600 font-black italic text-lg">${s.course?.code || '-'}</span>
+                            <span class="text-slate-600 font-bold text-sm">${s.course?.name || '---'}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-chalkboard-teacher text-slate-300"></i>
+                            <span class="font-bold text-slate-700">${s.teacher?.firstName} ${s.teacher?.lastName}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex gap-2">
+                            <span class="bg-orange-50 text-orange-600 border border-orange-100 px-2 py-1 rounded text-xs font-bold"><i class="fas fa-door-open mr-1"></i>${s.classroom?.roomNumber}</span>
+                            <span class="bg-purple-50 text-purple-600 border border-purple-100 px-2 py-1 rounded text-xs font-bold"><i class="fas fa-calendar mr-1"></i>${s.semester?.term}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <button onclick="deleteData('coursesection', ${s.id})" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-colors opacity-0 group-hover:opacity-100"><i class="fas fa-trash text-sm"></i></button>
+                    </td>
                 </tr>
             `).join('');
         }
@@ -745,36 +995,63 @@
         async function loadEnrollments() {
             const data = await apiRequest('/enrollment/all');
             document.getElementById('enrollmentsTableBody').innerHTML = (data || []).map(e => `
-                <tr class="hover:bg-slate-50 border-b">
-                    <td class="px-8 py-5 text-blue-600 italic font-black">${e.student?.studentNumber}</td>
-                    <td class="px-8 py-5">${e.student?.firstName} ${e.student?.lastName}</td>
-                    <td class="px-8 py-5 text-slate-400 text-sm font-bold uppercase">${e.courseSection?.course?.name}</td>
-                    <td class="px-8 py-5 text-center"><button onclick="deleteData('enrollment', ${e.id})" class="text-red-400"><i class="fas fa-trash-alt"></i></button></td>
+                <tr class="hover:bg-indigo-50/50 border-b border-slate-100 transition-colors group">
+                    <td class="px-6 py-4">
+                        <span class="bg-slate-100 text-slate-700 font-black italic px-3 py-1 rounded-lg">${e.student?.studentNumber}</span>
+                    </td>
+                    <td class="px-6 py-4 font-bold text-slate-800">
+                        ${e.student?.firstName} ${e.student?.lastName}
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex flex-col">
+                            <span class="text-indigo-600 font-black italic">${e.courseSection?.course?.code}</span>
+                            <span class="text-slate-500 text-xs font-bold">${e.courseSection?.course?.name}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <button onclick="deleteData('enrollment', ${e.id})" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-colors opacity-0 group-hover:opacity-100" title="Kaydı Sil"><i class="fas fa-user-minus text-sm"></i></button>
+                    </td>
                 </tr>
             `).join('');
         }
 
         async function openSectionModal() {
             const [c, t, cl, s] = await Promise.all([apiRequest('/course/all'), apiRequest('/teacher/all'), apiRequest('/classroom/all'), apiRequest('/semester/all')]);
-            document.getElementById('secCourse').innerHTML = (c || []).map(x => `<option value="${x.id}">${x.code} - ${x.name}</option>`).join('');
-            document.getElementById('secTeacher').innerHTML = (t || []).map(x => `<option value="${x.id}">${x.firstName} ${x.lastName}</option>`).join('');
-            document.getElementById('secClassroom').innerHTML = (cl || []).map(x => `<option value="${x.id}">${x.roomNumber}</option>`).join('');
-            document.getElementById('secSemester').innerHTML = (s || []).map(x => `<option value="${x.id}">${x.term}</option>`).join('');
+            document.getElementById('secCourse').innerHTML = '<option value="">Ders Seçin</option>' + (c || []).map(x => `<option value="${x.id}">${x.code} - ${x.name}</option>`).join('');
+            document.getElementById('secTeacher').innerHTML = '<option value="">Öğretmen Seçin</option>' + (t || []).map(x => `<option value="${x.id}">${x.firstName} ${x.lastName}</option>`).join('');
+            document.getElementById('secClassroom').innerHTML = '<option value="">Derslik</option>' + (cl || []).map(x => `<option value="${x.id}">${x.roomNumber}</option>`).join('');
+            document.getElementById('secSemester').innerHTML = '<option value="">Dönem</option>' + (s || []).map(x => `<option value="${x.id}">${x.term}</option>`).join('');
             openModal('sectionModal');
         }
 
         async function openEnrollmentModal() {
             const [st, se] = await Promise.all([apiRequest('/student/getAll'), apiRequest('/coursesection/all')]);
-            document.getElementById('enrStudent').innerHTML = (st || []).map(x => `<option value="${x.id}">${x.studentNumber} - ${x.firstName} ${x.lastName}</option>`).join('');
-            document.getElementById('enrSection').innerHTML = (se || []).map(x => `<option value="${x.id}">${x.course?.name} (${x.teacher?.lastName})</option>`).join('');
+            document.getElementById('enrStudent').innerHTML = '<option value="">Öğrenci Seçin</option>' + (st || []).map(x => `<option value="${x.id}">${x.studentNumber} - ${x.firstName} ${x.lastName}</option>`).join('');
+            document.getElementById('enrSection').innerHTML = '<option value="">Ders Şubesi Seçin</option>' + (se || []).map(x => `<option value="${x.id}">${x.course?.code} - ${x.course?.name} (${x.teacher?.lastName})</option>`).join('');
             openModal('enrollmentModal');
         }
 
         document.getElementById('sectionForm').onsubmit = async (e) => { e.preventDefault(); const data = { courseId: parseInt(document.getElementById('secCourse').value), teacherId: parseInt(document.getElementById('secTeacher').value), classroomId: parseInt(document.getElementById('secClassroom').value), semesterId: parseInt(document.getElementById('secSemester').value) }; if (await apiRequest('/coursesection/add', 'POST', data)) { closeModal('sectionModal'); loadSections(); } };
         document.getElementById('enrollmentForm').onsubmit = async (e) => { e.preventDefault(); const data = { studentId: parseInt(document.getElementById('enrStudent').value), courseSectionId: parseInt(document.getElementById('enrSection').value) }; if (await apiRequest('/enrollment/enroll', 'POST', data)) { closeModal('enrollmentModal'); loadEnrollments(); } };
 
-        function openModal(id) { document.getElementById(id).classList.replace('hidden', 'flex'); }
-        function closeModal(id) { document.getElementById(id).classList.replace('flex', 'hidden'); }
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                modal.querySelector('div').classList.add('scale-100');
+                modal.querySelector('div').classList.remove('scale-95', 'opacity-0');
+            }, 10);
+        }
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            modal.querySelector('div').classList.remove('scale-100');
+            modal.querySelector('div').classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 200);
+        }
         function logout() { localStorage.clear(); window.location.href = 'index.html'; }
     </script>
 </body>

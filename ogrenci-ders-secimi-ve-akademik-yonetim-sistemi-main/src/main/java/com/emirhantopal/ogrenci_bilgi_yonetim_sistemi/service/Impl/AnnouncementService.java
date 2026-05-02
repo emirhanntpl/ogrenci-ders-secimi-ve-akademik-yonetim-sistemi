@@ -5,7 +5,10 @@ import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoAnnouncementIU;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.exception.BaseException;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.exception.MessageType;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.model.Announcement;
+import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.model.Student;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.repository.AnnouncementRepository;
+import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.repository.StudentRepository;
+import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.service.EmailService;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.service.IAnnouncementService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +26,12 @@ public class AnnouncementService implements IAnnouncementService {
     @Autowired
     private AnnouncementRepository announcementRepository;
 
+    @Autowired
+    private StudentRepository studentRepository;
+
+    @Autowired
+    private EmailService emailService;
+
     @Override
     @Transactional
     public DtoAnnouncement addAnnouncement(DtoAnnouncementIU dtoAnnouncementIU) {
@@ -31,6 +40,29 @@ public class AnnouncementService implements IAnnouncementService {
         announcement.setPublishDate(LocalDateTime.now());
         
         Announcement savedAnnouncement = announcementRepository.save(announcement);
+
+        // Duyuru eklendiğinde tüm öğrencilere e-posta gönder
+        List<Student> students = studentRepository.findAll();
+        
+        new Thread(() -> {
+            for (Student student : students) {
+                if (student.getEmail() != null && !student.getEmail().isEmpty()) {
+                    String studentName = student.getFirstName() + " " + student.getLastName();
+                    try {
+                        emailService.sendAnnouncementEmail(
+                            student.getEmail(), 
+                            studentName, 
+                            savedAnnouncement.getTitle(), 
+                            savedAnnouncement.getContent(),
+                            savedAnnouncement.getAuthor()
+                        );
+                    } catch (Exception e) {
+                        System.err.println("Duyuru e-postası gönderilemedi: " + e.getMessage());
+                    }
+                }
+            }
+        }).start();
+
         return convertToDto(savedAnnouncement);
     }
 

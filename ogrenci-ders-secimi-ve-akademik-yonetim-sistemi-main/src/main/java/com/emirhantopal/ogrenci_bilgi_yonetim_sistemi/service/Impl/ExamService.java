@@ -8,9 +8,13 @@ import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.dto.DtoTeacher;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.exception.BaseException;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.exception.MessageType;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.model.CourseSection;
+import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.model.Enrollment;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.model.Exam;
+import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.model.Student;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.repository.CourseSectionRepository;
+import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.repository.EnrollmentRepository;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.repository.ExamRepository;
+import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.service.EmailService;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.service.IExamService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,11 +33,18 @@ public class ExamService implements IExamService {
 
     private final ExamRepository examRepository;
     private final CourseSectionRepository courseSectionRepository;
+    private final EnrollmentRepository enrollmentRepository;
+    private final EmailService emailService;
 
     @Autowired
-    public ExamService(ExamRepository examRepository, CourseSectionRepository courseSectionRepository) {
+    public ExamService(ExamRepository examRepository, 
+                       CourseSectionRepository courseSectionRepository,
+                       EnrollmentRepository enrollmentRepository,
+                       EmailService emailService) {
         this.examRepository = examRepository;
         this.courseSectionRepository = courseSectionRepository;
+        this.enrollmentRepository = enrollmentRepository;
+        this.emailService = emailService;
     }
 
     private final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
@@ -54,6 +65,32 @@ public class ExamService implements IExamService {
         exam.setCourseSection(courseSection);
 
         Exam savedExam = examRepository.save(exam);
+
+        // Sınav eklendiğinde derse kayıtlı tüm öğrencilere e-posta gönder
+        List<Enrollment> enrollments = enrollmentRepository.findByCourseSection_Id(courseSection.getId());
+        String courseName = courseSection.getCourse() != null ? courseSection.getCourse().getName() : "Ders";
+        
+        new Thread(() -> {
+            for (Enrollment enrollment : enrollments) {
+                Student student = enrollment.getStudent();
+                if (student != null && student.getEmail() != null && !student.getEmail().isEmpty()) {
+                    String studentName = student.getFirstName() + " " + student.getLastName();
+                    try {
+                        emailService.sendExamNotificationEmail(
+                            student.getEmail(), 
+                            studentName, 
+                            courseName, 
+                            savedExam.getExamName(), 
+                            savedExam.getClassroom(), 
+                            savedExam.getExamDate()
+                        );
+                    } catch (Exception e) {
+                        System.err.println("Sınav bildirimi e-postası gönderilemedi: " + e.getMessage());
+                    }
+                }
+            }
+        }).start();
+
         return convertToDto(savedExam);
     }
 

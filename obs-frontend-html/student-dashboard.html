@@ -7,179 +7,239 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .active-menu { background-color: #f97316 !important; color: white !important; box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.3); }
-        .section { display: none; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .active-menu {
+            background: linear-gradient(to right, #f97316, #ea580c) !important;
+            color: white !important;
+            box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.4);
+            transform: translateX(4px);
+        }
+        .menu-btn { transition: all 0.3s ease; }
+        .menu-btn:hover:not(.active-menu) { background-color: rgba(255,255,255,0.05); transform: translateX(4px); }
+        .section { display: none; animation: fadeIn 0.4s ease-out forwards; }
         .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="bg-[#f8fafc] font-sans antialiased overflow-hidden text-slate-900">
-    <div class="flex h-screen">
-        <!-- Sidebar -->
-        <aside class="w-72 bg-[#0f172a] text-white flex flex-col shrink-0 shadow-2xl z-20 overflow-y-auto font-medium text-sm">
-            <div class="p-8 border-b border-slate-800 flex items-center gap-3">
-                <i class="fas fa-user-graduate text-orange-500 text-3xl"></i>
-                <span class="text-2xl font-black tracking-tighter italic text-white">KTÜ BYS</span>
+<body class="bg-slate-50 text-slate-800 h-screen overflow-hidden flex">
+
+    <!-- Sidebar -->
+    <aside class="w-72 bg-[#0f172a] text-slate-300 flex flex-col shrink-0 shadow-2xl z-20 relative">
+        <!-- Dekoratif Arkaplan -->
+        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
+
+        <div class="p-8 border-b border-slate-800/50 flex items-center gap-4 relative z-10">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center shadow-lg shadow-orange-500/30">
+                <i class="fas fa-user-graduate text-white text-xl"></i>
             </div>
-
-            <nav class="flex-1 p-4 space-y-1 mt-4">
-                <button onclick="showSection('dashboard')" id="menu-dashboard" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800 transition-all text-slate-400">
-                    <i class="fas fa-th-large w-5"></i><span>Dashboard</span>
-                </button>
-                <div class="px-4 pt-4 pb-2 text-[10px] font-black uppercase text-slate-500 tracking-widest">Öğrenci İşlemleri</div>
-                <button onclick="showSection('announcements')" id="menu-announcements" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800 transition-all text-slate-400">
-                    <i class="fas fa-bullhorn w-5 text-yellow-400"></i><span>Duyurular</span>
-                </button>
-                <button onclick="showSection('courses')" id="menu-courses" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800 transition-all text-slate-400">
-                    <i class="fas fa-book w-5"></i><span>Derslerim</span>
-                </button>
-                <button onclick="showSection('grades')" id="menu-grades" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800 transition-all text-slate-400">
-                    <i class="fas fa-star w-5 text-yellow-500"></i><span>Notlarım</span>
-                </button>
-                <!-- Yeni Ödevler Sekmesi -->
-                <button onclick="showSection('assignments')" id="menu-assignments" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800 transition-all text-slate-400">
-                    <i class="fas fa-tasks w-5 text-green-500"></i><span>Ödevlerim</span>
-                </button>
-                <button onclick="showSection('profile')" id="menu-profile" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-800 transition-all text-slate-400">
-                    <i class="fas fa-user w-5"></i><span>Profilim</span>
-                </button>
-            </nav>
-
-            <div class="p-6 border-t border-slate-800">
-                <button onclick="logout()" class="flex items-center gap-3 p-3 w-full text-red-400 hover:bg-red-500/10 rounded-2xl transition-all">
-                    <i class="fas fa-power-off"></i><span>Oturumu Kapat</span>
-                </button>
+            <div>
+                <span class="text-2xl font-black tracking-tighter italic text-white block">KTÜ BYS</span>
+                <span class="text-[10px] uppercase tracking-widest font-bold text-orange-400">Öğrenci Portalı</span>
             </div>
-        </aside>
+        </div>
 
-        <!-- Main Content -->
-        <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
-            <header class="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-10 shrink-0 z-10">
-                <div class="flex items-center gap-4 flex-1">
-                    <h2 id="pageTitle" class="text-xl font-black text-slate-800 uppercase tracking-widest italic">Dashboard</h2>
-                </div>
-                <div class="flex items-center gap-4">
+        <nav class="flex-1 p-4 space-y-1 mt-4 overflow-y-auto relative z-10">
+            <button onclick="showSection('dashboard')" id="menu-dashboard" class="menu-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">
+                <i class="fas fa-th-large w-5"></i><span>Dashboard</span>
+            </button>
+
+            <div class="px-4 pt-6 pb-2 text-[10px] font-black uppercase text-slate-500 tracking-widest">Öğrenci İşlemleri</div>
+            <button onclick="showSection('announcements')" id="menu-announcements" class="menu-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">
+                <i class="fas fa-bullhorn w-5 text-yellow-500"></i><span>Duyurular</span>
+            </button>
+            <button onclick="showSection('courses')" id="menu-courses" class="menu-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">
+                <i class="fas fa-book w-5 text-blue-400"></i><span>Derslerim</span>
+            </button>
+            <button onclick="showSection('assignments')" id="menu-assignments" class="menu-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">
+                <i class="fas fa-tasks w-5 text-emerald-400"></i><span>Ödevlerim</span>
+            </button>
+            <button onclick="showSection('grades')" id="menu-grades" class="menu-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">
+                <i class="fas fa-star w-5 text-amber-400"></i><span>Notlarım</span>
+            </button>
+
+            <div class="px-4 pt-6 pb-2 text-[10px] font-black uppercase text-slate-500 tracking-widest">Kişisel</div>
+            <button onclick="showSection('profile')" id="menu-profile" class="menu-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">
+                <i class="fas fa-user-cog w-5 text-purple-400"></i><span>Profilim</span>
+            </button>
+        </nav>
+
+        <div class="p-6 border-t border-slate-800/50 relative z-10">
+            <button onclick="logout()" class="flex items-center justify-center gap-2 p-3 w-full text-red-400 font-bold hover:bg-red-500/10 hover:text-red-300 rounded-xl transition-all border border-transparent hover:border-red-500/20">
+                <i class="fas fa-sign-out-alt"></i><span>Oturumu Kapat</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col min-w-0 bg-slate-50">
+        <!-- Header -->
+        <header class="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-10 shrink-0 z-10 sticky top-0">
+            <div class="flex items-center gap-4 flex-1">
+                <h2 id="pageTitle" class="text-2xl font-black text-slate-800 uppercase tracking-wider italic">Dashboard</h2>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="text-right">
                     <p id="userNameDisplay" class="text-sm font-black text-slate-900 leading-tight">Yükleniyor...</p>
-                    <div class="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center text-white font-black shadow-lg"><i class="fas fa-user"></i></div>
+                    <p class="text-[10px] uppercase font-bold text-slate-400">Öğrenci</p>
                 </div>
-            </header>
+                <div class="w-11 h-11 rounded-full bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white font-black shadow-lg shadow-orange-500/30 border-2 border-white">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        </header>
 
-            <main class="flex-1 overflow-y-auto p-10">
-                <!-- SECTION: DASHBOARD -->
-                <div id="section-dashboard" class="section active">
-                    <div class="bg-gradient-to-r from-orange-500 to-red-600 p-10 rounded-[3rem] text-white shadow-2xl relative overflow-hidden mb-10">
-                        <div class="relative z-10">
-                            <h1 class="text-4xl font-black italic">Hoşgeldin, <span id="welcomeName">Öğrenci</span>!</h1>
-                            <p class="mt-4 text-orange-100 text-lg">Güncel durumunu ve derslerini buradan takip edebilirsin.</p>
-                        </div>
+        <main class="flex-1 overflow-y-auto p-8 lg:p-10">
+            <!-- SECTION: DASHBOARD -->
+            <div id="section-dashboard" class="section active">
+                <div class="bg-gradient-to-r from-orange-500 via-rose-500 to-red-600 p-10 rounded-[2rem] text-white shadow-2xl shadow-orange-500/20 relative overflow-hidden mb-10">
+                    <div class="absolute top-0 right-0 opacity-10 transform translate-x-1/4 -translate-y-1/4">
+                        <i class="fas fa-graduation-cap text-[20rem]"></i>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-white p-6 rounded-3xl shadow-xl border border-slate-100 flex items-center gap-6">
-                            <div class="w-16 h-16 rounded-full bg-orange-100 text-orange-500 flex items-center justify-center text-2xl"><i class="fas fa-book-open"></i></div>
-                            <div><p class="text-slate-400 text-xs font-black uppercase">Kayıtlı Ders Sayısı</p><h3 id="stat-courses" class="text-3xl font-black mt-1">0</h3></div>
-                        </div>
-                        <div class="bg-white p-6 rounded-3xl shadow-xl border border-slate-100 flex items-center gap-6">
-                            <div class="w-16 h-16 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center text-2xl"><i class="fas fa-bullhorn"></i></div>
-                            <div><p class="text-slate-400 text-xs font-black uppercase">Toplam Duyuru</p><h3 id="stat-announcements" class="text-3xl font-black mt-1">0</h3></div>
-                        </div>
+                    <div class="relative z-10">
+                        <span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full mb-4 inline-block backdrop-blur-sm">Öğrenci Paneli</span>
+                        <h1 class="text-4xl lg:text-5xl font-black italic tracking-tight">Hoşgeldin, <span id="welcomeName">Öğrenci</span>!</h1>
+                        <p class="mt-4 text-orange-100 text-lg max-w-2xl">Derslerini takip edebilir, ödevlerini görebilir ve akademik başarı durumunu buradan inceleyebilirsin.</p>
                     </div>
                 </div>
 
-                <!-- SECTION: ANNOUNCEMENTS -->
-                <div id="section-announcements" class="section">
-                    <h1 class="text-3xl font-black italic mb-8">Duyurular</h1>
-                    <div id="announcementList" class="grid grid-cols-1 gap-6"></div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow flex items-center justify-between">
+                        <div>
+                            <p class="text-slate-400 text-xs font-black uppercase tracking-wider">Kayıtlı Ders Sayısı</p>
+                            <h3 id="stat-courses" class="text-4xl font-black mt-2 text-slate-800">0</h3>
+                        </div>
+                        <div class="w-16 h-16 rounded-2xl bg-blue-50 text-blue-500 flex items-center justify-center text-2xl"><i class="fas fa-book-open"></i></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow flex items-center justify-between">
+                        <div>
+                            <p class="text-slate-400 text-xs font-black uppercase tracking-wider">Toplam Duyuru</p>
+                            <h3 id="stat-announcements" class="text-4xl font-black mt-2 text-slate-800">0</h3>
+                        </div>
+                        <div class="w-16 h-16 rounded-2xl bg-yellow-50 text-yellow-500 flex items-center justify-center text-2xl"><i class="fas fa-bullhorn"></i></div>
+                    </div>
                 </div>
+            </div>
 
-                <!-- SECTION: COURSES -->
-                <div id="section-courses" class="section">
-                    <h1 class="text-3xl font-black italic mb-8">Kayıtlı Olduğum Dersler</h1>
-                    <div class="bg-white rounded-[2rem] shadow-xl overflow-hidden border border-slate-200">
-                        <table class="w-full text-left font-bold text-slate-700">
-                            <thead class="bg-slate-50 text-slate-400 text-[10px] uppercase font-black tracking-widest border-b">
-                                <tr><th class="px-8 py-5">Ders Kodu</th><th class="px-8 py-5">Ders Adı</th><th class="px-8 py-5">Öğretmen</th><th class="px-8 py-5">Kredi / AKTS</th></tr>
+            <!-- SECTION: ANNOUNCEMENTS -->
+            <div id="section-announcements" class="section">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-3xl font-black italic text-slate-800">Duyurular</h1>
+                </div>
+                <div id="announcementList" class="grid grid-cols-1 lg:grid-cols-2 gap-6"></div>
+            </div>
+
+            <!-- SECTION: COURSES -->
+            <div id="section-courses" class="section">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-3xl font-black italic text-slate-800">Kayıtlı Olduğum Dersler</h1>
+                </div>
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-slate-50 text-slate-500 text-[10px] uppercase font-black tracking-wider border-b border-slate-200">
+                                <tr><th class="px-6 py-4">Ders Kodu</th><th class="px-6 py-4">Ders Adı</th><th class="px-6 py-4">Öğretmen</th><th class="px-6 py-4">Kredi / AKTS</th></tr>
                             </thead>
-                            <tbody id="myCoursesTableBody" class="divide-y font-medium text-slate-600"></tbody>
+                            <tbody id="myCoursesTableBody" class="divide-y divide-slate-100 text-sm font-medium text-slate-700"></tbody>
                         </table>
                     </div>
                 </div>
+            </div>
 
-                <!-- SECTION: GRADES -->
-                <div id="section-grades" class="section">
-                    <h1 class="text-3xl font-black italic mb-8">Notlarım</h1>
-                    <div class="bg-white rounded-[2rem] shadow-xl overflow-hidden border border-slate-200">
-                        <table class="w-full text-left font-bold text-slate-700">
-                            <thead class="bg-slate-50 text-slate-400 text-[10px] uppercase font-black tracking-widest border-b">
+            <!-- SECTION: GRADES -->
+            <div id="section-grades" class="section">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-3xl font-black italic text-slate-800">Notlarım</h1>
+                </div>
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-slate-50 text-slate-500 text-[10px] uppercase font-black tracking-wider border-b border-slate-200">
                                 <tr>
-                                    <th class="px-8 py-5">Ders Kodu</th>
-                                    <th class="px-8 py-5">Ders Adı</th>
-                                    <th class="px-8 py-5 text-center">Vize</th>
-                                    <th class="px-8 py-5 text-center">Final</th>
-                                    <th class="px-8 py-5 text-center">Ortalama</th>
-                                    <th class="px-8 py-5 text-center">Harf Notu</th>
-                                    <th class="px-8 py-5 text-center">Durum</th>
+                                    <th class="px-6 py-4">Ders Kodu</th>
+                                    <th class="px-6 py-4">Ders Adı</th>
+                                    <th class="px-6 py-4 text-center">Vize</th>
+                                    <th class="px-6 py-4 text-center">Final</th>
+                                    <th class="px-6 py-4 text-center">Ortalama</th>
+                                    <th class="px-6 py-4 text-center">Harf Notu</th>
+                                    <th class="px-6 py-4 text-center">Durum</th>
                                 </tr>
                             </thead>
-                            <tbody id="gradesTableBody" class="divide-y font-medium text-slate-600">
+                            <tbody id="gradesTableBody" class="divide-y divide-slate-100 text-sm font-medium text-slate-700">
                                 <!-- Notlar buraya yüklenecek -->
                             </tbody>
                         </table>
                     </div>
                 </div>
+            </div>
 
-                <!-- SECTION: ASSIGNMENTS -->
-                <div id="section-assignments" class="section">
-                    <h1 class="text-3xl font-black italic mb-8">Ödevlerim</h1>
-                    <div id="assignmentList" class="grid grid-cols-1 gap-6">
-                        <!-- Ödevler buraya yüklenecek -->
+            <!-- SECTION: ASSIGNMENTS -->
+            <div id="section-assignments" class="section">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-3xl font-black italic text-slate-800">Ödevlerim</h1>
+                </div>
+                <div id="assignmentList" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Ödevler buraya yüklenecek -->
+                </div>
+            </div>
+
+            <!-- SECTION: PROFILE -->
+            <div id="section-profile" class="section">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-3xl font-black italic text-slate-800">Profilim</h1>
+                    <button onclick="openProfileModal()" class="bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2">
+                        <i class="fas fa-user-edit"></i> Bilgileri Güncelle
+                    </button>
+                </div>
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 max-w-2xl relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-48 h-48 bg-orange-50 rounded-bl-full -mr-8 -mt-8 z-0"></div>
+                    <div class="flex items-center gap-6 mb-8 border-b border-slate-100 pb-8 relative z-10">
+                        <div class="w-28 h-28 rounded-full bg-gradient-to-br from-orange-400 to-red-500 text-white text-5xl flex items-center justify-center font-black shadow-xl shadow-orange-500/30 border-4 border-white"><i class="fas fa-user"></i></div>
+                        <div>
+                            <h2 id="profName" class="text-3xl font-black italic text-slate-800">...</h2>
+                            <p id="profDept" class="text-orange-600 font-bold mt-1 bg-orange-50 px-3 py-1 rounded-lg inline-block uppercase text-xs tracking-wider">...</p>
+                        </div>
+                    </div>
+                    <div class="space-y-6 font-bold text-slate-600 relative z-10">
+                        <div class="flex justify-between items-center p-4 bg-slate-50 rounded-xl border border-slate-100"><span class="text-slate-400 uppercase text-[10px] tracking-wider">Öğrenci Numarası</span><span id="profNo" class="text-slate-800 text-lg font-black italic">...</span></div>
+                        <div class="flex justify-between items-center p-4 bg-slate-50 rounded-xl border border-slate-100"><span class="text-slate-400 uppercase text-[10px] tracking-wider">E-Posta</span><span id="profEmail" class="text-slate-800">...</span></div>
+                        <div class="flex justify-between items-center p-4 bg-slate-50 rounded-xl border border-slate-100"><span class="text-slate-400 uppercase text-[10px] tracking-wider">Telefon</span><span id="profTel" class="text-slate-800">...</span></div>
                     </div>
                 </div>
+            </div>
 
-                <!-- SECTION: PROFILE -->
-                <div id="section-profile" class="section">
-                    <div class="flex justify-between items-center mb-8">
-                        <h1 class="text-3xl font-black italic">Profilim</h1>
-                        <button onclick="openProfileModal()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-2xl font-bold shadow-xl transition-all">Bilgilerimi Güncelle</button>
-                    </div>
-                    <div class="bg-white rounded-[2rem] shadow-xl border border-slate-200 p-10 max-w-2xl">
-                        <div class="flex items-center gap-6 mb-8 border-b pb-8">
-                            <div class="w-24 h-24 rounded-full bg-orange-100 text-orange-500 text-4xl flex items-center justify-center font-black"><i class="fas fa-user"></i></div>
-                            <div>
-                                <h2 id="profName" class="text-2xl font-black italic">...</h2>
-                                <p id="profDept" class="text-slate-500 font-bold mt-1">...</p>
-                            </div>
-                        </div>
-                        <div class="space-y-4 font-bold text-slate-600">
-                            <div class="flex justify-between items-center"><span class="text-slate-400">Öğrenci Numarası</span><span id="profNo" class="text-slate-900 bg-slate-100 px-3 py-1 rounded-lg">...</span></div>
-                            <div class="flex justify-between items-center"><span class="text-slate-400">E-Posta</span><span id="profEmail" class="text-slate-900">...</span></div>
-                            <div class="flex justify-between items-center"><span class="text-slate-400">Telefon</span><span id="profTel" class="text-slate-900">...</span></div>
-                        </div>
-                    </div>
-                </div>
-
-            </main>
-        </div>
+        </main>
     </div>
 
     <!-- PROFILE UPDATE MODAL -->
-    <div id="profileModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-[2.5rem] max-w-md w-full p-10 font-bold shadow-2xl">
-            <h3 class="text-2xl font-black mb-6 italic text-orange-500">Profili Güncelle</h3>
-            <form id="profileForm" class="space-y-4">
+    <div id="profileModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl transform transition-transform scale-100">
+            <h3 class="text-2xl font-black mb-6 italic text-slate-800">Profili Güncelle</h3>
+            <form id="profileForm" class="space-y-5">
                 <div>
-                    <label class="block text-xs uppercase text-slate-400 mb-1">E-Posta Adresi</label>
-                    <input type="email" id="updEmail" placeholder="ornek@ogrenci.ktu.edu.tr" required class="p-4 border w-full rounded-2xl outline-none focus:ring-4 focus:ring-orange-500/10">
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">E-Posta Adresi</label>
+                    <input type="email" id="updEmail" placeholder="ornek@ogrenci.ktu.edu.tr" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none font-medium">
                 </div>
                 <div>
-                    <label class="block text-xs uppercase text-slate-400 mb-1">Telefon Numarası</label>
-                    <input type="text" id="updTel" placeholder="05XX XXX XX XX" required class="p-4 border w-full rounded-2xl outline-none focus:ring-4 focus:ring-orange-500/10">
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Telefon Numarası</label>
+                    <input type="text" id="updTel" placeholder="05XX XXX XX XX" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none font-medium">
                 </div>
-                <div class="border-t pt-4 mt-2">
-                    <label class="block text-xs uppercase text-slate-400 mb-1">Yeni Şifre (Değiştirmek istemiyorsanız boş bırakın)</label>
-                    <input type="password" id="updPassword" placeholder="Yeni şifreniz" class="p-4 border w-full rounded-2xl outline-none focus:ring-4 focus:ring-orange-500/10">
+                <div class="pt-4 border-t border-slate-100">
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Yeni Şifre</label>
+                    <p class="text-[10px] text-slate-400 mb-2">Değiştirmek istemiyorsanız boş bırakın</p>
+                    <input type="password" id="updPassword" placeholder="••••••••" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none font-medium">
                 </div>
-                <button type="submit" class="w-full bg-orange-500 text-white py-4 rounded-2xl italic font-black uppercase shadow-xl mt-4 hover:bg-orange-600 transition-all">Değişiklikleri Kaydet</button>
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeModal('profileModal')" class="flex-1 bg-slate-100 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-200 transition-colors">İptal</button>
+                    <button type="submit" class="flex-1 bg-purple-500 text-white font-bold py-4 rounded-xl hover:bg-purple-600 shadow-lg shadow-purple-500/30 transition-all">Değişiklikleri Kaydet</button>
+                </div>
             </form>
-            <button onclick="closeModal('profileModal')" class="mt-4 text-slate-400 font-bold w-full text-center hover:text-slate-600">İptal</button>
         </div>
     </div>
 
@@ -244,13 +304,22 @@
             document.getElementById('section-' + id).classList.add('active');
             document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active-menu'));
             document.getElementById('menu-' + id).classList.add('active-menu');
-            document.getElementById('pageTitle').innerText = id.toUpperCase();
+
+            const titles = {
+                'dashboard': 'Sistem Özeti',
+                'announcements': 'Duyurular',
+                'courses': 'Kayıtlı Derslerim',
+                'grades': 'Not Görüntüleme',
+                'assignments': 'Ödevlerim',
+                'profile': 'Kişisel Bilgiler'
+            };
+            document.getElementById('pageTitle').innerText = titles[id] || id.toUpperCase();
 
             if (id === 'dashboard') loadDashboard();
             if (id === 'announcements') loadAnnouncements();
             if (id === 'courses') loadCourses();
             if (id === 'grades') loadGrades();
-            if (id === 'assignments') loadAssignments(); // Yeni eklendi
+            if (id === 'assignments') loadAssignments();
         }
 
         async function loadDashboard() {
@@ -270,12 +339,18 @@
             try {
                 const anns = await apiRequest('/announcement/all');
                 document.getElementById('announcementList').innerHTML = (anns || []).map(a => `
-                    <div class="bg-white p-8 rounded-[2rem] shadow-xl border">
-                        <h3 class="text-xl font-black italic text-orange-600">${a.title}</h3>
-                        <p class="text-xs text-slate-400 mt-1">${new Date(a.publishDate).toLocaleString()} - ${a.author || 'Anonim'}</p>
-                        <p class="text-slate-600 font-medium whitespace-pre-wrap mt-4">${a.content}</p>
+                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+                        <div class="mb-4">
+                            <h3 class="text-xl font-black italic text-orange-600">${a.title}</h3>
+                            <p class="text-xs font-bold text-slate-400 mt-1"><i class="far fa-clock mr-1"></i>${new Date(a.publishDate).toLocaleString()}</p>
+                        </div>
+                        <p class="text-slate-600 font-medium whitespace-pre-wrap leading-relaxed">${a.content}</p>
+                        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center text-xs font-black shadow-inner border border-white">${a.author ? a.author[0].toUpperCase() : '?'}</div>
+                            <span class="text-xs font-black uppercase text-slate-500">${a.author || 'Anonim'}</span>
+                        </div>
                     </div>
-                `).join('') || '<p class="text-slate-500 font-bold p-6">Hiç duyuru bulunmuyor.</p>';
+                `).join('') || '<div class="col-span-full p-8 text-center text-slate-500 font-bold bg-white rounded-3xl border border-dashed border-slate-200"><i class="fas fa-bell-slash text-3xl mb-3 text-slate-300 block"></i>Hiç duyuru bulunmuyor.</div>';
             } catch(e) { console.error("Duyurular yüklenemedi", e); }
         }
 
@@ -286,32 +361,43 @@
                 const myEnrollments = (enrollments || []).filter(e => e.student?.id === studentData.id);
 
                 document.getElementById('myCoursesTableBody').innerHTML = myEnrollments.map(e => `
-                    <tr class="hover:bg-slate-50 border-b">
-                        <td class="px-8 py-5 text-orange-600 italic font-black">${e.courseSection?.course?.code || '-'}</td>
-                        <td class="px-8 py-5 font-bold">${e.courseSection?.course?.name || '-'}</td>
-                        <td class="px-8 py-5">${e.courseSection?.teacher?.firstName} ${e.courseSection?.teacher?.lastName}</td>
-                        <td class="px-8 py-5 text-slate-500">${e.courseSection?.course?.credit || '-'} / ${e.courseSection?.course?.akts || '-'}</td>
+                    <tr class="hover:bg-slate-50 border-b border-slate-100 transition-colors">
+                        <td class="px-6 py-4">
+                            <span class="text-xs font-black text-blue-600 bg-blue-50 border border-blue-100 px-3 py-1 rounded-lg uppercase tracking-wider">${e.courseSection?.course?.code || '-'}</span>
+                        </td>
+                        <td class="px-6 py-4 font-bold text-slate-800">${e.courseSection?.course?.name || '-'}</td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-2 text-slate-600">
+                                <i class="fas fa-chalkboard-teacher text-slate-400"></i>
+                                <span>${e.courseSection?.teacher?.firstName} ${e.courseSection?.teacher?.lastName}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex gap-2">
+                                <span class="bg-slate-100 text-slate-500 px-2 py-1 rounded text-xs font-bold border border-slate-200">Krd: ${e.courseSection?.course?.credit || '-'}</span>
+                                <span class="bg-slate-100 text-slate-500 px-2 py-1 rounded text-xs font-bold border border-slate-200">AKTS: ${e.courseSection?.course?.akts || '-'}</span>
+                            </div>
+                        </td>
                     </tr>
-                `).join('') || '<tr><td colspan="4" class="px-8 py-5 text-center text-slate-500">Kayıtlı olduğunuz ders bulunmuyor.</td></tr>';
+                `).join('') || '<tr><td colspan="4" class="px-6 py-12 text-center text-slate-500 font-bold bg-slate-50">Kayıtlı olduğunuz ders bulunmuyor.</td></tr>';
             } catch(e) { console.error("Dersler yüklenemedi", e); }
         }
 
         async function loadGrades() {
             if (!studentData) {
-                document.getElementById('gradesTableBody').innerHTML = '<tr><td colspan="7" class="px-8 py-5 text-center text-slate-500">Öğrenci bilgileri yüklenemedi.</td></tr>';
+                document.getElementById('gradesTableBody').innerHTML = '<tr><td colspan="7" class="px-6 py-12 text-center text-slate-500">Öğrenci bilgileri yüklenemedi.</td></tr>';
                 return;
             }
 
             const gradesTableBody = document.getElementById('gradesTableBody');
-            gradesTableBody.innerHTML = ''; // Tabloyu temizle
+            gradesTableBody.innerHTML = '';
 
             try {
-                // Öğrencinin kayıtlı olduğu tüm dersleri çek
                 const enrollments = await apiRequest('/enrollment/all');
                 const myEnrollments = (enrollments || []).filter(e => e.student?.id === studentData.id);
 
                 if (myEnrollments.length === 0) {
-                    gradesTableBody.innerHTML = '<tr><td colspan="7" class="px-8 py-5 text-center text-slate-500">Kayıtlı olduğunuz ders bulunmuyor.</td></tr>';
+                    gradesTableBody.innerHTML = '<tr><td colspan="7" class="px-6 py-12 text-center text-slate-500 font-bold bg-slate-50">Kayıtlı olduğunuz ders bulunmuyor.</td></tr>';
                     return;
                 }
 
@@ -324,7 +410,6 @@
                     try {
                         const grades = await apiRequest(`/grade/course-section/${courseSectionId}/student/${studentId}`);
 
-                        // Her ders için sadece ilk not kaydını alıyoruz (varsayım: her öğrencinin bir ders için tek bir not kaydı var)
                         const grade = grades && grades.length > 0 ? grades[0] : null;
 
                         const courseCode = enrollment.courseSection?.course?.code || '-';
@@ -335,41 +420,44 @@
                         const letterGrade = grade?.letterGrade || '-';
                         const passStatus = grade?.passStatus || '-';
 
+                        const passClass = passStatus === 'GEÇTİ' ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : (passStatus === 'KALDI' ? 'text-red-600 bg-red-50 border-red-100' : 'text-slate-500 bg-slate-50 border-slate-200');
+
                         gradesTableBody.innerHTML += `
-                            <tr class="hover:bg-slate-50 border-b">
-                                <td class="px-8 py-5 text-orange-600 italic font-black">${courseCode}</td>
-                                <td class="px-8 py-5 font-bold">${courseName}</td>
-                                <td class="px-8 py-5 text-center font-mono">${midterm}</td>
-                                <td class="px-8 py-5 text-center font-mono">${final}</td>
-                                <td class="px-8 py-5 text-center font-black ${average >= 50 ? 'text-blue-600' : (average !== '-' ? 'text-red-500' : '')}">${average}</td>
-                                <td class="px-8 py-5 text-center font-black">${letterGrade}</td>
-                                <td class="px-8 py-5 text-center font-black ${passStatus === 'GEÇTİ' ? 'text-green-600' : (passStatus === 'KALDI' ? 'text-red-600' : '')}">${passStatus}</td>
+                            <tr class="hover:bg-slate-50 border-b border-slate-100 transition-colors">
+                                <td class="px-6 py-4">
+                                    <span class="text-xs font-black text-amber-600 bg-amber-50 border border-amber-100 px-3 py-1 rounded-lg uppercase tracking-wider">${courseCode}</span>
+                                </td>
+                                <td class="px-6 py-4 font-bold text-slate-800">${courseName}</td>
+                                <td class="px-6 py-4 text-center font-mono text-lg text-slate-600">${midterm}</td>
+                                <td class="px-6 py-4 text-center font-mono text-lg text-slate-600">${final}</td>
+                                <td class="px-6 py-4 text-center font-black text-lg ${average >= 50 ? 'text-blue-600' : (average !== '-' ? 'text-red-500' : 'text-slate-400')}">${average}</td>
+                                <td class="px-6 py-4 text-center font-black text-lg text-slate-700">${letterGrade}</td>
+                                <td class="px-6 py-4 text-center">
+                                    <span class="border px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider ${passClass}">${passStatus}</span>
+                                </td>
                             </tr>
                         `;
                     } catch (gradeError) {
-                        console.error(`Ders ${enrollment.courseSection?.course?.name} için notlar çekilemedi:`, gradeError);
                         gradesTableBody.innerHTML += `
-                            <tr class="hover:bg-slate-50 border-b">
-                                <td class="px-8 py-5 text-orange-600 italic font-black">${enrollment.courseSection?.course?.code || '-'}</td>
-                                <td class="px-8 py-5 font-bold">${enrollment.courseSection?.course?.name || '-'}</td>
-                                <td colspan="5" class="px-8 py-5 text-center text-red-500">Notlar yüklenirken hata oluştu.</td>
+                            <tr class="hover:bg-slate-50 border-b border-slate-100">
+                                <td class="px-6 py-4"><span class="text-xs font-black text-slate-500 bg-slate-100 border border-slate-200 px-3 py-1 rounded-lg uppercase">${enrollment.courseSection?.course?.code || '-'}</span></td>
+                                <td class="px-6 py-4 font-bold text-slate-800">${enrollment.courseSection?.course?.name || '-'}</td>
+                                <td colspan="5" class="px-6 py-4 text-center text-slate-400 italic">Not girişi henüz yapılmamış.</td>
                             </tr>
                         `;
                     }
                 }
 
                 if (gradesTableBody.innerHTML === '') {
-                    gradesTableBody.innerHTML = '<tr><td colspan="7" class="px-8 py-5 text-center text-slate-500">Henüz not girişi yapılmamış dersiniz bulunmuyor.</td></tr>';
+                    gradesTableBody.innerHTML = '<tr><td colspan="7" class="px-6 py-12 text-center text-slate-500 font-bold">Henüz not girişi yapılmamış dersiniz bulunmuyor.</td></tr>';
                 }
 
             } catch (e) {
                 console.error("Notlar yüklenirken genel hata", e);
-                gradesTableBody.innerHTML = '<tr><td colspan="7" class="px-8 py-5 text-center text-red-500">Notlar yüklenirken bir hata oluştu.</td></tr>';
+                gradesTableBody.innerHTML = '<tr><td colspan="7" class="px-6 py-12 text-center text-red-500 font-bold bg-red-50">Notlar yüklenirken bir hata oluştu.</td></tr>';
             }
         }
 
-
-        // --- PROFILE UPDATE FUNCTIONS ---
         function openProfileModal() {
             if (!studentData) {
                 alert("Öğrenci bilgileri henüz yüklenmedi!");
@@ -378,11 +466,26 @@
             document.getElementById('updEmail').value = studentData.email || '';
             document.getElementById('updTel').value = studentData.telNumber || '';
             document.getElementById('updPassword').value = '';
-            document.getElementById('profileModal').classList.replace('hidden', 'flex');
+            openModal('profileModal');
         }
 
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.replace('flex', 'hidden');
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                modal.querySelector('div').classList.add('scale-100');
+                modal.querySelector('div').classList.remove('scale-95', 'opacity-0');
+            }, 10);
+        }
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            modal.querySelector('div').classList.remove('scale-100');
+            modal.querySelector('div').classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 200);
         }
 
         document.getElementById('profileForm').addEventListener('submit', async (e) => {
@@ -399,13 +502,11 @@
             };
 
             try {
-                // Backend'deki /student/update-profile/{id} endpoint'ine istek atılıyor
                 const updatedStudent = await apiRequest(`/student/update-profile/${studentData.id}`, 'PUT', payload);
 
                 if (updatedStudent) {
                     alert("Profiliniz başarıyla güncellendi!");
                     closeModal('profileModal');
-                    // Verileri sayfada yeniden yükle
                     await fetchStudentData();
                 }
             } catch (err) {
@@ -420,24 +521,22 @@
 
         async function loadAssignments() {
             if (!studentData) {
-                document.getElementById('assignmentList').innerHTML = '<p class="text-slate-500 font-bold p-6">Öğrenci bilgileri yüklenemedi.</p>';
+                document.getElementById('assignmentList').innerHTML = '<p class="col-span-full text-center text-slate-500 font-bold p-12 bg-slate-50 rounded-3xl">Öğrenci bilgileri yüklenemedi.</p>';
                 return;
             }
 
             const assignmentListDiv = document.getElementById('assignmentList');
-            assignmentListDiv.innerHTML = ''; // Ödev listesini temizle
+            assignmentListDiv.innerHTML = '';
 
             try {
-                // Öğrencinin kayıtlı olduğu tüm dersleri çek
                 const enrollments = await apiRequest('/enrollment/all');
                 const myEnrollments = (enrollments || []).filter(e => e.student?.id === studentData.id);
 
                 if (myEnrollments.length === 0) {
-                    assignmentListDiv.innerHTML = '<p class="text-slate-500 font-bold p-6">Kayıtlı olduğunuz ders bulunmuyor, bu nedenle ödevler gösterilemiyor.</p>';
+                    assignmentListDiv.innerHTML = '<p class="col-span-full text-center text-slate-500 font-bold p-12 bg-slate-50 rounded-3xl">Kayıtlı olduğunuz ders bulunmuyor, bu nedenle ödevler gösterilemiyor.</p>';
                     return;
                 }
 
-                // Tüm ödevleri çek
                 const allAssignments = await apiRequest('/assignment/all');
                 const studentAssignments = [];
 
@@ -450,24 +549,32 @@
                 }
 
                 if (studentAssignments.length === 0) {
-                    assignmentListDiv.innerHTML = '<p class="text-slate-500 font-bold p-6">Henüz size atanmış bir ödev bulunmamaktadır.</p>';
+                    assignmentListDiv.innerHTML = '<div class="col-span-full p-12 text-center text-slate-500 font-bold bg-white rounded-3xl border border-dashed border-slate-200"><i class="fas fa-check-circle text-4xl mb-4 text-emerald-400 block"></i>Şu an için beklemede olan bir ödeviniz yok. Harika!</div>';
                     return;
                 }
 
                 assignmentListDiv.innerHTML = studentAssignments.map(a => `
-                    <div class="bg-white p-8 rounded-[2rem] shadow-xl border border-slate-200">
-                        <h3 class="text-xl font-black italic text-orange-600">${a.title}</h3>
-                        <p class="text-orange-500 font-bold text-xs mb-4">${a.courseSection?.course?.name || 'Ders Bilgisi Yok'}</p>
-                        <p class="text-slate-600 text-sm mb-6">${a.description}</p>
-                        <div class="pt-4 border-t border-slate-100">
-                            <p class="text-[10px] font-black uppercase text-red-400"><i class="fas fa-hourglass-end mr-2"></i>Son Teslim: ${new Date(a.dueDate).toLocaleString()}</p>
+                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-emerald-50 rounded-bl-full -mr-2 -mt-2 transition-transform group-hover:scale-110"></div>
+                        <div class="relative z-10">
+                            <span class="text-[10px] font-black text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-1 rounded uppercase tracking-wider mb-3 inline-block">${a.courseSection?.course?.code || 'KOD YOK'}</span>
+                            <h3 class="text-xl font-black italic text-slate-800 mb-1">${a.title}</h3>
+                            <p class="text-emerald-600 font-bold text-xs mb-4">${a.courseSection?.course?.name || 'Ders Bilgisi Yok'}</p>
+
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 mb-6">
+                                <p class="text-slate-600 text-sm font-medium leading-relaxed">${a.description}</p>
+                            </div>
+
+                            <div class="flex items-center gap-2 text-xs font-bold text-rose-500 bg-rose-50 px-3 py-2 rounded-xl inline-flex border border-rose-100">
+                                <i class="fas fa-hourglass-half"></i> Son Teslim: ${new Date(a.dueDate).toLocaleString('tr-TR', {dateStyle:'short', timeStyle:'short'})}
+                            </div>
                         </div>
                     </div>
                 `).join('');
 
             } catch (e) {
                 console.error("Ödevler yüklenirken genel hata", e);
-                assignmentListDiv.innerHTML = '<p class="text-slate-500 font-bold p-6">Ödevler yüklenirken bir hata oluştu.</p>';
+                assignmentListDiv.innerHTML = '<p class="col-span-full text-center text-red-500 font-bold p-12 bg-red-50 rounded-3xl">Ödevler yüklenirken bir hata oluştu.</p>';
             }
         }
     </script>

@@ -24,6 +24,8 @@ public class SecurityConfig {
     private static final String[] WHITE_LIST_URL = {
             "/authenticate", 
             "/refreshToken",
+            "/auth/forgot-password",
+            "/auth/reset-password",
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/swagger-ui.html"
@@ -47,7 +49,9 @@ public class SecurityConfig {
                                 .requestMatchers("/teacher/**", "/course/**", "/coursesection/**").hasAnyAuthority("ADMIN", "TEACHER")
                                 .requestMatchers("/student/**").hasAnyAuthority("ADMIN", "TEACHER", "STUDENT")
                                 .requestMatchers("/grade/**").hasAnyAuthority("ADMIN", "TEACHER", "STUDENT")
-                                .requestMatchers("/exam/**", "/assignment/**").hasAnyAuthority("ADMIN", "TEACHER") // Sınav ve Ödev yönetimi
+                                .requestMatchers("/exam/**").hasAnyAuthority("ADMIN", "TEACHER") // Sınav yönetimi
+                                .requestMatchers("/assignment/all").hasAnyAuthority("ADMIN", "TEACHER", "STUDENT") // Ödevleri listeleme izni öğrenciye de verildi
+                                .requestMatchers("/assignment/**").hasAnyAuthority("ADMIN", "TEACHER") // Ödev ekleme/güncelleme/silme sadece ADMIN ve TEACHER
                                 .requestMatchers("/enrollment/**").hasAnyAuthority("ADMIN", "STUDENT")
                                 .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

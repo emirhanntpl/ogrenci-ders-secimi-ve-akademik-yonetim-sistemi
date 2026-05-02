@@ -7,192 +7,281 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .active-menu { background-color: #059669 !important; color: white !important; shadow: 0 10px 15px -3px rgba(5, 150, 105, 0.3); }
-        .section { display: none; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .active-menu {
+            background: linear-gradient(to right, #059669, #047857) !important;
+            color: white !important;
+            box-shadow: 0 10px 15px -3px rgba(5, 150, 105, 0.4);
+            transform: translateX(4px);
+        }
+        .menu-btn { transition: all 0.3s ease; }
+        .menu-btn:hover:not(.active-menu) { background-color: rgba(255,255,255,0.05); transform: translateX(4px); }
+        .section { display: none; animation: fadeIn 0.4s ease-out forwards; }
         .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        select { appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1.5em 1.5em; }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="bg-[#f0fdf4] font-sans antialiased overflow-hidden text-slate-900">
-    <div class="flex h-screen">
-        <!-- Sidebar -->
-        <aside class="w-72 bg-[#064e3b] text-white flex flex-col shrink-0 shadow-2xl z-20 overflow-y-auto font-medium text-sm">
-            <div class="p-8 border-b border-emerald-900 flex items-center gap-3">
-                <i class="fas fa-chalkboard-teacher text-emerald-400 text-3xl"></i>
-                <span class="text-2xl font-black tracking-tighter italic">HOCA PANELİ</span>
+<body class="bg-slate-50 text-slate-800 h-screen overflow-hidden flex">
+
+    <!-- Sidebar -->
+    <aside class="w-72 bg-[#064e3b] text-emerald-100 flex flex-col shrink-0 shadow-2xl z-20 relative">
+        <!-- Dekoratif Arkaplan -->
+        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
+
+        <div class="p-8 border-b border-emerald-900/50 flex items-center gap-4 relative z-10">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/30">
+                <i class="fas fa-chalkboard-teacher text-white text-xl"></i>
+            </div>
+            <div>
+                <span class="text-2xl font-black tracking-tighter italic text-white block">KTÜ BYS</span>
+                <span class="text-[10px] uppercase tracking-widest font-bold text-emerald-300">Akademik Personel</span>
+            </div>
+        </div>
+
+        <nav class="flex-1 p-4 space-y-1 mt-4 overflow-y-auto relative z-10">
+            <button onclick="showSection('my-courses')" id="menu-my-courses" class="menu-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">
+                <i class="fas fa-book-open w-5"></i><span>Derslerim</span>
+            </button>
+            <button onclick="showSection('my-students')" id="menu-my-students" class="menu-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">
+                <i class="fas fa-user-graduate w-5"></i><span>Öğrencilerim</span>
+            </button>
+
+            <div class="px-4 pt-6 pb-2 text-[10px] font-black uppercase text-emerald-300 tracking-widest">Akademik Süreçler</div>
+            <button onclick="showSection('exams')" id="menu-exams" class="menu-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">
+                <i class="fas fa-calendar-check w-5 text-amber-400"></i><span>Sınav Takvimi</span>
+            </button>
+            <button onclick="showSection('assignments')" id="menu-assignments" class="menu-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">
+                <i class="fas fa-tasks w-5 text-cyan-400"></i><span>Ödev Yönetimi</span>
+            </button>
+
+            <div class="px-4 pt-6 pb-2 text-[10px] font-black uppercase text-emerald-300 tracking-widest">İletişim</div>
+            <button onclick="showSection('announcements')" id="menu-announcements" class="menu-btn w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold">
+                <i class="fas fa-bullhorn w-5 text-yellow-400"></i><span>Duyurular</span>
+            </button>
+        </nav>
+
+        <div class="p-6 border-t border-emerald-900/50 relative z-10">
+            <button onclick="logout()" class="flex items-center justify-center gap-2 p-3 w-full text-red-400 font-bold hover:bg-red-500/10 hover:text-red-300 rounded-xl transition-all border border-transparent hover:border-red-500/20">
+                <i class="fas fa-sign-out-alt"></i><span>Oturumu Kapat</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col min-w-0 bg-slate-50">
+        <!-- Header -->
+        <header class="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-10 shrink-0 z-10 sticky top-0">
+            <div class="flex items-center gap-4 flex-1">
+                <h2 id="pageTitle" class="text-2xl font-black text-slate-800 uppercase tracking-wider italic">Derslerim</h2>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="text-right">
+                    <p id="teacherNameDisplay" class="text-sm font-black text-slate-900 leading-tight">Yükleniyor...</p>
+                    <p class="text-[10px] uppercase font-bold text-slate-400">Öğretim Üyesi</p>
+                </div>
+                <div class="w-11 h-11 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-black shadow-lg shadow-emerald-500/30 border-2 border-white">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-8 lg:p-10">
+            <!-- SECTION: MY COURSES -->
+            <div id="section-my-courses" class="section active">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-3xl font-black italic text-slate-800">Verdiğim Dersler</h1>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="courseList"></div>
             </div>
 
-            <nav class="flex-1 p-4 space-y-1 mt-4">
-                <button onclick="showSection('my-courses')" id="menu-my-courses" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-emerald-800 transition-all text-emerald-100">
-                    <i class="fas fa-book-open w-5"></i><span>Derslerim</span>
-                </button>
-                <button onclick="showSection('my-students')" id="menu-my-students" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-emerald-800 transition-all text-emerald-100">
-                    <i class="fas fa-user-graduate w-5"></i><span>Öğrencilerim</span>
-                </button>
-                <button onclick="showSection('exams')" id="menu-exams" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-emerald-800 transition-all text-emerald-100">
-                    <i class="fas fa-calendar-check w-5"></i><span>Sınav Tarihleri</span>
-                </button>
-                <button onclick="showSection('assignments')" id="menu-assignments" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-emerald-800 transition-all text-emerald-100">
-                    <i class="fas fa-tasks w-5"></i><span>Ödevler</span>
-                </button>
-                <button onclick="showSection('announcements')" id="menu-announcements" class="menu-btn w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-emerald-800 transition-all text-emerald-100">
-                    <i class="fas fa-bullhorn w-5"></i><span>Duyuru Yap</span>
-                </button>
-            </nav>
-
-            <div class="p-6 border-t border-emerald-900">
-                <button onclick="logout()" class="flex items-center gap-3 p-3 w-full text-emerald-300 hover:bg-emerald-500/10 rounded-2xl transition-all">
-                    <i class="fas fa-power-off"></i><span>Oturumu Kapat</span>
-                </button>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
-            <header class="h-20 bg-white border-b border-emerald-100 flex items-center justify-between px-10 shrink-0 z-10">
-                <div class="flex items-center gap-4 flex-1">
-                    <h2 id="pageTitle" class="text-xl font-black text-emerald-900 uppercase tracking-widest italic">Derslerim</h2>
+            <!-- SECTION: MY STUDENTS -->
+            <div id="section-my-students" class="section">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-3xl font-black italic text-slate-800">Öğrencilerim & Not Girişi</h1>
                 </div>
-                <div class="flex items-center gap-4">
-                    <p id="teacherNameDisplay" class="text-sm font-black text-emerald-900 leading-tight">Yükleniyor...</p>
-                    <div class="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-black shadow-lg">HP</div>
-                </div>
-            </header>
-
-            <main class="flex-1 overflow-y-auto p-10">
-                <!-- SECTION: MY COURSES -->
-                <div id="section-my-courses" class="section active">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="courseList"></div>
-                </div>
-
-                <!-- SECTION: MY STUDENTS -->
-                <div id="section-my-students" class="section">
-                    <div class="bg-white rounded-[2rem] shadow-xl overflow-hidden border border-emerald-100">
-                        <div class="p-6 border-b border-emerald-50 flex justify-between items-center bg-emerald-50/30">
-                            <select id="studentCourseFilter" onchange="loadMyStudents()" class="p-3 rounded-xl border border-emerald-200 outline-none font-bold text-emerald-800 bg-white min-w-[250px]">
-                                <option value="">Ders Seçiniz</option>
-                            </select>
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-wrap gap-4 justify-between items-center">
+                        <select id="studentCourseFilter" onchange="loadMyStudents()" class="p-3 rounded-xl border border-slate-200 outline-none font-bold text-slate-700 bg-white min-w-[300px] shadow-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+                            <option value="">Ders Şubesi Seçiniz...</option>
+                        </select>
+                        <div class="text-sm text-slate-500 font-medium">
+                            <i class="fas fa-info-circle text-blue-500 mr-1"></i> Not girmek için ilgili öğrencinin satırındaki butonu kullanın.
                         </div>
-                        <table class="w-full text-left font-bold text-slate-700">
-                            <thead class="bg-emerald-50 text-emerald-700 text-[10px] uppercase font-black tracking-widest border-b">
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-slate-50 text-slate-500 text-[10px] uppercase font-black tracking-wider border-b border-slate-200">
                                 <tr>
-                                    <th class="px-8 py-5">No</th>
-                                    <th class="px-8 py-5">Ad Soyad</th>
-                                    <th class="px-8 py-5 text-center">Vize</th>
-                                    <th class="px-8 py-5 text-center">Final</th>
-                                    <th class="px-8 py-5 text-center">Ortalama</th>
-                                    <th class="px-8 py-5 text-center">Harf Notu</th> <!-- Yeni Sütun -->
-                                    <th class="px-8 py-5 text-center">Durum</th> <!-- Yeni Sütun -->
-                                    <th class="px-8 py-5 text-center">İşlem</th>
+                                    <th class="px-6 py-4">Öğrenci No</th>
+                                    <th class="px-6 py-4">Ad Soyad</th>
+                                    <th class="px-6 py-4 text-center">Vize</th>
+                                    <th class="px-6 py-4 text-center">Final</th>
+                                    <th class="px-6 py-4 text-center">Ortalama</th>
+                                    <th class="px-6 py-4 text-center">Harf Notu</th>
+                                    <th class="px-6 py-4 text-center">Durum</th>
+                                    <th class="px-6 py-4 text-center">İşlem</th>
                                 </tr>
                             </thead>
-                            <tbody id="studentTableBody" class="divide-y font-bold text-slate-600"></tbody>
+                            <tbody id="studentTableBody" class="divide-y divide-slate-100 text-sm font-medium text-slate-700"></tbody>
                         </table>
                     </div>
                 </div>
+            </div>
 
-                <!-- SECTION: EXAMS -->
-                <div id="section-exams" class="section">
-                    <div class="flex justify-between items-center mb-8">
-                        <h1 class="text-3xl font-black italic text-emerald-900">Sınav Takvimi</h1>
-                        <button onclick="openExamModal()" class="bg-emerald-600 text-white px-6 py-3 rounded-2xl font-bold shadow-xl">+ Sınav Ekle</button>
-                    </div>
-                    <div id="examList" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+            <!-- SECTION: EXAMS -->
+            <div id="section-exams" class="section">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-3xl font-black italic text-slate-800">Sınav Takvimi</h1>
+                    <button onclick="openExamModal()" class="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2">
+                        <i class="fas fa-calendar-plus"></i> Sınav Ekle
+                    </button>
                 </div>
+                <div id="examList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </div>
 
-                <!-- SECTION: ASSIGNMENTS -->
-                <div id="section-assignments" class="section">
-                    <div class="flex justify-between items-center mb-8">
-                        <h1 class="text-3xl font-black italic text-emerald-900">Ödev Yönetimi</h1>
-                        <button onclick="openAssignmentModal()" class="bg-emerald-600 text-white px-6 py-3 rounded-2xl font-bold shadow-xl">+ Ödev Ver</button>
-                    </div>
-                    <div id="assignmentList" class="grid grid-cols-1 gap-6"></div>
+            <!-- SECTION: ASSIGNMENTS -->
+            <div id="section-assignments" class="section">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-3xl font-black italic text-slate-800">Ödev Yönetimi</h1>
+                    <button onclick="openAssignmentModal()" class="bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2">
+                        <i class="fas fa-plus"></i> Ödev Ver
+                    </button>
                 </div>
+                <div id="assignmentList" class="grid grid-cols-1 lg:grid-cols-2 gap-6"></div>
+            </div>
 
-                <!-- SECTION: ANNOUNCEMENTS -->
-                <div id="section-announcements" class="section">
-                    <div class="flex justify-between items-center mb-8">
-                        <h1 class="text-3xl font-black italic text-emerald-900">Duyurularım</h1>
-                        <button onclick="openAnnouncementModal()" class="bg-emerald-600 text-white px-6 py-3 rounded-2xl font-bold shadow-xl">+ Yeni Duyuru</button>
-                    </div>
-                    <div id="teacherAnnouncementList" class="grid grid-cols-1 gap-6"></div>
+            <!-- SECTION: ANNOUNCEMENTS -->
+            <div id="section-announcements" class="section">
+                <div class="flex justify-between items-center mb-8">
+                    <h1 class="text-3xl font-black italic text-slate-800">Duyurularım</h1>
+                    <button onclick="openAnnouncementModal()" class="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2">
+                        <i class="fas fa-bullhorn"></i> Yeni Duyuru
+                    </button>
                 </div>
-            </main>
-        </div>
+                <div id="teacherAnnouncementList" class="grid grid-cols-1 lg:grid-cols-2 gap-6"></div>
+            </div>
+        </main>
     </div>
 
     <!-- MODALS -->
 
     <!-- Not Giriş Modalı -->
-    <div id="gradeModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-[2.5rem] max-w-md w-full p-10 font-bold shadow-2xl">
-            <h3 class="text-2xl font-black mb-6 italic text-emerald-900 text-center">Not Girişi</h3>
-            <div class="mb-6 p-4 bg-emerald-50 rounded-2xl">
-                <p id="gradeStudentName" class="text-emerald-800 text-center"></p>
-                <p id="gradeCourseName" class="text-emerald-600 text-sm text-center mt-1 font-medium"></p>
+    <div id="gradeModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-8 shadow-2xl transform transition-transform scale-100">
+            <h3 class="text-2xl font-black mb-6 italic text-slate-800 text-center">Not Girişi</h3>
+            <div class="mb-6 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl text-center">
+                <p id="gradeStudentName" class="text-emerald-800 font-bold text-lg"></p>
+                <p id="gradeCourseName" class="text-emerald-600 text-xs font-bold uppercase mt-1 tracking-wider"></p>
             </div>
-            <form id="gradeForm" class="space-y-4">
+            <form id="gradeForm" class="space-y-5">
                 <input type="hidden" id="gradeStudentId">
                 <input type="hidden" id="gradeCourseSectionId">
                 <div>
-                    <label class="block text-xs uppercase text-slate-400 mb-2 px-2">Sınav Tipi</label>
-                    <select id="gradeExamType" required class="p-4 border w-full rounded-2xl outline-none focus:ring-4 focus:ring-emerald-500/10">
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Sınav Tipi</label>
+                    <select id="gradeExamType" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none font-medium bg-white">
                         <option value="MIDTERM">Vize (Midterm)</option>
                         <option value="FINAL">Final</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs uppercase text-slate-400 mb-2 px-2">Not Değeri (0-100)</label>
-                    <input type="number" id="gradeValue" placeholder="Örn: 85" required min="0" max="100" step="0.01" class="p-4 border w-full rounded-2xl outline-none focus:ring-4 focus:ring-emerald-500/10">
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Not Değeri (0-100)</label>
+                    <input type="number" id="gradeValue" placeholder="Örn: 85" required min="0" max="100" step="0.01" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none font-medium text-xl text-center tracking-widest">
                 </div>
-                <button type="submit" class="w-full bg-emerald-600 text-white py-4 rounded-2xl italic font-black uppercase shadow-xl mt-4">Notu Kaydet</button>
+                <div class="pt-2 flex gap-3">
+                    <button type="button" onclick="closeModal('gradeModal')" class="flex-1 bg-slate-100 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-200 transition-colors">İptal</button>
+                    <button type="submit" class="flex-1 bg-emerald-600 text-white font-bold py-4 rounded-xl hover:bg-emerald-700 shadow-lg shadow-emerald-500/30 transition-all">Kaydet</button>
+                </div>
             </form>
-            <button onclick="closeModal('gradeModal')" class="mt-4 text-slate-400 font-bold w-full text-center">Kapat</button>
         </div>
     </div>
 
     <!-- Sınav Modalı -->
-    <div id="examModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-[2.5rem] max-w-md w-full p-10 font-bold shadow-2xl">
-            <h3 id="examModalTitle" class="text-2xl font-black mb-6 italic text-emerald-900">Sınav Tanımla</h3>
+    <div id="examModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl transform transition-transform scale-100">
+            <h3 id="examModalTitle" class="text-2xl font-black mb-6 italic text-slate-800">Sınav Tanımla</h3>
             <form id="examForm" class="space-y-4">
                 <input type="hidden" id="examEditId">
-                <select id="examCourse" required class="p-4 border w-full rounded-2xl outline-none bg-emerald-50"></select>
-                <input type="text" id="examName" placeholder="Sınav Adı (Vize, Final...)" required class="p-4 border w-full rounded-2xl">
-                <input type="datetime-local" id="examDate" required class="p-4 border w-full rounded-2xl">
-                <input type="text" id="examClassroom" placeholder="Sınıf/Derslik" required class="p-4 border w-full rounded-2xl">
-                <button type="submit" class="w-full bg-emerald-600 text-white py-4 rounded-2xl italic font-black uppercase shadow-xl">Kaydet</button>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Ders Seçimi</label>
+                    <select id="examCourse" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none font-medium bg-white"></select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Sınav Adı</label>
+                    <input type="text" id="examName" placeholder="Örn: Vize, Final, Mazeret" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none font-medium">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Tarih & Saat</label>
+                    <input type="datetime-local" id="examDate" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none font-medium">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Derslik / Sınıf</label>
+                    <input type="text" id="examClassroom" placeholder="Örn: D-101, Amfi-1" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 outline-none font-medium">
+                </div>
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeModal('examModal')" class="flex-1 bg-slate-100 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-200 transition-colors">İptal</button>
+                    <button type="submit" class="flex-1 bg-amber-500 text-white font-bold py-4 rounded-xl hover:bg-amber-600 shadow-lg shadow-amber-500/30 transition-all">Kaydet</button>
+                </div>
             </form>
-            <button onclick="closeModal('examModal')" class="mt-4 text-slate-400 font-bold w-full">İptal</button>
         </div>
     </div>
 
     <!-- Ödev Modalı -->
-    <div id="assignmentModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-[2.5rem] max-w-md w-full p-10 font-bold shadow-2xl">
-            <h3 id="assignmentModalTitle" class="text-2xl font-black mb-6 italic text-emerald-900">Ödev Ver</h3>
+    <div id="assignmentModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl transform transition-transform scale-100">
+            <h3 id="assignmentModalTitle" class="text-2xl font-black mb-6 italic text-slate-800">Ödev Ver</h3>
             <form id="assignmentForm" class="space-y-4">
                 <input type="hidden" id="assignmentEditId">
-                <select id="assignmentCourse" required class="p-4 border w-full rounded-2xl outline-none bg-emerald-50"></select>
-                <input type="text" id="assignmentTitle" placeholder="Ödev Başlığı" required class="p-4 border w-full rounded-2xl">
-                <textarea id="assignmentDesc" placeholder="Ödev Açıklaması" required class="p-4 border w-full rounded-2xl h-32"></textarea>
-                <input type="datetime-local" id="assignmentDueDate" required class="p-4 border w-full rounded-2xl">
-                <button type="submit" class="w-full bg-emerald-600 text-white py-4 rounded-2xl italic font-black uppercase shadow-xl">Yayınla</button>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Ders Seçimi</label>
+                    <select id="assignmentCourse" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none font-medium bg-white"></select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Ödev Başlığı</label>
+                    <input type="text" id="assignmentTitle" placeholder="Örn: Proje Taslak Raporu" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none font-medium">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Açıklama</label>
+                    <textarea id="assignmentDesc" placeholder="Ödevin detayları ve beklentiler..." required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none font-medium h-32 resize-none"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Son Teslim Tarihi</label>
+                    <input type="datetime-local" id="assignmentDueDate" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none font-medium">
+                </div>
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeModal('assignmentModal')" class="flex-1 bg-slate-100 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-200 transition-colors">İptal</button>
+                    <button type="submit" class="flex-1 bg-cyan-500 text-white font-bold py-4 rounded-xl hover:bg-cyan-600 shadow-lg shadow-cyan-500/30 transition-all">Yayınla</button>
+                </div>
             </form>
-            <button onclick="closeModal('assignmentModal')" class="mt-4 text-slate-400 font-bold w-full">İptal</button>
         </div>
     </div>
 
-    <!-- Duyuru Modalı (Hoca İçin) -->
-    <div id="announcementModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-[2.5rem] max-w-lg w-full p-10 font-bold shadow-2xl">
-            <h3 id="announcementModalTitle" class="text-2xl font-black mb-6 italic text-emerald-900">Duyuru Yayınla</h3>
+    <!-- Duyuru Modalı -->
+    <div id="announcementModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl transform transition-transform scale-100">
+            <h3 id="announcementModalTitle" class="text-2xl font-black mb-6 italic text-slate-800">Duyuru Yayınla</h3>
             <form id="announcementForm" class="space-y-4">
                 <input type="hidden" id="announcementEditId">
-                <input type="text" id="annTitle" placeholder="Başlık" required class="p-4 border w-full rounded-2xl">
-                <textarea id="annContent" placeholder="Mesajınız..." required class="p-4 border w-full rounded-2xl h-32"></textarea>
-                <button type="submit" class="w-full bg-emerald-600 text-white py-4 rounded-2xl italic font-black uppercase shadow-xl">Gönder</button>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Başlık</label>
+                    <input type="text" id="annTitle" placeholder="Örn: Ders Saati Değişikliği" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none font-medium">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">İçerik</label>
+                    <textarea id="annContent" placeholder="Öğrencilere iletmek istediğiniz mesaj..." required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none font-medium h-32 resize-none"></textarea>
+                </div>
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeModal('announcementModal')" class="flex-1 bg-slate-100 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-200 transition-colors">İptal</button>
+                    <button type="submit" class="flex-1 bg-emerald-500 text-white font-bold py-4 rounded-xl hover:bg-emerald-600 shadow-lg shadow-emerald-500/30 transition-all">Gönder</button>
+                </div>
             </form>
-            <button onclick="closeModal('announcementModal')" class="mt-4 text-slate-400 font-bold w-full">İptal</button>
         </div>
     </div>
 
@@ -250,10 +339,10 @@
         }
 
         function populateCourseFilters() {
-            const options = teacherCourses.map(c => `<option value="${c.id}">${c.course?.name} (${c.course?.code})</option>`).join('');
-            document.getElementById('studentCourseFilter').innerHTML = '<option value="">Ders Seçiniz</option>' + options;
-            document.getElementById('examCourse').innerHTML = options;
-            document.getElementById('assignmentCourse').innerHTML = options;
+            const options = teacherCourses.map(c => `<option value="${c.id}">${c.course?.code} - ${c.course?.name}</option>`).join('');
+            document.getElementById('studentCourseFilter').innerHTML = '<option value="">Ders Şubesi Seçiniz...</option>' + options;
+            document.getElementById('examCourse').innerHTML = '<option value="">Ders Seçin</option>' + options;
+            document.getElementById('assignmentCourse').innerHTML = '<option value="">Ders Seçin</option>' + options;
         }
 
         function showSection(id) {
@@ -261,7 +350,15 @@
             document.getElementById('section-' + id).classList.add('active');
             document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active-menu'));
             document.getElementById('menu-' + id).classList.add('active-menu');
-            document.getElementById('pageTitle').innerText = id.toUpperCase().replace('-', ' ');
+
+            const titles = {
+                'my-courses': 'Verdiğim Dersler',
+                'my-students': 'Öğrenciler ve Notlar',
+                'exams': 'Sınav Takvimi',
+                'assignments': 'Ödev Yönetimi',
+                'announcements': 'Duyurularım'
+            };
+            document.getElementById('pageTitle').innerText = titles[id] || id.toUpperCase().replace('-', ' ');
 
             if (id === 'my-courses') loadMyCourses();
             if (id === 'announcements') loadAnnouncements();
@@ -271,12 +368,22 @@
 
         async function loadMyCourses() {
             document.getElementById('courseList').innerHTML = teacherCourses.map(c => `
-                <div class="bg-white p-8 rounded-[2rem] shadow-xl border border-emerald-50">
-                    <span class="text-[10px] font-black text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full uppercase italic">${c.course?.code}</span>
-                    <h3 class="text-xl font-black italic mt-4 text-emerald-900">${c.course?.name}</h3>
-                    <p class="text-xs text-slate-400 mt-2">Dönem: ${c.semester?.term || '---'}</p>
-                    <div class="mt-6 flex gap-2">
-                        <button onclick="viewStudents(${c.id})" class="flex-1 bg-emerald-600 text-white py-3 rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/20">Öğrencileri Gör</button>
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow relative overflow-hidden group">
+                    <div class="absolute right-0 bottom-0 opacity-5 text-emerald-500 transform translate-x-4 translate-y-4">
+                        <i class="fas fa-book-open text-8xl"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-xs font-black text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-lg uppercase tracking-wider">${c.course?.code}</span>
+                        </div>
+                        <h3 class="text-xl font-black italic text-slate-800 mb-2 leading-tight">${c.course?.name}</h3>
+                        <p class="text-xs font-bold text-slate-500 uppercase tracking-wider bg-slate-50 inline-block px-2 py-1 rounded">Dönem: ${c.semester?.term || '-'}</p>
+
+                        <div class="mt-6 pt-4 border-t border-slate-100">
+                            <button onclick="viewStudents(${c.id})" class="w-full bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white py-3 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2">
+                                <i class="fas fa-users"></i> Öğrencileri Gör
+                            </button>
+                        </div>
                     </div>
                 </div>
             `).join('');
@@ -290,7 +397,10 @@
 
         async function loadMyStudents() {
             const sectionId = document.getElementById('studentCourseFilter').value;
-            if (!sectionId) { document.getElementById('studentTableBody').innerHTML = ''; return; }
+            if (!sectionId) {
+                document.getElementById('studentTableBody').innerHTML = '<tr><td colspan="8" class="px-6 py-12 text-center text-slate-400 font-bold"><i class="fas fa-hand-point-up text-3xl mb-3 block text-slate-300"></i> Lütfen yukarıdan bir ders şubesi seçin.</td></tr>';
+                return;
+            }
 
             try {
                 const response = await fetch(`${API_URL}/teacher/course-section/${sectionId}/students`, {
@@ -303,7 +413,7 @@
                 if(response.ok){
                     const students = await response.json();
                     if(!students || students.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="8" class="px-8 py-5 text-center text-slate-500">Bu derse kayıtlı öğrenci bulunamadı.</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="8" class="px-6 py-8 text-center text-slate-500 font-bold bg-slate-50 rounded-xl">Bu derse kayıtlı öğrenci bulunamadı.</td></tr>';
                         return;
                     }
 
@@ -316,8 +426,8 @@
                             let midterm = '-';
                             let final = '-';
                             let avg = '-';
-                            let letterGrade = '-'; // Yeni
-                            let passStatus = '-';  // Yeni
+                            let letterGrade = '-';
+                            let passStatus = '-';
 
                             if(gradesRes.ok) {
                                 const grades = await gradesRes.json();
@@ -325,40 +435,40 @@
                                     midterm = grades[0].midTerm !== null ? grades[0].midTerm : '-';
                                     final = grades[0].finalExam !== null ? grades[0].finalExam : '-';
                                     avg = grades[0].average !== null ? grades[0].average : '-';
-                                    letterGrade = grades[0].letterGrade !== null ? grades[0].letterGrade : '-'; // Backend'den gelen harf notu
-                                    passStatus = grades[0].passStatus !== null ? grades[0].passStatus : '-';   // Backend'den gelen durum
+                                    letterGrade = grades[0].letterGrade !== null ? grades[0].letterGrade : '-';
+                                    passStatus = grades[0].passStatus !== null ? grades[0].passStatus : '-';
                                 }
                             }
 
+                            const passClass = passStatus === 'GEÇTİ' ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : (passStatus === 'KALDI' ? 'text-red-600 bg-red-50 border-red-100' : 'text-slate-500 bg-slate-50 border-slate-200');
+
                             tbody.innerHTML += `
-                                <tr class="hover:bg-emerald-50/50 border-b">
-                                    <td class="px-8 py-5 text-emerald-600 italic font-black">${s.studentNumber}</td>
-                                    <td class="px-8 py-5">${s.firstName} ${s.lastName}</td>
-                                    <td class="px-8 py-5 text-center font-mono">${midterm}</td>
-                                    <td class="px-8 py-5 text-center font-mono">${final}</td>
-                                    <td class="px-8 py-5 text-center font-black ${avg >= 50 ? 'text-blue-600' : (avg !== '-' ? 'text-red-500' : '')}">${avg}</td>
-                                    <td class="px-8 py-5 text-center font-black">${letterGrade}</td> <!-- Harf Notu -->
-                                    <td class="px-8 py-5 text-center font-black ${passStatus === 'GEÇTİ' ? 'text-green-600' : (passStatus === 'KALDI' ? 'text-red-600' : '')}">${passStatus}</td> <!-- Durum -->
-                                    <td class="px-8 py-5 text-center">
-                                        <button onclick="openGradeModal(${s.id}, ${sectionId}, '${s.firstName} ${s.lastName}')" class="bg-emerald-50 text-emerald-600 px-4 py-2 rounded-xl text-[10px] uppercase font-black tracking-widest hover:bg-emerald-600 hover:text-white transition-all">Not Gir</button>
+                                <tr class="hover:bg-slate-50 border-b border-slate-100 transition-colors group">
+                                    <td class="px-6 py-4">
+                                        <span class="bg-slate-100 text-slate-600 font-black italic px-3 py-1 rounded-lg">${s.studentNumber}</span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-black">${s.firstName[0]}${s.lastName[0]}</div>
+                                            <span class="font-bold text-slate-800">${s.firstName} ${s.lastName}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-center font-mono text-lg">${midterm}</td>
+                                    <td class="px-6 py-4 text-center font-mono text-lg">${final}</td>
+                                    <td class="px-6 py-4 text-center font-black text-lg ${avg >= 50 ? 'text-blue-600' : (avg !== '-' ? 'text-red-500' : '')}">${avg}</td>
+                                    <td class="px-6 py-4 text-center font-black text-lg text-slate-700">${letterGrade}</td>
+                                    <td class="px-6 py-4 text-center">
+                                        <span class="border px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider ${passClass}">${passStatus}</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <button onclick="openGradeModal(${s.id}, ${sectionId}, '${s.firstName} ${s.lastName}')" class="bg-emerald-100 text-emerald-700 px-4 py-2 rounded-xl text-xs font-bold hover:bg-emerald-600 hover:text-white transition-colors shadow-sm flex items-center justify-center gap-2 mx-auto opacity-0 group-hover:opacity-100">
+                                            <i class="fas fa-edit"></i> Not Gir
+                                        </button>
                                     </td>
                                 </tr>
                             `;
                         } catch(e) {
-                             tbody.innerHTML += `
-                                <tr class="hover:bg-emerald-50/50 border-b">
-                                    <td class="px-8 py-5 text-emerald-600 italic font-black">${s.studentNumber}</td>
-                                    <td class="px-8 py-5">${s.firstName} ${s.lastName}</td>
-                                    <td class="px-8 py-5 text-center font-mono">-</td>
-                                    <td class="px-8 py-5 text-center font-mono">-</td>
-                                    <td class="px-8 py-5 text-center font-black">-</td>
-                                    <td class="px-8 py-5 text-center font-black">-</td> <!-- Harf Notu -->
-                                    <td class="px-8 py-5 text-center font-black">-</td> <!-- Durum -->
-                                    <td class="px-8 py-5 text-center">
-                                        <button onclick="openGradeModal(${s.id}, ${sectionId}, '${s.firstName} ${s.lastName}')" class="bg-emerald-50 text-emerald-600 px-4 py-2 rounded-xl text-[10px] uppercase font-black tracking-widest hover:bg-emerald-600 hover:text-white transition-all">Not Gir</button>
-                                    </td>
-                                </tr>
-                            `;
+                             // Hata durumunda boş satır
                         }
                     }
                 }
@@ -367,9 +477,14 @@
 
         // --- GRADE FUNCTIONS ---
         function openGradeModal(studentId, sectionId, name) {
+            const courseSelect = document.getElementById('studentCourseFilter');
+            const courseName = courseSelect.options[courseSelect.selectedIndex].text;
+
             document.getElementById('gradeStudentId').value = studentId;
             document.getElementById('gradeCourseSectionId').value = sectionId;
             document.getElementById('gradeStudentName').innerText = name;
+            document.getElementById('gradeCourseName').innerText = courseName;
+            document.getElementById('gradeValue').value = '';
             openModal('gradeModal');
         }
 
@@ -387,168 +502,140 @@
                 loadMyStudents();
             } catch(e) {
                 alert("Not sistemi backend entegrasyonu yapılamadı.");
-                closeModal('gradeModal');
             }
         };
 
         // --- EXAM & ASSIGNMENT & ANNOUNCEMENT (CRUD) ---
         async function loadExams() {
             try {
-                const response = await fetch(`${API_URL}/exam/all`, {
-                     headers: { 'Authorization': 'Bearer ' + token }
-                });
+                const response = await fetch(`${API_URL}/exam/all`, { headers: { 'Authorization': 'Bearer ' + token } });
                 if(response.ok) {
                     const exams = await response.json();
                     if(exams && Array.isArray(exams)) {
                         document.getElementById('examList').innerHTML = exams.filter(e => teacherCourses.some(tc => tc.id === e.courseSection?.id)).map(e => `
-                            <div class="bg-white p-8 rounded-[2rem] shadow-xl border border-emerald-50">
-                                <div class="flex justify-between">
-                                    <h3 class="text-xl font-black italic text-emerald-900">${e.examName}</h3>
-                                    <button onclick="deleteData('exam', ${e.id})" class="text-red-400"><i class="fas fa-trash"></i></button>
-                                </div>
-                                <p class="text-sm text-emerald-600 font-bold mt-2">${e.courseSection?.course?.name}</p>
-                                <div class="mt-6 space-y-2">
-                                    <p class="text-xs font-bold text-slate-400"><i class="far fa-clock mr-2"></i>${e.examDate}</p>
-                                    <p class="text-xs font-bold text-slate-400"><i class="fas fa-map-marker-alt mr-2"></i>Sınıf: ${e.classroom}</p>
+                            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow relative overflow-hidden group">
+                                <div class="absolute top-0 right-0 w-16 h-16 bg-amber-50 rounded-bl-full -mr-2 -mt-2 transition-transform group-hover:scale-110"></div>
+                                <div class="relative z-10">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <span class="text-[10px] font-black text-amber-600 bg-amber-50 border border-amber-100 px-2 py-1 rounded uppercase tracking-wider">${e.courseSection?.course?.code || '-'}</span>
+                                        <button onclick="deleteData('exam', ${e.id})" class="text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                    <h3 class="text-xl font-black italic text-slate-800 mb-1">${e.examName}</h3>
+                                    <p class="text-xs text-slate-500 font-bold mb-4 line-clamp-1">${e.courseSection?.course?.name}</p>
+
+                                    <div class="space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                        <div class="flex items-center text-sm font-bold text-slate-600"><i class="far fa-calendar-alt w-5 text-amber-500 mr-2"></i> ${new Date(e.examDate).toLocaleString('tr-TR', {dateStyle:'short', timeStyle:'short'})}</div>
+                                        <div class="flex items-center text-sm font-bold text-slate-600"><i class="fas fa-door-open w-5 text-amber-500 mr-2"></i> ${e.classroom}</div>
+                                    </div>
                                 </div>
                             </div>
                         `).join('');
                     }
                 }
-            } catch(e) {
-                 document.getElementById('examList').innerHTML = '<p class="text-slate-500 font-bold p-6">Sınavlar yüklenirken bir hata oluştu.</p>';
-            }
+            } catch(e) {}
         }
 
         async function loadAssignments() {
             try {
-                const response = await fetch(`${API_URL}/assignment/all`, {
-                     headers: { 'Authorization': 'Bearer ' + token }
-                });
+                const response = await fetch(`${API_URL}/assignment/all`, { headers: { 'Authorization': 'Bearer ' + token } });
                 if(response.ok) {
                     const list = await response.json();
                     if(list && Array.isArray(list)) {
                         document.getElementById('assignmentList').innerHTML = list.filter(a => teacherCourses.some(tc => tc.id === a.courseSection?.id)).map(a => `
-                            <div class="bg-white p-8 rounded-[2rem] shadow-xl border border-emerald-50">
-                                <div class="flex justify-between">
-                                    <h3 class="text-xl font-black italic text-emerald-900">${a.title}</h3>
-                                    <button onclick="deleteData('assignment', ${a.id})" class="text-red-400"><i class="fas fa-trash"></i></button>
+                            <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow relative group">
+                                <div class="flex justify-between items-start mb-2">
+                                    <span class="text-[10px] font-black text-cyan-600 bg-cyan-50 border border-cyan-100 px-2 py-1 rounded uppercase tracking-wider">${a.courseSection?.course?.code || '-'}</span>
+                                    <button onclick="deleteData('assignment', ${a.id})" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-colors opacity-0 group-hover:opacity-100 flex items-center justify-center"><i class="fas fa-trash text-xs"></i></button>
                                 </div>
-                                <p class="text-emerald-600 font-bold text-xs mb-4">${a.courseSection?.course?.name}</p>
-                                <p class="text-slate-600 text-sm mb-6">${a.description}</p>
-                                <div class="pt-4 border-t border-emerald-50">
-                                    <p class="text-[10px] font-black uppercase text-red-400"><i class="fas fa-hourglass-end mr-2"></i>Son Teslim: ${a.dueDate}</p>
+                                <h3 class="text-xl font-black italic text-slate-800">${a.title}</h3>
+                                <p class="text-xs text-slate-500 font-bold mb-4">${a.courseSection?.course?.name}</p>
+
+                                <p class="text-sm text-slate-600 font-medium mb-6 line-clamp-3 bg-slate-50 p-4 rounded-xl border border-slate-100">${a.description}</p>
+
+                                <div class="flex items-center gap-2 text-xs font-bold text-rose-500 bg-rose-50 px-3 py-2 rounded-lg inline-flex border border-rose-100">
+                                    <i class="fas fa-hourglass-half"></i> Son Teslim: ${new Date(a.dueDate).toLocaleString('tr-TR', {dateStyle:'short', timeStyle:'short'})}
                                 </div>
                             </div>
                         `).join('');
                     }
                 }
-            } catch (e) {
-                document.getElementById('assignmentList').innerHTML = '<p class="text-slate-500 font-bold p-6">Ödevler yüklenirken bir hata oluştu.</p>';
-            }
+            } catch (e) {}
         }
 
         async function loadAnnouncements() {
             try {
-                const response = await fetch(`${API_URL}/announcement/all`, {
-                     headers: { 'Authorization': 'Bearer ' + token }
-                });
-
+                const response = await fetch(`${API_URL}/announcement/all`, { headers: { 'Authorization': 'Bearer ' + token } });
                 if(response.ok) {
                     const list = await response.json();
                     const authorName = `${currentTeacher.firstName} ${currentTeacher.lastName}`;
-
                     const myAnnouncements = (list || []).filter(a => a.author === authorName);
 
                     document.getElementById('teacherAnnouncementList').innerHTML = myAnnouncements.map(a => `
-                        <div class="bg-white p-8 rounded-[2rem] shadow-xl border border-emerald-50">
-                            <div class="flex justify-between items-start">
-                                <h3 class="text-xl font-black italic text-emerald-900">${a.title}</h3>
-                                <button onclick="deleteData('announcement', ${a.id})" class="text-red-400"><i class="fas fa-trash"></i></button>
+                        <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow group">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="text-xl font-black italic text-emerald-600">${a.title}</h3>
+                                    <p class="text-xs font-bold text-slate-400 mt-1"><i class="far fa-clock mr-1"></i>${new Date(a.publishDate).toLocaleString()}</p>
+                                </div>
+                                <button onclick="deleteData('announcement', ${a.id})" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-colors opacity-0 group-hover:opacity-100 flex items-center justify-center"><i class="fas fa-trash text-xs"></i></button>
                             </div>
-                            <p class="text-xs text-slate-400 mt-1 mb-4">${new Date(a.publishDate).toLocaleString()}</p>
-                            <p class="text-slate-600 text-sm">${a.content}</p>
+                            <p class="text-slate-600 font-medium whitespace-pre-wrap leading-relaxed">${a.content}</p>
                         </div>
-                    `).join('') || '<p class="text-slate-500 font-bold p-6">Henüz yayınladığınız bir duyuru bulunmamaktadır.</p>';
+                    `).join('') || '<div class="col-span-full p-8 text-center text-slate-500 font-bold bg-white rounded-3xl border border-dashed border-slate-200"><i class="fas fa-comment-slash text-3xl mb-3 text-slate-300 block"></i>Henüz yayınladığınız bir duyuru bulunmamaktadır.</div>';
                 }
-            } catch(e) {
-                console.error(e);
-            }
+            } catch(e) {}
+        }
+
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                modal.querySelector('div').classList.add('scale-100');
+                modal.querySelector('div').classList.remove('scale-95', 'opacity-0');
+            }, 10);
+        }
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            modal.querySelector('div').classList.remove('scale-100');
+            modal.querySelector('div').classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 200);
         }
 
         document.getElementById('examForm').onsubmit = async (e) => {
             e.preventDefault();
-            // datetime-local input'undan gelen değerin sonuna saniye ve saat formatında :00 eklendi ki
-            // backend DateTimeFormatter.ISO_LOCAL_DATE_TIME sorunsuz parse edebilsin.
             let dateInput = document.getElementById('examDate').value;
-            if (dateInput.length === 16) {
-                 dateInput += ':00';
-            }
-
+            if (dateInput.length === 16) dateInput += ':00';
             const data = { examName: document.getElementById('examName').value, examDate: dateInput, classroom: document.getElementById('examClassroom').value, courseSectionId: parseInt(document.getElementById('examCourse').value) };
-            try {
-                await apiRequest('/exam/add', 'POST', data);
-                alert("Sınav eklendi!");
-                closeModal('examModal');
-                loadExams();
-            } catch (err) {
-                 alert("Sınav eklenirken bir hata oluştu.");
-            }
+            if(await apiRequest('/exam/add', 'POST', data)) { closeModal('examModal'); loadExams(); }
         };
 
         document.getElementById('assignmentForm').onsubmit = async (e) => {
             e.preventDefault();
             let dateInput = document.getElementById('assignmentDueDate').value;
-            if (dateInput.length === 16) {
-                 dateInput += ':00';
-            }
-
+            if (dateInput.length === 16) dateInput += ':00';
             const data = { title: document.getElementById('assignmentTitle').value, description: document.getElementById('assignmentDesc').value, dueDate: dateInput, courseSectionId: parseInt(document.getElementById('assignmentCourse').value) };
-            try {
-                await apiRequest('/assignment/add', 'POST', data);
-                alert("Ödev eklendi!");
-                closeModal('assignmentModal');
-                loadAssignments();
-            } catch (err) {
-                 alert("Ödev eklenirken bir hata oluştu.");
-            }
+            if(await apiRequest('/assignment/add', 'POST', data)) { closeModal('assignmentModal'); loadAssignments(); }
         };
 
         document.getElementById('announcementForm').onsubmit = async (e) => {
             e.preventDefault();
             const authorName = `${currentTeacher.firstName} ${currentTeacher.lastName}`;
-            const data = {
-                title: document.getElementById('annTitle').value,
-                content: document.getElementById('annContent').value,
-                author: authorName
-            };
-
-            try {
-                await apiRequest('/announcement/add', 'POST', data);
-                alert("Duyurunuz başarıyla yayınlandı.");
-                closeModal('announcementModal');
-                loadAnnouncements();
-            } catch(err) {
-                 alert("Duyuru eklenirken bir hata oluştu: " + err.message);
-            }
+            const data = { title: document.getElementById('annTitle').value, content: document.getElementById('annContent').value, author: authorName };
+            if(await apiRequest('/announcement/add', 'POST', data)) { closeModal('announcementModal'); loadAnnouncements(); }
         };
 
         async function deleteData(type, id) {
             if (!confirm('Bu kaydı silmek istediğinizden emin misiniz?')) return;
             try {
                 await apiRequest(`/${type}/delete/${id}`, 'DELETE');
-                alert("Başarıyla silindi.");
                 showSection(document.querySelector('.section.active').id.split('-')[1]);
-            } catch(e) {
-                alert("Silme işlemi başarısız: " + e.message);
-            }
+            } catch(e) {}
         }
 
-        function openModal(id) { document.getElementById(id).classList.replace('hidden', 'flex'); }
-        function closeModal(id) { document.getElementById(id).classList.replace('flex', 'hidden'); }
-        function openExamModal() { document.getElementById('examForm').reset(); openModal('examModal'); }
-        function openAssignmentModal() { document.getElementById('assignmentForm').reset(); openModal('assignmentModal'); }
-        function openAnnouncementModal() { document.getElementById('announcementForm').reset(); openModal('announcementModal'); }
         function logout() { localStorage.clear(); window.location.href = 'index.html'; }
     </script>
 </body>

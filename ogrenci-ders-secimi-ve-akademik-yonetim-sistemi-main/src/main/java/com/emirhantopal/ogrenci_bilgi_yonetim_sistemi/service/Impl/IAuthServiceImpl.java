@@ -45,6 +45,19 @@ public class IAuthServiceImpl implements IAuthService {
             User user = userRepository.findByUsername(request.getUsername())
                     .orElseThrow(() -> new BaseException(MessageType.INVALID_USER_ID, HttpStatus.BAD_REQUEST));
 
+            // Rol ve Giriş Tipi Kontrolü
+            if ("STUDENT".equalsIgnoreCase(request.getLoginType())) {
+                if (user.getRole() != Role.STUDENT) {
+                    throw new RuntimeException("Öğrenci giriş ekranından sadece öğrenciler giriş yapabilir.");
+                }
+            } else if ("STAFF".equalsIgnoreCase(request.getLoginType())) {
+                if (user.getRole() != Role.TEACHER && user.getRole() != Role.ADMIN) {
+                    throw new RuntimeException("Personel giriş ekranından sadece öğretmenler ve adminler giriş yapabilir.");
+                }
+            } else {
+                throw new RuntimeException("Geçersiz giriş tipi.");
+            }
+
             String accessToken = jwtService.generateToken(user);
             RefreshToken refreshToken = createRefreshToken(user);
             refreshTokenRepository.save(refreshToken);

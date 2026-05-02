@@ -6,8 +6,10 @@ import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.exception.BaseException;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.exception.MessageType;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.model.Enrollment;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.model.Grade;
+import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.model.Student;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.repository.EnrollmentRepository;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.repository.GradeRepository;
+import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.service.EmailService;
 import com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.service.IGradeService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,12 +30,14 @@ public class GradeServiceImpl implements IGradeService {
     @Autowired
     private EnrollmentRepository enrollmentRepository;
 
+    @Autowired
+    private EmailService emailService;
+
     @Override
     @Transactional
     public DtoGrade gradeAdd(DtoGradeIU dtoGradeIU) {
         Grade grade = new Grade();
         BeanUtils.copyProperties(dtoGradeIU, grade);
-        // Calculate average, letter grade and pass status
         calculateAndSetGradeDetails(grade);
         Grade savedGrade = gradeRepository.save(grade);
         return convertToDto(savedGrade);
@@ -47,7 +51,6 @@ public class GradeServiceImpl implements IGradeService {
         
         grade.setMidTerm(dtoGradeIU.getMidTerm());
         grade.setFinalExam(dtoGradeIU.getFinalExam());
-        // Calculate average, letter grade and pass status
         calculateAndSetGradeDetails(grade);
 
         Grade savedGrade = gradeRepository.save(grade);
@@ -77,7 +80,6 @@ public class GradeServiceImpl implements IGradeService {
 
     @Override
     public List<DtoGrade> getGradesByCourseSectionAndStudent(Long courseSectionId, Long studentId) {
-        // Find enrollment first
         List<Enrollment> enrollments = enrollmentRepository.findByCourseSection_Id(courseSectionId);
         Enrollment enrollment = enrollments.stream()
                 .filter(e -> e.getStudent().getId().equals(studentId))
@@ -95,7 +97,6 @@ public class GradeServiceImpl implements IGradeService {
     @Override
     @Transactional
     public DtoGrade updateStudentGrade(Long courseSectionId, Long studentId, String examType, Double gradeValue) {
-        // Find enrollment first
         List<Enrollment> enrollments = enrollmentRepository.findByCourseSection_Id(courseSectionId);
         Enrollment enrollment = enrollments.stream()
                 .filter(e -> e.getStudent().getId().equals(studentId))
@@ -118,9 +119,26 @@ public class GradeServiceImpl implements IGradeService {
             grade.setFinalExam(gradeValue);
         }
         
-        // Calculate average, letter grade and pass status
         calculateAndSetGradeDetails(grade);
         Grade savedGrade = gradeRepository.save(grade);
+
+        // Not girişi yapıldığında e-posta gönder
+        Student student = enrollment.getStudent();
+        if (student != null && student.getEmail() != null && !student.getEmail().isEmpty()) {
+            String courseName = enrollment.getCourseSection() != null && enrollment.getCourseSection().getCourse() != null 
+                              ? enrollment.getCourseSection().getCourse().getName() : "Ders";
+            String studentName = student.getFirstName() + " " + student.getLastName();
+            
+            // Mail gönderme işlemini ayrı bir thread'de yaparak ana akışı (HTTP response'u) yavaşlatmıyoruz
+            new Thread(() -> {
+                try {
+                    emailService.sendGradeNotificationEmail(student.getEmail(), studentName, courseName, examType, gradeValue);
+                } catch (Exception e) {
+                    System.err.println("Not bildirimi e-postası gönderilemedi: " + e.getMessage());
+                }
+            }).start();
+        }
+
         return convertToDto(savedGrade);
     }
 
@@ -131,9 +149,8 @@ public class GradeServiceImpl implements IGradeService {
         String letterGrade;
         String passStatus;
 
-        // Final notu 45'in altında ise doğrudan KALDI
         if (finalExam < 45.0) {
-            average = (midterm * 0.4) + (finalExam * 0.6); // Ortalama yine de hesaplanır
+            average = (midterm * 0.4) + (finalExam * 0.6); 
             letterGrade = "FF";
             passStatus = "KALDI";
         } else {
@@ -148,33 +165,23 @@ public class GradeServiceImpl implements IGradeService {
     }
 
     private String calculateLetterGrade(Double average) {
-        if (average >= 90) {
-            return "AA";
-        } else if (average >= 85) {
-            return "BA";
-        } else if (average >= 80) {
-            return "BB";
-        } else if (average >= 75) {
-            return "CB";
-        } else if (average >= 70) {
-            return "CC";
-        } else if (average >= 60) {
-            return "DC";
-        } else if (average >= 50) {
-            return "DD";
-        } else if (average >= 40) {
-            return "FD";
-        } else {
-            return "FF";
-        }
+        if (average >= 90) return "AA";
+        else if (average >= 85) return "BA";
+        else if (average >= 80) return "BB";
+        else if (average >= 75) return "CB";
+        else if (average >= 70) return "CC";
+        else if (average >= 60) return "DC";
+        else if (average >= 50) return "DD";
+        else if (average >= 40) return "FD";
+        else return "FF";
     }
 
     private DtoGrade convertToDto(Grade grade) {
         DtoGrade dto = new DtoGrade();
         BeanUtils.copyProperties(grade, dto);
         dto.setId(grade.getId());
-        dto.setLetterGrade(grade.getLetterGrade()); // Yeni eklendi
-        dto.setPassStatus(grade.getPassStatus());   // Yeni eklendi
+        dto.setLetterGrade(grade.getLetterGrade()); 
+        dto.setPassStatus(grade.getPassStatus());   
         return dto;
     }
 }
