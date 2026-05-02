@@ -9,10 +9,46 @@
 
     <!-- SweetAlert2 CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: 'Inter', sans-serif; transition: background-color 0.3s, color 0.3s; }
+
+        /* Dark Mode Variables */
+        :root {
+            --bg-body: #f8fafc;
+            --bg-sidebar: #0f172a;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+        }
+
+        body.dark-mode {
+            --bg-body: #0f172a;
+            --bg-sidebar: #020617;
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+        }
+
+        body.dark-mode .bg-white { background-color: var(--bg-card) !important; }
+        body.dark-mode .bg-slate-50 { background-color: var(--bg-body) !important; }
+        body.dark-mode .text-slate-800, body.dark-mode .text-slate-900 { color: var(--text-main) !important; }
+        body.dark-mode .text-slate-500, body.dark-mode .text-slate-600 { color: var(--text-muted) !important; }
+        body.dark-mode .border-slate-100, body.dark-mode .border-slate-200 { border-color: var(--border-color) !important; }
+        body.dark-mode th, body.dark-mode td { border-color: var(--border-color) !important; }
+        body.dark-mode input, body.dark-mode select, body.dark-mode textarea {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            border-color: var(--border-color);
+        }
+
         .active-menu {
             background: linear-gradient(to right, #2563eb, #1d4ed8) !important;
             color: white !important;
@@ -25,19 +61,21 @@
         .section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         select { appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1.5em 1.5em; }
-        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
+        .glass-card { background: var(--bg-card); backdrop-filter: blur(10px); border: 1px solid var(--border-color); }
 
         /* Scrollbar Styling */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        body.dark-mode ::-webkit-scrollbar-thumb { background: #475569; }
+        body.dark-mode ::-webkit-scrollbar-thumb:hover { background: #64748b; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 h-screen overflow-hidden flex">
+<body class="bg-slate-50 text-slate-800 h-screen overflow-hidden flex transition-colors duration-300">
 
     <!-- Sidebar -->
-    <aside class="w-72 bg-[#0f172a] text-slate-300 flex flex-col shrink-0 shadow-2xl z-20 relative">
+    <aside class="w-72 bg-[#0f172a] text-slate-300 flex flex-col shrink-0 shadow-2xl z-20 relative transition-colors duration-300" style="background-color: var(--bg-sidebar);">
         <!-- Dekoratif Arkaplan -->
         <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
 
@@ -101,25 +139,30 @@
     </aside>
 
     <!-- Main Content -->
-    <div class="flex-1 flex flex-col min-w-0 bg-slate-50">
+    <div class="flex-1 flex flex-col min-w-0 bg-slate-50 transition-colors duration-300" style="background-color: var(--bg-body);">
         <!-- Header -->
-        <header class="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-10 shrink-0 z-10 sticky top-0">
+        <header class="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-10 shrink-0 z-10 sticky top-0 transition-colors duration-300" style="background-color: var(--bg-card); border-color: var(--border-color);">
             <div class="flex items-center gap-4 flex-1">
                 <h2 id="pageTitle" class="text-2xl font-black text-slate-800 uppercase tracking-wider italic">Dashboard</h2>
             </div>
             <div class="flex items-center gap-6">
+                <!-- Tema Değiştirme Butonu -->
+                <button onclick="toggleTheme()" class="w-10 h-10 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-slate-200 transition-colors dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700" title="Gece/Gündüz Modu">
+                    <i id="themeIcon" class="fas fa-moon"></i>
+                </button>
+
                 <!-- Saat ve Tarih Alanı -->
-                <div class="hidden md:flex flex-col items-end border-r border-slate-200 pr-6">
+                <div class="hidden md:flex flex-col items-end border-r border-slate-200 pr-6 transition-colors duration-300" style="border-color: var(--border-color);">
                     <span id="currentDate" class="text-xs font-bold text-slate-400 uppercase tracking-wider">--.--.----</span>
-                    <span id="currentTime" class="text-lg font-black text-slate-700 italic">--:--:--</span>
+                    <span id="currentTime" class="text-lg font-black text-slate-700 italic transition-colors duration-300">--:--:--</span>
                 </div>
 
                 <div class="flex items-center gap-4">
                     <div class="text-right">
-                        <p id="userNameDisplay" class="text-sm font-black text-slate-900 leading-tight">Admin</p>
+                        <p id="userNameDisplay" class="text-sm font-black text-slate-900 leading-tight transition-colors duration-300">Admin</p>
                         <p class="text-[10px] uppercase font-bold text-slate-400">Sistem Yöneticisi</p>
                     </div>
-                    <div class="w-11 h-11 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black shadow-lg shadow-blue-500/30 border-2 border-white">
+                    <div class="w-11 h-11 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black shadow-lg shadow-blue-500/30 border-2 border-white dark:border-slate-800">
                         <i class="fas fa-user-shield"></i>
                     </div>
                 </div>
@@ -140,29 +183,45 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div class="glass-card p-6 rounded-3xl shadow-lg hover:-translate-y-1 transition-transform duration-300">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                    <div class="glass-card p-6 rounded-3xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300">
                         <div class="flex justify-between items-start">
-                            <div><p class="text-slate-400 text-xs font-black uppercase tracking-wider">Toplam Öğrenci</p><h3 id="stat-students" class="text-4xl font-black mt-2 text-slate-800">0</h3></div>
+                            <div><p class="text-slate-400 text-xs font-black uppercase tracking-wider">Toplam Öğrenci</p><h3 id="stat-students" class="text-4xl font-black mt-2 text-slate-800 transition-colors duration-300">0</h3></div>
                             <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-500 flex items-center justify-center text-xl"><i class="fas fa-user-graduate"></i></div>
                         </div>
                     </div>
-                    <div class="glass-card p-6 rounded-3xl shadow-lg hover:-translate-y-1 transition-transform duration-300">
+                    <div class="glass-card p-6 rounded-3xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300">
                         <div class="flex justify-between items-start">
-                            <div><p class="text-slate-400 text-xs font-black uppercase tracking-wider">Akademisyen</p><h3 id="stat-teachers" class="text-4xl font-black mt-2 text-slate-800">0</h3></div>
+                            <div><p class="text-slate-400 text-xs font-black uppercase tracking-wider">Akademisyen</p><h3 id="stat-teachers" class="text-4xl font-black mt-2 text-slate-800 transition-colors duration-300">0</h3></div>
                             <div class="w-12 h-12 rounded-2xl bg-cyan-100 text-cyan-500 flex items-center justify-center text-xl"><i class="fas fa-chalkboard-teacher"></i></div>
                         </div>
                     </div>
-                    <div class="glass-card p-6 rounded-3xl shadow-lg hover:-translate-y-1 transition-transform duration-300">
+                    <div class="glass-card p-6 rounded-3xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300">
                         <div class="flex justify-between items-start">
-                            <div><p class="text-slate-400 text-xs font-black uppercase tracking-wider">Aktif Dersler</p><h3 id="stat-courses" class="text-4xl font-black mt-2 text-slate-800">0</h3></div>
+                            <div><p class="text-slate-400 text-xs font-black uppercase tracking-wider">Aktif Dersler</p><h3 id="stat-courses" class="text-4xl font-black mt-2 text-slate-800 transition-colors duration-300">0</h3></div>
                             <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-500 flex items-center justify-center text-xl"><i class="fas fa-book"></i></div>
                         </div>
                     </div>
-                    <div class="glass-card p-6 rounded-3xl shadow-lg hover:-translate-y-1 transition-transform duration-300">
+                    <div class="glass-card p-6 rounded-3xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300">
                         <div class="flex justify-between items-start">
-                            <div><p class="text-slate-400 text-xs font-black uppercase tracking-wider">Fakülteler</p><h3 id="stat-faculties" class="text-4xl font-black mt-2 text-slate-800">0</h3></div>
+                            <div><p class="text-slate-400 text-xs font-black uppercase tracking-wider">Fakülteler</p><h3 id="stat-faculties" class="text-4xl font-black mt-2 text-slate-800 transition-colors duration-300">0</h3></div>
                             <div class="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-500 flex items-center justify-center text-xl"><i class="fas fa-university"></i></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart Alanı -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 transition-colors duration-300">
+                        <h3 class="text-lg font-black italic text-slate-800 mb-4 transition-colors duration-300">Öğrenci - Akademisyen Dağılımı</h3>
+                        <div class="h-64 flex items-center justify-center">
+                            <canvas id="usersChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 transition-colors duration-300">
+                        <h3 class="text-lg font-black italic text-slate-800 mb-4 transition-colors duration-300">Fakültelere Göre Bölümler</h3>
+                        <div class="h-64 flex items-center justify-center">
+                            <canvas id="facultiesChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -183,17 +242,23 @@
             <div id="section-students" class="section">
                 <div class="flex justify-between items-center mb-8">
                     <h1 class="text-3xl font-black italic text-slate-800">Öğrenci Yönetimi</h1>
-                    <button onclick="openStudentModal()" class="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2">
-                        <i class="fas fa-user-plus"></i> Öğrenci Ekle
-                    </button>
+                    <div class="flex gap-4">
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><i class="fas fa-search"></i></span>
+                            <input type="text" id="searchStudent" onkeyup="filterTable('searchStudent', 'studentTableBody')" placeholder="İsim veya No ile ara..." class="pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none font-medium text-sm transition-colors duration-300 bg-white text-slate-800 w-64">
+                        </div>
+                        <button onclick="openStudentModal()" class="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2">
+                            <i class="fas fa-user-plus"></i> Öğrenci Ekle
+                        </button>
+                    </div>
                 </div>
-                <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden transition-colors duration-300">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
-                            <thead class="bg-slate-50 text-slate-500 text-[10px] uppercase font-black tracking-wider border-b border-slate-200">
+                            <thead class="bg-slate-50 text-slate-500 text-[10px] uppercase font-black tracking-wider border-b border-slate-200 transition-colors duration-300">
                                 <tr><th class="px-6 py-4">No</th><th class="px-6 py-4">Öğrenci</th><th class="px-6 py-4">Departman</th><th class="px-6 py-4">İletişim</th><th class="px-6 py-4 text-center">İşlem</th></tr>
                             </thead>
-                            <tbody id="studentTableBody" class="divide-y divide-slate-100 text-sm font-medium"></tbody>
+                            <tbody id="studentTableBody" class="divide-y divide-slate-100 text-sm font-medium transition-colors duration-300"></tbody>
                         </table>
                     </div>
                 </div>
@@ -236,9 +301,15 @@
             <div id="section-courses" class="section">
                 <div class="flex justify-between items-center mb-8">
                     <h1 class="text-3xl font-black italic text-slate-800">Ders Kataloğu</h1>
-                    <button onclick="openCourseModal()" class="bg-gradient-to-r from-rose-500 to-pink-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2">
-                        <i class="fas fa-book-medical"></i> Ders Ekle
-                    </button>
+                    <div class="flex gap-4">
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><i class="fas fa-search"></i></span>
+                            <input type="text" id="searchCourse" onkeyup="filterCards('searchCourse', 'courseList')" placeholder="Ders Ara..." class="pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none font-medium text-sm transition-colors duration-300 bg-white text-slate-800 w-64">
+                        </div>
+                        <button onclick="openCourseModal()" class="bg-gradient-to-r from-rose-500 to-pink-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2">
+                            <i class="fas fa-book-medical"></i> Ders Ekle
+                        </button>
+                    </div>
                 </div>
                 <div id="courseList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
             </div>
@@ -251,13 +322,13 @@
                         <i class="fas fa-layer-group"></i> Şube Oluştur
                     </button>
                 </div>
-                <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden transition-colors duration-300">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
-                            <thead class="bg-slate-50 text-slate-500 text-[10px] uppercase font-black tracking-wider border-b border-slate-200">
+                            <thead class="bg-slate-50 text-slate-500 text-[10px] uppercase font-black tracking-wider border-b border-slate-200 transition-colors duration-300">
                                 <tr><th class="px-6 py-4">Ders Adı</th><th class="px-6 py-4">Öğretmen</th><th class="px-6 py-4">Derslik / Dönem</th><th class="px-6 py-4 text-center">İşlem</th></tr>
                             </thead>
-                            <tbody id="sectionsTableBody" class="divide-y divide-slate-100 text-sm font-medium"></tbody>
+                            <tbody id="sectionsTableBody" class="divide-y divide-slate-100 text-sm font-medium transition-colors duration-300"></tbody>
                         </table>
                     </div>
                 </div>
@@ -267,17 +338,23 @@
             <div id="section-enrollments" class="section">
                 <div class="flex justify-between items-center mb-8">
                     <h1 class="text-3xl font-black italic text-slate-800">Ders Kayıtları</h1>
-                    <button onclick="openEnrollmentModal()" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2">
-                        <i class="fas fa-user-plus"></i> Öğrenci Kaydet
-                    </button>
+                    <div class="flex gap-4">
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><i class="fas fa-search"></i></span>
+                            <input type="text" id="searchEnrollment" onkeyup="filterTable('searchEnrollment', 'enrollmentsTableBody')" placeholder="Öğrenci Ara..." class="pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none font-medium text-sm transition-colors duration-300 bg-white text-slate-800 w-64">
+                        </div>
+                        <button onclick="openEnrollmentModal()" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2">
+                            <i class="fas fa-user-plus"></i> Öğrenci Kaydet
+                        </button>
+                    </div>
                 </div>
-                <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden transition-colors duration-300">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
-                            <thead class="bg-slate-50 text-slate-500 text-[10px] uppercase font-black tracking-wider border-b border-slate-200">
+                            <thead class="bg-slate-50 text-slate-500 text-[10px] uppercase font-black tracking-wider border-b border-slate-200 transition-colors duration-300">
                                 <tr><th class="px-6 py-4">Öğrenci No</th><th class="px-6 py-4">Ad Soyad</th><th class="px-6 py-4">Kayıtlı Ders</th><th class="px-6 py-4 text-center">İşlem</th></tr>
                             </thead>
-                            <tbody id="enrollmentsTableBody" class="divide-y divide-slate-100 text-sm font-medium"></tbody>
+                            <tbody id="enrollmentsTableBody" class="divide-y divide-slate-100 text-sm font-medium transition-colors duration-300"></tbody>
                         </table>
                     </div>
                 </div>
@@ -308,21 +385,21 @@
     <!-- MODALS (Slightly improved styling) -->
 
     <div id="announcementModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm transition-opacity">
-        <div class="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl transform transition-transform scale-100">
-            <h3 id="announcementModalTitle" class="text-2xl font-black mb-6 italic text-slate-800">Duyuru Kaydı</h3>
+        <div class="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl transform transition-transform scale-100 transition-colors duration-300">
+            <h3 id="announcementModalTitle" class="text-2xl font-black mb-6 italic text-slate-800 transition-colors duration-300">Duyuru Kaydı</h3>
             <form id="announcementForm" class="space-y-5">
                 <input type="hidden" id="announcementEditId">
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Başlık</label>
-                    <input type="text" id="annTitle" placeholder="Örn: Final Sınavları Hakkında" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium text-slate-700">
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 transition-colors duration-300">Başlık</label>
+                    <input type="text" id="annTitle" placeholder="Örn: Final Sınavları Hakkında" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium text-slate-700 bg-white">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">İçerik</label>
-                    <textarea id="annContent" placeholder="Mesajınız..." required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium text-slate-700 h-32 resize-none"></textarea>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 transition-colors duration-300">İçerik</label>
+                    <textarea id="annContent" placeholder="Mesajınız..." required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium text-slate-700 h-32 resize-none bg-white"></textarea>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Yazar (Opsiyonel)</label>
-                    <input type="text" id="annAuthor" placeholder="Örn: Rektörlük" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium text-slate-700">
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 transition-colors duration-300">Yazar (Opsiyonel)</label>
+                    <input type="text" id="annAuthor" placeholder="Örn: Rektörlük" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium text-slate-700 bg-white">
                 </div>
                 <div class="pt-2 flex gap-3">
                     <button type="button" onclick="closeModal('announcementModal')" class="flex-1 bg-slate-100 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-200 transition-colors">İptal</button>
@@ -334,34 +411,34 @@
 
     <!-- STUDENT MODAL -->
     <div id="studentModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-3xl max-w-xl w-full p-8 overflow-y-auto max-h-[90vh] shadow-2xl">
-            <h3 id="studentModalTitle" class="text-2xl font-black italic mb-6 text-slate-800">Öğrenci Kaydı</h3>
+        <div class="bg-white rounded-3xl max-w-xl w-full p-8 overflow-y-auto max-h-[90vh] shadow-2xl transition-colors duration-300">
+            <h3 id="studentModalTitle" class="text-2xl font-black italic mb-6 text-slate-800 transition-colors duration-300">Öğrenci Kaydı</h3>
             <form id="studentForm" class="space-y-4">
                 <input type="hidden" id="studentEditId">
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Ad</label>
-                        <input type="text" id="sFirstName" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none font-medium">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 transition-colors duration-300">Ad</label>
+                        <input type="text" id="sFirstName" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none font-medium bg-white">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Soyad</label>
-                        <input type="text" id="sLastName" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none font-medium">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 transition-colors duration-300">Soyad</label>
+                        <input type="text" id="sLastName" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none font-medium bg-white">
                     </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Öğrenci No</label>
-                    <input type="text" id="sNumber" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none font-medium">
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 transition-colors duration-300">Öğrenci No</label>
+                    <input type="text" id="sNumber" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none font-medium bg-white">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">E-Posta</label>
-                    <input type="email" id="sEmail" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none font-medium">
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 transition-colors duration-300">E-Posta</label>
+                    <input type="email" id="sEmail" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none font-medium bg-white">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Telefon</label>
-                    <input type="text" id="sTel" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none font-medium">
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 transition-colors duration-300">Telefon</label>
+                    <input type="text" id="sTel" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none font-medium bg-white">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Departman</label>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 transition-colors duration-300">Departman</label>
                     <select id="sDeptId" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none font-medium bg-white"></select>
                 </div>
                 <div class="pt-4 flex gap-3">
@@ -372,21 +449,20 @@
         </div>
     </div>
 
-    <!-- Generic single column forms styling (Teacher, Course, etc) applied similarly -->
     <!-- TEACHER MODAL -->
     <div id="teacherModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl">
-            <h3 id="teacherModalTitle" class="text-2xl font-black mb-6 italic text-slate-800">Hoca Kaydı</h3>
+        <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl transition-colors duration-300">
+            <h3 id="teacherModalTitle" class="text-2xl font-black mb-6 italic text-slate-800 transition-colors duration-300">Hoca Kaydı</h3>
             <form id="teacherForm" class="space-y-4">
                 <input type="hidden" id="teacherEditId">
                 <div class="grid grid-cols-2 gap-4">
-                    <input type="text" id="tFirstName" placeholder="Ad" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none font-medium">
-                    <input type="text" id="tLastName" placeholder="Soyad" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none font-medium">
+                    <input type="text" id="tFirstName" placeholder="Ad" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none font-medium bg-white">
+                    <input type="text" id="tLastName" placeholder="Soyad" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none font-medium bg-white">
                 </div>
                 <select id="tDeptId" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none bg-white font-medium">
                     <option value="">Departman Seçin</option>
                 </select>
-                <input type="text" id="tNumber" placeholder="Sicil Numarası" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none font-medium">
+                <input type="text" id="tNumber" placeholder="Sicil Numarası" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none font-medium bg-white">
                 <div class="pt-4 flex gap-3">
                     <button type="button" onclick="closeModal('teacherModal')" class="flex-1 bg-slate-100 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-200">İptal</button>
                     <button type="submit" class="flex-1 bg-cyan-500 text-white font-bold py-4 rounded-xl hover:bg-cyan-600 shadow-lg shadow-cyan-500/30">Kaydet</button>
@@ -397,16 +473,16 @@
 
     <!-- COURSE MODAL -->
     <div id="courseModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl">
-            <h3 id="courseModalTitle" class="text-2xl font-black italic mb-6 text-slate-800">Ders Bilgileri</h3>
+        <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl transition-colors duration-300">
+            <h3 id="courseModalTitle" class="text-2xl font-black italic mb-6 text-slate-800 transition-colors duration-300">Ders Bilgileri</h3>
             <form id="courseForm" class="space-y-4">
                 <input type="hidden" id="courseEditId">
-                <input type="text" id="cCode" placeholder="Ders Kodu (Örn: YAZ101)" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none font-medium">
-                <input type="text" id="cName" placeholder="Ders Adı" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none font-medium">
+                <input type="text" id="cCode" placeholder="Ders Kodu (Örn: YAZ101)" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none font-medium bg-white">
+                <input type="text" id="cName" placeholder="Ders Adı" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none font-medium bg-white">
                 <div class="grid grid-cols-3 gap-4">
-                    <input type="text" id="cCredit" placeholder="Kredi" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none font-medium">
-                    <input type="number" id="cAkts" placeholder="AKTS" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none font-medium">
-                    <input type="number" id="cQuota" placeholder="Kota" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none font-medium">
+                    <input type="text" id="cCredit" placeholder="Kredi" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none font-medium bg-white">
+                    <input type="number" id="cAkts" placeholder="AKTS" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none font-medium bg-white">
+                    <input type="number" id="cQuota" placeholder="Kota" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none font-medium bg-white">
                 </div>
                 <div class="pt-4 flex gap-3">
                     <button type="button" onclick="closeModal('courseModal')" class="flex-1 bg-slate-100 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-200">İptal</button>
@@ -418,20 +494,20 @@
 
     <!-- FACULTY MODAL -->
     <div id="facultyModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <h3 id="facultyModalTitle" class="text-2xl font-black mb-6 italic text-slate-800">Fakülte Kaydı</h3>
+        <div class="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl max-h-[90vh] overflow-y-auto transition-colors duration-300">
+            <h3 id="facultyModalTitle" class="text-2xl font-black mb-6 italic text-slate-800 transition-colors duration-300">Fakülte Kaydı</h3>
             <form id="facultyForm" class="space-y-4">
                 <input type="hidden" id="facultyEditId">
-                <input type="text" id="fName" placeholder="Fakülte Adı" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none font-medium">
-                <input type="text" id="fAddress" placeholder="Adres" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none font-medium">
-                <input type="text" id="fDean" placeholder="Dekan" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none font-medium">
+                <input type="text" id="fName" placeholder="Fakülte Adı" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none font-medium bg-white">
+                <input type="text" id="fAddress" placeholder="Adres" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none font-medium bg-white">
+                <input type="text" id="fDean" placeholder="Dekan" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none font-medium bg-white">
                 <div class="grid grid-cols-2 gap-4">
-                    <input type="number" id="fNumberOfPersonel" placeholder="Personel Sayısı" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none font-medium">
-                    <input type="text" id="fAvailable" placeholder="Durum (Mevcut/Değil)" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none font-medium">
+                    <input type="number" id="fNumberOfPersonel" placeholder="Personel Sayısı" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none font-medium bg-white">
+                    <input type="text" id="fAvailable" placeholder="Durum (Mevcut/Değil)" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none font-medium bg-white">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
-                    <input type="text" id="fYearOfEstablishment" placeholder="Kuruluş Yılı" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none font-medium">
-                    <input type="text" id="fSecretary" placeholder="Sekreter" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none font-medium">
+                    <input type="text" id="fYearOfEstablishment" placeholder="Kuruluş Yılı" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none font-medium bg-white">
+                    <input type="text" id="fSecretary" placeholder="Sekreter" class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none font-medium bg-white">
                 </div>
                 <div class="pt-4 flex gap-3">
                     <button type="button" onclick="closeModal('facultyModal')" class="flex-1 bg-slate-100 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-200">İptal</button>
@@ -443,12 +519,12 @@
 
     <!-- DEPARTMENT MODAL -->
     <div id="departmentModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl">
-            <h3 id="departmentModalTitle" class="text-2xl font-black mb-6 italic text-slate-800">Departman Kaydı</h3>
+        <div class="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl transition-colors duration-300">
+            <h3 id="departmentModalTitle" class="text-2xl font-black mb-6 italic text-slate-800 transition-colors duration-300">Departman Kaydı</h3>
             <form id="departmentForm" class="space-y-4">
                 <input type="hidden" id="departmentEditId">
-                <input type="text" id="dName" placeholder="Departman Adı" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none font-medium">
-                <input type="text" id="dCode" placeholder="Departman Kodu" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none font-medium">
+                <input type="text" id="dName" placeholder="Departman Adı" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none font-medium bg-white">
+                <input type="text" id="dCode" placeholder="Departman Kodu" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none font-medium bg-white">
                 <select id="dFacultyId" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none bg-white font-medium">
                     <option value="">Fakülte Seçin</option>
                 </select>
@@ -462,12 +538,12 @@
 
     <!-- CLASSROOM MODAL -->
     <div id="classroomModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-3xl max-w-xs w-full shadow-2xl p-8">
-            <h3 id="classroomModalTitle" class="text-2xl font-black italic mb-6 text-slate-800">Derslik</h3>
+        <div class="bg-white rounded-3xl max-w-xs w-full shadow-2xl p-8 transition-colors duration-300">
+            <h3 id="classroomModalTitle" class="text-2xl font-black italic mb-6 text-slate-800 transition-colors duration-300">Derslik</h3>
             <form id="classroomForm" class="space-y-4">
                 <input type="hidden" id="classroomEditId">
-                <input type="text" id="crNumber" placeholder="Derslik No" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none font-medium">
-                <input type="number" id="crCapacity" placeholder="Kapasite" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none font-medium">
+                <input type="text" id="crNumber" placeholder="Derslik No" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none font-medium bg-white">
+                <input type="number" id="crCapacity" placeholder="Kapasite" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none font-medium bg-white">
                 <div class="pt-4 flex gap-3">
                     <button type="button" onclick="closeModal('classroomModal')" class="flex-1 bg-slate-100 text-slate-600 font-bold py-4 rounded-xl hover:bg-slate-200">İptal</button>
                     <button type="submit" class="flex-1 bg-orange-500 text-white font-bold py-4 rounded-xl hover:bg-orange-600 shadow-lg shadow-orange-500/30">Kaydet</button>
@@ -478,12 +554,12 @@
 
     <!-- SEMESTER MODAL -->
     <div id="semesterModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-3xl max-w-xs w-full shadow-2xl p-8">
-            <h3 id="semesterModalTitle" class="text-2xl font-black italic mb-6 text-slate-800">Dönem</h3>
+        <div class="bg-white rounded-3xl max-w-xs w-full shadow-2xl p-8 transition-colors duration-300">
+            <h3 id="semesterModalTitle" class="text-2xl font-black italic mb-6 text-slate-800 transition-colors duration-300">Dönem</h3>
             <form id="semesterForm" class="space-y-4">
                 <input type="hidden" id="semesterEditId">
-                <input type="text" id="semTerm" placeholder="Dönem Adı (Örn: 2023-Güz)" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none font-medium">
-                <label class="flex items-center gap-3 font-bold text-slate-600 p-2 bg-slate-50 rounded-xl cursor-pointer">
+                <input type="text" id="semTerm" placeholder="Dönem Adı (Örn: 2023-Güz)" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 outline-none font-medium bg-white">
+                <label class="flex items-center gap-3 font-bold text-slate-600 p-2 bg-slate-50 rounded-xl cursor-pointer transition-colors duration-300">
                     <input type="checkbox" id="semActive" class="w-5 h-5 rounded text-purple-600 focus:ring-purple-500/50">
                     <span>Aktif Dönem mi?</span>
                 </label>
@@ -497,8 +573,8 @@
 
     <!-- SECTION MODAL -->
     <div id="sectionModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl p-8">
-            <h3 class="text-2xl font-black italic mb-6 text-slate-800">Şube Tanımla</h3>
+        <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl p-8 transition-colors duration-300">
+            <h3 class="text-2xl font-black italic mb-6 text-slate-800 transition-colors duration-300">Şube Tanımla</h3>
             <form id="sectionForm" class="space-y-4">
                 <select id="secCourse" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none bg-white font-medium"><option value="">Ders Seçin</option></select>
                 <select id="secTeacher" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none bg-white font-medium"><option value="">Öğretmen Seçin</option></select>
@@ -516,8 +592,8 @@
 
     <!-- ENROLLMENT MODAL -->
     <div id="enrollmentModal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl p-8">
-            <h3 class="text-2xl font-black italic mb-6 text-slate-800">Derse Öğrenci Kaydet</h3>
+        <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl p-8 transition-colors duration-300">
+            <h3 class="text-2xl font-black italic mb-6 text-slate-800 transition-colors duration-300">Derse Öğrenci Kaydet</h3>
             <form id="enrollmentForm" class="space-y-4">
                 <select id="enrStudent" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none bg-white font-medium"><option value="">Öğrenci Seçin</option></select>
                 <select id="enrSection" required class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none bg-white font-medium"><option value="">Ders Şubesi Seçin</option></select>
@@ -529,13 +605,34 @@
         </div>
     </div>
 
-    <!-- SweetAlert2 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.all.min.js"></script>
-
     <script>
         const API_URL = 'http://localhost:8080';
         const token = localStorage.getItem('token');
         let allData = { students: [], courses: [], teachers: [], faculties: [], classrooms: [], semesters: [], departments: [], announcements: [] };
+
+        let usersChartInstance = null;
+        let facultiesChartInstance = null;
+
+        // Dark Mode Logic
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const icon = document.getElementById('themeIcon');
+            const isDark = document.body.classList.contains('dark-mode');
+
+            if (isDark) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                localStorage.setItem('theme', 'light');
+            }
+
+            // Re-render charts if they exist to match theme colors
+            if (usersChartInstance) usersChartInstance.update();
+            if (facultiesChartInstance) facultiesChartInstance.update();
+        }
 
         // Özelleştirilmiş Toast (Sağ üstten çıkan bildirim)
         const Toast = Swal.mixin({
@@ -552,6 +649,12 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             if (!token) { window.location.href = 'index.html'; return; }
+
+            // Load saved theme
+            if (localStorage.getItem('theme') === 'dark') {
+                toggleTheme();
+            }
+
             document.getElementById('userNameDisplay').innerText = localStorage.getItem('username');
             showSection('dashboard');
             loadStats();
@@ -570,17 +673,136 @@
 
         async function loadStats() {
             try {
-                const [s, t, c, f] = await Promise.all([
+                const [s, t, c, f, d] = await Promise.all([
                     fetch(`${API_URL}/student/getAll`, { headers: { 'Authorization': 'Bearer ' + token } }).then(r => r.json()),
                     fetch(`${API_URL}/teacher/all`, { headers: { 'Authorization': 'Bearer ' + token } }).then(r => r.json()),
                     fetch(`${API_URL}/course/all`, { headers: { 'Authorization': 'Bearer ' + token } }).then(r => r.json()),
-                    fetch(`${API_URL}/faculty/getAll`, { headers: { 'Authorization': 'Bearer ' + token } }).then(r => r.json())
+                    fetch(`${API_URL}/faculty/getAll`, { headers: { 'Authorization': 'Bearer ' + token } }).then(r => r.json()),
+                    fetch(`${API_URL}/department/getAll`, { headers: { 'Authorization': 'Bearer ' + token } }).then(r => r.json())
                 ]);
-                document.getElementById('stat-students').innerText = (s || []).length || 0;
-                document.getElementById('stat-teachers').innerText = (t || []).length || 0;
-                document.getElementById('stat-courses').innerText = (c || []).length || 0;
-                document.getElementById('stat-faculties').innerText = (f || []).length || 0;
+
+                const students = s || [];
+                const teachers = t || [];
+                const courses = c || [];
+                const faculties = f || [];
+                const departments = d || [];
+
+                document.getElementById('stat-students').innerText = students.length;
+                document.getElementById('stat-teachers').innerText = teachers.length;
+                document.getElementById('stat-courses').innerText = courses.length;
+                document.getElementById('stat-faculties').innerText = faculties.length;
+
+                initCharts(students.length, teachers.length, faculties, departments);
             } catch (e) {}
+        }
+
+        function initCharts(studentCount, teacherCount, faculties, departments) {
+            // Chart.js default font settings
+            Chart.defaults.font.family = 'Inter';
+
+            // Get text color based on theme
+            const getTextColor = () => document.body.classList.contains('dark-mode') ? '#f8fafc' : '#1e293b';
+
+            // 1. Users Chart (Pie)
+            const ctxUsers = document.getElementById('usersChart').getContext('2d');
+            if (usersChartInstance) usersChartInstance.destroy();
+            usersChartInstance = new Chart(ctxUsers, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Öğrenciler', 'Akademisyenler'],
+                    datasets: [{
+                        data: [studentCount, teacherCount],
+                        backgroundColor: ['#10b981', '#06b6d4'], // Emerald, Cyan
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: getTextColor } }
+                    }
+                }
+            });
+
+            // 2. Faculties Chart (Bar)
+            // Fakültelere göre departman sayılarını hesapla
+            const facultyNames = faculties.map(f => f.name.length > 15 ? f.name.substring(0, 15) + '...' : f.name);
+            const deptCounts = faculties.map(f => {
+                return departments.filter(d => d.faculty && d.faculty.id === f.id).length;
+            });
+
+            const ctxFac = document.getElementById('facultiesChart').getContext('2d');
+            if (facultiesChartInstance) facultiesChartInstance.destroy();
+            facultiesChartInstance = new Chart(ctxFac, {
+                type: 'bar',
+                data: {
+                    labels: facultyNames.length > 0 ? facultyNames : ['Veri Yok'],
+                    datasets: [{
+                        label: 'Bölüm Sayısı',
+                        data: deptCounts.length > 0 ? deptCounts : [0],
+                        backgroundColor: '#6366f1', // Indigo
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1, color: getTextColor }, grid: { color: 'rgba(148, 163, 184, 0.1)' } },
+                        x: { ticks: { color: getTextColor }, grid: { display: false } }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        // Basit Arama Fonksiyonu
+        function filterTable(inputId, tableId) {
+            const input = document.getElementById(inputId);
+            const filter = input.value.toUpperCase();
+            const table = document.getElementById(tableId);
+            const tr = table.getElementsByTagName("tr");
+
+            for (let i = 0; i < tr.length; i++) {
+                let tdName = tr[i].getElementsByTagName("td")[1]; // Ad Soyad genelde 2. sütunda
+                let tdNo = tr[i].getElementsByTagName("td")[0];   // No genelde 1. sütunda
+
+                if (tdName || tdNo) {
+                    let txtValueName = tdName?.textContent || tdName?.innerText || "";
+                    let txtValueNo = tdNo?.textContent || tdNo?.innerText || "";
+                    if (txtValueName.toUpperCase().indexOf(filter) > -1 || txtValueNo.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+
+        function filterCards(inputId, containerId) {
+            const input = document.getElementById(inputId);
+            const filter = input.value.toUpperCase();
+            const container = document.getElementById(containerId);
+            const cards = container.children;
+
+            for (let i = 0; i < cards.length; i++) {
+                let title = cards[i].querySelector('h4') || cards[i].querySelector('h3');
+                let code = cards[i].querySelector('span'); // Badge for course code
+
+                if (title || code) {
+                    let txtValueTitle = title?.textContent || title?.innerText || "";
+                    let txtValueCode = code?.textContent || code?.innerText || "";
+                    if (txtValueTitle.toUpperCase().indexOf(filter) > -1 || txtValueCode.toUpperCase().indexOf(filter) > -1) {
+                        cards[i].style.display = "";
+                    } else {
+                        cards[i].style.display = "none";
+                    }
+                }
+            }
         }
 
         function showSection(id) {
@@ -608,6 +830,9 @@
 
             const loaders = { students: loadStudents, classrooms: loadClassrooms, semesters: loadSemesters, courses: loadCourses, teachers: loadTeachers, faculties: loadFaculties, departments: loadDepartments, sections: loadSections, enrollments: loadEnrollments, announcements: loadAnnouncements };
             if (loaders[id]) loaders[id]();
+
+            // Arama kutularını temizle
+            document.querySelectorAll('input[type="text"][onkeyup]').forEach(inp => {inp.value = ''; inp.dispatchEvent(new Event('keyup'))});
         }
 
         async function apiRequest(endpoint, method = 'GET', data = null, showSuccessToast = false, successMsg = 'İşlem başarılı') {
@@ -659,6 +884,7 @@
                 const endpoint = type === 'enrollment' ? `/enrollment/drop/${id}` : `/${type}/delete/${id}`;
                 if (await apiRequest(endpoint, 'DELETE', null, true, 'Kayıt başarıyla silindi')) {
                     showSection(document.querySelector('.section.active').id.split('-')[1]);
+                    if(type === 'student' || type === 'teacher' || type === 'faculty' || type === 'course') loadStats(); // Update charts
                 }
             }
         }
@@ -717,7 +943,7 @@
                         <h3 class="text-xl font-black italic text-slate-800">${f.name}</h3>
                         <p class="text-xs font-medium text-slate-500 mt-2 min-h-[2.5rem]"><i class="fas fa-map-marker-alt mr-1"></i>${f.address}</p>
 
-                        <div class="mt-5 space-y-2 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <div class="mt-5 space-y-2 bg-slate-50 p-4 rounded-2xl border border-slate-100 transition-colors duration-300">
                             <div class="flex justify-between items-center"><span class="text-[10px] uppercase font-bold text-slate-400">Dekan</span><span class="text-xs font-black text-slate-700">${f.dean || '-'}</span></div>
                             <div class="flex justify-between items-center"><span class="text-[10px] uppercase font-bold text-slate-400">Personel</span><span class="text-xs font-black text-slate-700">${f.numberOfPersonel || '-'}</span></div>
                             <div class="flex justify-between items-center"><span class="text-[10px] uppercase font-bold text-slate-400">Kuruluş</span><span class="text-xs font-black text-slate-700">${f.year_of_establishment || '-'}</span></div>
@@ -758,7 +984,7 @@
                 secretary: document.getElementById('fSecretary').value
             };
             if (await apiRequest(id ? `/faculty/update/${id}` : '/faculty/add', id ? 'PUT' : 'POST', data, true, id ? 'Fakülte güncellendi' : 'Yeni fakülte eklendi')) {
-                closeModal('facultyModal'); loadFaculties();
+                closeModal('facultyModal'); loadFaculties(); loadStats();
             }
         };
 
@@ -772,7 +998,7 @@
                         <div class="w-12 h-12 bg-teal-100 text-teal-600 rounded-2xl flex items-center justify-center text-xl mb-4"><i class="fas fa-building"></i></div>
                         <h3 class="text-xl font-black italic text-slate-800">${d.name}</h3>
                         <div class="mt-4 flex flex-col gap-2">
-                            <span class="inline-flex items-center gap-1.5 bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg text-xs font-bold w-fit"><i class="fas fa-hashtag text-slate-400"></i> ${d.code || 'KOD YOK'}</span>
+                            <span class="inline-flex items-center gap-1.5 bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg text-xs font-bold w-fit transition-colors duration-300"><i class="fas fa-hashtag text-slate-400"></i> ${d.code || 'KOD YOK'}</span>
                             <span class="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider w-fit"><i class="fas fa-university opacity-70"></i> ${d.faculty?.name || 'Fakülte Yok'}</span>
                         </div>
                         <div class="mt-6 flex gap-2">
@@ -800,7 +1026,7 @@
             const id = document.getElementById('departmentEditId').value;
             const data = { name: document.getElementById('dName').value, code: document.getElementById('dCode').value, facultyId: parseInt(document.getElementById('dFacultyId').value) };
             if (await apiRequest(id ? `/department/update/${id}` : '/department/add', id ? 'PUT' : 'POST', data, true, id ? 'Departman güncellendi' : 'Yeni departman eklendi')) {
-                closeModal('departmentModal'); loadDepartments();
+                closeModal('departmentModal'); loadDepartments(); loadStats();
             }
         };
 
@@ -814,7 +1040,7 @@
                     </td>
                     <td class="px-6 py-4">
                         <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-black text-slate-500">${s.firstName[0]}${s.lastName[0]}</div>
+                            <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-black text-slate-500 transition-colors duration-300">${s.firstName[0]}${s.lastName[0]}</div>
                             <span class="font-bold text-slate-800">${s.firstName} ${s.lastName}</span>
                         </div>
                     </td>
@@ -865,6 +1091,7 @@
             if (await apiRequest(id ? `/student/update/${id}` : '/student/add', id ? 'PUT' : 'POST', data, true, id ? 'Öğrenci bilgileri güncellendi' : 'Öğrenci sisteme eklendi')) {
                 closeModal('studentModal');
                 loadStudents();
+                loadStats();
             }
         };
 
@@ -879,7 +1106,7 @@
                         </div>
                         <div>
                             <h4 class="font-black italic text-slate-800 text-lg">${t.firstName} ${t.lastName}</h4>
-                            <p class="text-xs text-slate-500 font-bold mt-1 bg-slate-100 px-2 py-0.5 rounded inline-block">${t.department?.name || 'Departman Yok'}</p>
+                            <p class="text-xs text-slate-500 font-bold mt-1 bg-slate-100 px-2 py-0.5 rounded inline-block transition-colors duration-300">${t.department?.name || 'Departman Yok'}</p>
                             <p class="text-[10px] text-slate-400 font-bold uppercase mt-1 tracking-wider">Sicil: ${t.registrationNumber || t.user?.username || '-'}</p>
                         </div>
                     </div>
@@ -917,6 +1144,7 @@
             if (await apiRequest(id ? `/teacher/update/${id}` : '/teacher/add', id ? 'PUT' : 'POST', data, true, id ? 'Hoca bilgileri güncellendi' : 'Yeni hoca eklendi')) {
                 closeModal('teacherModal');
                 loadTeachers();
+                loadStats();
             }
         };
 
@@ -938,15 +1166,15 @@
                         </div>
                         <h4 class="text-xl font-black italic text-slate-800 mb-4">${c.name}</h4>
                         <div class="flex gap-4">
-                            <div class="bg-slate-50 px-3 py-2 rounded-xl flex-1 text-center border border-slate-100">
+                            <div class="bg-slate-50 px-3 py-2 rounded-xl flex-1 text-center border border-slate-100 transition-colors duration-300">
                                 <span class="block text-[10px] uppercase font-bold text-slate-400">Kredi</span>
                                 <span class="block text-lg font-black text-slate-700">${c.credit || '-'}</span>
                             </div>
-                            <div class="bg-slate-50 px-3 py-2 rounded-xl flex-1 text-center border border-slate-100">
+                            <div class="bg-slate-50 px-3 py-2 rounded-xl flex-1 text-center border border-slate-100 transition-colors duration-300">
                                 <span class="block text-[10px] uppercase font-bold text-slate-400">AKTS</span>
                                 <span class="block text-lg font-black text-slate-700">${c.akts || '-'}</span>
                             </div>
-                            <div class="bg-slate-50 px-3 py-2 rounded-xl flex-1 text-center border border-slate-100">
+                            <div class="bg-slate-50 px-3 py-2 rounded-xl flex-1 text-center border border-slate-100 transition-colors duration-300">
                                 <span class="block text-[10px] uppercase font-bold text-slate-400">Kota</span>
                                 <span class="block text-lg font-black text-slate-700">${c.quota || '-'}</span>
                             </div>
@@ -972,7 +1200,7 @@
             const id = document.getElementById('courseEditId').value;
             const data = { code: document.getElementById('cCode').value, name: document.getElementById('cName').value, credit: document.getElementById('cCredit').value, akts: parseInt(document.getElementById('cAkts').value), quota: parseInt(document.getElementById('cQuota').value) };
             if (await apiRequest(id ? `/course/update/${id}` : '/course/add', id ? 'PUT' : 'POST', data, true, id ? 'Ders güncellendi' : 'Ders eklendi')) {
-                closeModal('courseModal'); loadCourses();
+                closeModal('courseModal'); loadCourses(); loadStats();
             }
         };
 
@@ -983,7 +1211,7 @@
                 <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:-translate-y-1 transition-transform group text-center relative overflow-hidden">
                     <div class="w-16 h-16 mx-auto bg-orange-50 text-orange-500 rounded-full flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform"><i class="fas fa-chalkboard"></i></div>
                     <h4 class="text-2xl font-black italic text-slate-800">${c.roomNumber}</h4>
-                    <p class="text-xs text-slate-500 font-bold uppercase mt-2 tracking-wider bg-slate-50 inline-block px-3 py-1 rounded-lg">Kapasite: ${c.capacity}</p>
+                    <p class="text-xs text-slate-500 font-bold uppercase mt-2 tracking-wider bg-slate-50 inline-block px-3 py-1 rounded-lg transition-colors duration-300">Kapasite: ${c.capacity}</p>
                     <div class="absolute top-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button onclick='openClassroomModal(${JSON.stringify(c)})' class="text-slate-400 hover:text-orange-500"><i class="fas fa-pen"></i></button>
                         <button onclick="deleteData('classroom', ${c.id})" class="text-slate-400 hover:text-red-500"><i class="fas fa-trash"></i></button>
@@ -1018,7 +1246,7 @@
                         <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center text-xl"><i class="fas fa-calendar-check"></i></div>
                         <div>
                             <h4 class="font-black italic text-xl text-slate-800">${s.term}</h4>
-                            <span class="${s.isActive ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : 'text-slate-500 bg-slate-100 border-slate-200'} border px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider mt-1 inline-block">
+                            <span class="${s.isActive ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : 'text-slate-500 bg-slate-100 border-slate-200'} border px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider mt-1 inline-block transition-colors duration-300">
                                 ${s.isActive ? '<i class="fas fa-circle text-[8px] mr-1"></i> Aktif' : 'Pasif'}
                             </span>
                         </div>
@@ -1083,7 +1311,7 @@
             document.getElementById('enrollmentsTableBody').innerHTML = (data || []).map(e => `
                 <tr class="hover:bg-indigo-50/50 border-b border-slate-100 transition-colors group">
                     <td class="px-6 py-4">
-                        <span class="bg-slate-100 text-slate-700 font-black italic px-3 py-1 rounded-lg">${e.student?.studentNumber}</span>
+                        <span class="bg-slate-100 text-slate-700 font-black italic px-3 py-1 rounded-lg transition-colors duration-300">${e.student?.studentNumber}</span>
                     </td>
                     <td class="px-6 py-4 font-bold text-slate-800">
                         ${e.student?.firstName} ${e.student?.lastName}
