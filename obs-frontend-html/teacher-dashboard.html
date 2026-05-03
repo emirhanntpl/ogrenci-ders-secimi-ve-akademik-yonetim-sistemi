@@ -114,7 +114,7 @@
         </nav>
 
         <div class="p-6 border-t border-emerald-900/50 relative z-10">
-            <button onclick="logout()" class="flex items-center justify-center gap-2 p-3 w-full text-red-400 font-bold hover:bg-red-500/10 hover:text-red-300 rounded-xl transition-all border border-transparent hover:border-red-500/20">
+            <button onclick="performLogout()" class="flex items-center justify-center gap-2 p-3 w-full text-red-400 font-bold hover:bg-red-500/10 hover:text-red-300 rounded-xl transition-all border border-transparent hover:border-red-500/20">
                 <i class="fas fa-sign-out-alt"></i><span>Oturumu Kapat</span>
             </button>
         </div>
@@ -418,18 +418,37 @@
             if (gradeDistChartInstance) gradeDistChartInstance.update();
         }
 
-        // Özelleştirilmiş Toast (Sağ üstten çıkan bildirim)
-        const Toast = Swal.mixin({
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-                toast.addEventListener('mouseenter', Swal.stopTimer)
-                toast.addEventListener('mouseleave', Swal.resumeTimer)
+        // Özelleştirilmiş Toast & Geri Dönüş (Fallback) Uyarıcıları
+        let Toast = null;
+        if (typeof Swal !== 'undefined') {
+            Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
+        }
+
+        function showMessage(title, text, icon) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({ title, text, icon, confirmButtonColor: '#059669' });
+            } else {
+                alert(title + ": " + text);
             }
-        });
+        }
+
+        function showToast(title, icon) {
+            if (Toast) {
+                Toast.fire({ icon, title });
+            } else {
+                console.log(title);
+            }
+        }
 
         document.addEventListener('DOMContentLoaded', async () => {
             if (!token || localStorage.getItem('userRole') !== 'TEACHER') {
@@ -465,29 +484,58 @@
 
             try {
                 const res = await fetch(`${API_URL}${endpoint}`, options);
+
+                // Yetkilendirme hatası (403 veya 401) ise
+                if (res.status === 401 || res.status === 403) {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Oturum Süresi Doldu',
+                            text: 'Güvenlik nedeniyle oturumunuz sonlandırıldı. Lütfen tekrar giriş yapın.',
+                            confirmButtonColor: '#059669'
+                        }).then(() => {
+                            performLogout(true);
+                        });
+                    } else {
+                        performLogout(true);
+                    }
+                    return null;
+                }
+
+                // Diğer API Hataları (400, 500 vb.)
                 if (!res.ok) {
-                    const errText = await res.text();
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Hata!',
-                        text: errText || 'Bir hata oluştu',
-                        confirmButtonColor: '#059669'
-                    });
+                    let errText = 'Sunucu ile iletişim kurulamadı';
+                    try {
+                        const errJson = await res.json();
+                        errText = errJson.message || errText;
+                    } catch(e) {
+                        try { errText = await res.text() || errText; } catch(e2) {}
+                    }
+                    showMessage('Hata!', errText, 'error');
                     return null;
                 }
 
                 if (showSuccessToast) {
-                    Toast.fire({ icon: 'success', title: successMsg });
+                    showToast(successMsg, 'success');
                 }
 
-                return res.status !== 204 && res.status !== 200 ? res.json().catch(() => true) : true;
+                // 204 No Content
+                if (res.status === 204) return true;
+
+                // Boş string veya hatalı JSON durumlarında çökmeyi önle
+                const responseText = await res.text();
+                if (!responseText) return true;
+
+                try {
+                    return JSON.parse(responseText);
+                } catch (jsonErr) {
+                    console.error("JSON parse hatası. Endpoint:", endpoint, "Gelen metin:", responseText);
+                    return responseText; // JSON değilse düz metin dön
+                }
+
             } catch(e) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Bağlantı Hatası',
-                    text: 'Sunucuya ulaşılamıyor. Lütfen internet bağlantınızı kontrol edin.',
-                    confirmButtonColor: '#059669'
-                });
+                console.error("Fetch Hatası:", e);
+                showMessage('Bağlantı Hatası', 'Sunucuya ulaşılamıyor. Lütfen internet bağlantınızı kontrol edin.', 'error');
                 return null;
             }
         }
@@ -538,19 +586,15 @@
 
         async function loadTeacherInfo() {
             try {
-                const response = await fetch(`${API_URL}/teacher/by-username?username=${username}`, {
-                     headers: { 'Authorization': 'Bearer ' + token }
-                });
+                const data = await apiRequest(`/teacher/by-username?username=${username}`);
 
-                if(response.ok){
-                     currentTeacher = await response.json();
+                if(data && typeof data === 'object'){
+                     currentTeacher = data;
                      document.getElementById('teacherNameDisplay').innerText = `Dr. ${currentTeacher.firstName} ${currentTeacher.lastName}`;
 
-                     const coursesRes = await fetch(`${API_URL}/teacher/${currentTeacher.id}/course-sections`, {
-                          headers: { 'Authorization': 'Bearer ' + token }
-                     });
-                     if(coursesRes.ok) {
-                         teacherCourses = await coursesRes.json();
+                     const coursesData = await apiRequest(`/teacher/${currentTeacher.id}/course-sections`);
+                     if(Array.isArray(coursesData)) {
+                         teacherCourses = coursesData;
                          populateCourseFilters();
                          loadCharts(); // Initial load for charts
                      }
@@ -607,22 +651,18 @@
                 let sectionsToFetch = sectionId ? [{id: sectionId}] : teacherCourses;
 
                 for (const section of sectionsToFetch) {
-                    const studentsRes = await fetch(`${API_URL}/teacher/course-section/${section.id}/students`, { headers: { 'Authorization': 'Bearer ' + token } });
-                    if (!studentsRes.ok) continue;
+                    const students = await apiRequest(`/teacher/course-section/${section.id}/students`);
+                    if (!Array.isArray(students)) continue;
 
-                    const students = await studentsRes.json();
                     for (const student of students) {
                         try {
-                            const gradeRes = await fetch(`${API_URL}/grade/course-section/${section.id}/student/${student.id}`, { headers: { 'Authorization': 'Bearer ' + token } });
-                            if (gradeRes.ok) {
-                                const grades = await gradeRes.json();
-                                if (grades && grades.length > 0) {
-                                    const g = grades[0];
-                                    if (g.passStatus === 'GEÇTİ') passCount++;
-                                    if (g.passStatus === 'KALDI') failCount++;
-                                    if (g.letterGrade && gradeDist[g.letterGrade] !== undefined) {
-                                        gradeDist[g.letterGrade]++;
-                                    }
+                            const grades = await apiRequest(`/grade/course-section/${section.id}/student/${student.id}`);
+                            if (Array.isArray(grades) && grades.length > 0) {
+                                const g = grades[0];
+                                if (g.passStatus === 'GEÇTİ') passCount++;
+                                if (g.passStatus === 'KALDI') failCount++;
+                                if (g.letterGrade && gradeDist[g.letterGrade] !== undefined) {
+                                    gradeDist[g.letterGrade]++;
                                 }
                             }
                         } catch(e) {}
@@ -656,7 +696,7 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'bottom', labels: { color: getTextColor } }
+                        legend: { position: 'bottom', labels: { color: getTextColor() } }
                     }
                 }
             });
@@ -679,8 +719,8 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: { beginAtZero: true, ticks: { stepSize: 1, color: getTextColor }, grid: { color: 'rgba(148, 163, 184, 0.1)' } },
-                        x: { ticks: { color: getTextColor }, grid: { display: false } }
+                        y: { beginAtZero: true, ticks: { stepSize: 1, color: getTextColor() }, grid: { color: 'rgba(148, 163, 184, 0.1)' } },
+                        x: { ticks: { color: getTextColor() }, grid: { display: false } }
                     },
                     plugins: {
                         legend: { display: false }
@@ -726,74 +766,66 @@
             }
 
             try {
-                const response = await fetch(`${API_URL}/teacher/course-section/${sectionId}/students`, {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
+                const students = await apiRequest(`/teacher/course-section/${sectionId}/students`);
 
                 const tbody = document.getElementById('studentTableBody');
                 tbody.innerHTML = '';
 
-                if(response.ok){
-                    const students = await response.json();
-                    if(!students || students.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="8" class="px-6 py-8 text-center text-slate-500 font-bold bg-slate-50 rounded-xl">Bu derse kayıtlı öğrenci bulunamadı.</td></tr>';
-                        return;
-                    }
+                if(!Array.isArray(students) || students.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" class="px-6 py-8 text-center text-slate-500 font-bold bg-slate-50 rounded-xl">Bu derse kayıtlı öğrenci bulunamadı.</td></tr>';
+                    return;
+                }
 
-                    for (const s of students) {
-                        try {
-                            const gradesRes = await fetch(`${API_URL}/grade/course-section/${sectionId}/student/${s.id}`,{
-                                headers: { 'Authorization': 'Bearer ' + token }
-                            });
+                for (const s of students) {
+                    try {
+                        const grades = await apiRequest(`/grade/course-section/${sectionId}/student/${s.id}`);
 
-                            let midterm = '-';
-                            let final = '-';
-                            let avg = '-';
-                            let letterGrade = '-';
-                            let passStatus = '-';
+                        let midterm = '-';
+                        let final = '-';
+                        let avg = '-';
+                        let letterGrade = '-';
+                        let passStatus = '-';
 
-                            if(gradesRes.ok) {
-                                const grades = await gradesRes.json();
-                                if (grades && grades.length > 0) {
-                                    midterm = grades[0].midTerm !== null ? grades[0].midTerm : '-';
-                                    final = grades[0].finalExam !== null ? grades[0].finalExam : '-';
-                                    avg = grades[0].average !== null ? grades[0].average : '-';
-                                    letterGrade = grades[0].letterGrade !== null ? grades[0].letterGrade : '-';
-                                    passStatus = grades[0].passStatus !== null ? grades[0].passStatus : '-';
-                                }
-                            }
+                        if(Array.isArray(grades) && grades.length > 0) {
+                            midterm = grades[0].midTerm !== null ? grades[0].midTerm : '-';
+                            final = grades[0].finalExam !== null ? grades[0].finalExam : '-';
+                            avg = grades[0].average !== null ? grades[0].average : '-';
+                            letterGrade = grades[0].letterGrade !== null ? grades[0].letterGrade : '-';
+                            passStatus = grades[0].passStatus !== null ? grades[0].passStatus : '-';
+                        }
 
-                            const passClass = passStatus === 'GEÇTİ' ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : (passStatus === 'KALDI' ? 'text-red-600 bg-red-50 border-red-100' : 'text-slate-500 bg-slate-50 border-slate-200');
+                        const passClass = passStatus === 'GEÇTİ' ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : (passStatus === 'KALDI' ? 'text-red-600 bg-red-50 border-red-100' : 'text-slate-500 bg-slate-50 border-slate-200');
 
-                            tbody.innerHTML += `
-                                <tr class="hover:bg-slate-50 border-b border-emerald-50 transition-colors group">
-                                    <td class="px-6 py-4">
-                                        <span class="bg-slate-100 text-slate-600 font-black italic px-3 py-1 rounded-lg">${s.studentNumber}</span>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs font-black">${s.firstName[0]}${s.lastName[0]}</div>
-                                            <span class="font-bold text-slate-800">${s.firstName} ${s.lastName}</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 text-center font-mono text-lg">${midterm}</td>
-                                    <td class="px-6 py-4 text-center font-mono text-lg">${final}</td>
-                                    <td class="px-6 py-4 text-center font-black text-lg ${avg >= 50 ? 'text-blue-600' : (avg !== '-' ? 'text-red-500' : '')}">${avg}</td>
-                                    <td class="px-6 py-4 text-center font-black text-lg text-slate-700">${letterGrade}</td>
-                                    <td class="px-6 py-4 text-center">
-                                        <span class="border px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider ${passClass}">${passStatus}</span>
-                                    </td>
-                                    <td class="px-6 py-4 text-center">
-                                        <button onclick="openGradeModal(${s.id}, ${sectionId}, '${s.firstName} ${s.lastName}')" class="bg-emerald-100 text-emerald-700 px-4 py-2 rounded-xl text-xs font-bold hover:bg-emerald-600 hover:text-white transition-colors shadow-sm flex items-center justify-center gap-2 mx-auto opacity-0 group-hover:opacity-100">
-                                            <i class="fas fa-edit"></i> Not Gir
-                                        </button>
-                                    </td>
-                                </tr>
-                            `;
-                        } catch(e) {}
+                        tbody.innerHTML += `
+                            <tr class="hover:bg-slate-50 border-b border-emerald-50 transition-colors group">
+                                <td class="px-6 py-4">
+                                    <span class="bg-slate-100 text-slate-600 font-black italic px-3 py-1 rounded-lg">${s.studentNumber}</span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-black">${s.firstName[0]}${s.lastName[0]}</div>
+                                        <span class="font-bold text-slate-800">${s.firstName} ${s.lastName}</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-center font-mono text-lg">${midterm}</td>
+                                <td class="px-6 py-4 text-center font-mono text-lg">${final}</td>
+                                <td class="px-6 py-4 text-center font-black text-lg ${avg >= 50 ? 'text-blue-600' : (avg !== '-' ? 'text-red-500' : '')}">${avg}</td>
+                                <td class="px-6 py-4 text-center font-black text-lg text-slate-700">${letterGrade}</td>
+                                <td class="px-6 py-4 text-center">
+                                    <span class="border px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider ${passClass}">${passStatus}</span>
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <button onclick="openGradeModal(${s.id}, ${sectionId}, '${s.firstName} ${s.lastName}')" class="bg-emerald-100 text-emerald-700 px-4 py-2 rounded-xl text-xs font-bold hover:bg-emerald-600 hover:text-white transition-colors shadow-sm flex items-center justify-center gap-2 mx-auto opacity-0 group-hover:opacity-100">
+                                        <i class="fas fa-edit"></i> Not Gir
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    } catch(e) {
+                         // Hata durumunda boş satır
                     }
                 }
-            } catch(e) {}
+            } catch(e) { console.error("Öğrenci yüklenirken hata", e); }
         }
 
         // --- GRADE FUNCTIONS ---
@@ -826,7 +858,7 @@
         // --- EXAM & ASSIGNMENT & ANNOUNCEMENT (CRUD) ---
         async function loadExams() {
             const exams = await apiRequest('/exam/all');
-            if(exams && Array.isArray(exams)) {
+            if(Array.isArray(exams)) {
                 document.getElementById('examList').innerHTML = exams.filter(e => teacherCourses.some(tc => tc.id === e.courseSection?.id)).map(e => `
                     <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow relative overflow-hidden group">
                         <div class="absolute top-0 right-0 w-16 h-16 bg-amber-50 rounded-bl-full -mr-2 -mt-2 transition-transform group-hover:scale-110"></div>
@@ -850,7 +882,7 @@
 
         async function loadAssignments() {
             const list = await apiRequest('/assignment/all');
-            if(list && Array.isArray(list)) {
+            if(Array.isArray(list)) {
                 document.getElementById('assignmentList').innerHTML = list.filter(a => teacherCourses.some(tc => tc.id === a.courseSection?.id)).map(a => `
                     <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow relative group">
                         <div class="flex justify-between items-start mb-2">
@@ -872,8 +904,10 @@
 
         async function loadAnnouncements() {
             const list = await apiRequest('/announcement/all');
+            if(!Array.isArray(list)) return;
+
             const authorName = `${currentTeacher.firstName} ${currentTeacher.lastName}`;
-            const myAnnouncements = (list || []).filter(a => a.author === authorName);
+            const myAnnouncements = list.filter(a => a.author === authorName);
 
             document.getElementById('teacherAnnouncementList').innerHTML = myAnnouncements.map(a => `
                 <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 hover:shadow-md transition-shadow group">
@@ -932,18 +966,25 @@
         };
 
         async function deleteData(type, id) {
-            const result = await Swal.fire({
-                title: 'Emin misiniz?',
-                text: "Bu işlem geri alınamaz ve kalıcı olarak silinecektir!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ef4444',
-                cancelButtonColor: '#94a3b8',
-                confirmButtonText: 'Evet, sil!',
-                cancelButtonText: 'İptal'
-            });
+            let result = false;
 
-            if (result.isConfirmed) {
+            if (typeof Swal !== 'undefined') {
+                const swalRes = await Swal.fire({
+                    title: 'Emin misiniz?',
+                    text: "Bu işlem geri alınamaz ve kalıcı olarak silinecektir!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#94a3b8',
+                    confirmButtonText: 'Evet, sil!',
+                    cancelButtonText: 'İptal'
+                });
+                result = swalRes.isConfirmed;
+            } else {
+                result = confirm('Bu kaydı silmek istediğinizden emin misiniz?');
+            }
+
+            if (result) {
                 if (await apiRequest(`/${type}/delete/${id}`, 'DELETE', null, true, 'Kayıt başarıyla silindi')) {
                     showSection(document.querySelector('.section.active').id.split('-')[1]);
                     if(type === 'exam' || type === 'assignment') loadCharts(); // Update charts if needed
@@ -951,7 +992,13 @@
             }
         }
 
-        function logout() {
+        function performLogout(force = false) {
+            if (force === true || typeof Swal === 'undefined') {
+                localStorage.clear();
+                window.location.href = 'index.html';
+                return;
+            }
+
             Swal.fire({
                 title: 'Çıkış Yapılıyor...',
                 text: 'Lütfen bekleyin.',

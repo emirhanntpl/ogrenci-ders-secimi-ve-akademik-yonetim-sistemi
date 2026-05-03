@@ -12,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/enrollment")
+@CrossOrigin(origins = "*") // CORS EKLENDI
 public class EnrollmentControllerImpl implements IEnrollmentController {
 
     @Autowired

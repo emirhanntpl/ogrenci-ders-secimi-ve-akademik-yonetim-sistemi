@@ -45,13 +45,20 @@ public class SecurityConfig {
                         request.requestMatchers(WHITE_LIST_URL).permitAll()
                                 .requestMatchers("/faculty/**", "/department/**", "/semester/**", "/classroom/**").hasAuthority("ADMIN")
                                 .requestMatchers("/announcement/all").hasAnyAuthority("ADMIN", "TEACHER", "STUDENT")
-                                .requestMatchers("/announcement/**").hasAnyAuthority("ADMIN", "TEACHER") // Öğretmen de duyuru ekleyebilsin
+                                .requestMatchers("/announcement/**").hasAnyAuthority("ADMIN", "TEACHER") 
+                                .requestMatchers("/course/all").hasAnyAuthority("ADMIN", "TEACHER", "STUDENT") 
                                 .requestMatchers("/teacher/**", "/course/**", "/coursesection/**").hasAnyAuthority("ADMIN", "TEACHER")
-                                .requestMatchers("/student/**").hasAnyAuthority("ADMIN", "TEACHER", "STUDENT")
+                                .requestMatchers("/student/by-username").hasAnyAuthority("ADMIN", "TEACHER", "STUDENT") // ÖĞRENCİ KENDİ VERİSİNİ ÇEKEBİLMELİ
+                                .requestMatchers("/student/update-profile/**").hasAnyAuthority("ADMIN", "STUDENT") 
+                                .requestMatchers("/student/getAll").hasAnyAuthority("ADMIN", "TEACHER", "STUDENT") 
+                                .requestMatchers("/student/**").hasAnyAuthority("ADMIN", "TEACHER") 
+                                .requestMatchers("/grade/course-section/**").hasAnyAuthority("ADMIN", "TEACHER", "STUDENT") 
                                 .requestMatchers("/grade/**").hasAnyAuthority("ADMIN", "TEACHER", "STUDENT")
-                                .requestMatchers("/exam/**").hasAnyAuthority("ADMIN", "TEACHER") // Sınav yönetimi
-                                .requestMatchers("/assignment/all").hasAnyAuthority("ADMIN", "TEACHER", "STUDENT") // Ödevleri listeleme izni öğrenciye de verildi
-                                .requestMatchers("/assignment/**").hasAnyAuthority("ADMIN", "TEACHER") // Ödev ekleme/güncelleme/silme sadece ADMIN ve TEACHER
+                                .requestMatchers("/exam/all").hasAnyAuthority("ADMIN", "TEACHER", "STUDENT") 
+                                .requestMatchers("/exam/**").hasAnyAuthority("ADMIN", "TEACHER") 
+                                .requestMatchers("/assignment/all").hasAnyAuthority("ADMIN", "TEACHER", "STUDENT") 
+                                .requestMatchers("/assignment/**").hasAnyAuthority("ADMIN", "TEACHER") 
+                                .requestMatchers("/enrollment/all").hasAnyAuthority("ADMIN", "STUDENT", "TEACHER")
                                 .requestMatchers("/enrollment/**").hasAnyAuthority("ADMIN", "STUDENT")
                                 .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
