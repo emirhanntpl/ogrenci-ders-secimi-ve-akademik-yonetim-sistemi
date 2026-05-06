@@ -170,7 +170,7 @@
             const errorDiv = document.getElementById('errorMessage');
 
             try {
-                const response = await fetch('http://localhost:8080/authenticate', {
+                const response = await fetch('https://bys-backend-1a3v.onrender.com/authenticate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password, loginType }) // loginType'ı body'ye ekliyoruz
