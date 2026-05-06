@@ -1,9 +1,9 @@
 services:
   - type: web
     name: bys-backend-final
-    runtime: java
-    buildCommand: mvn clean install -DskipTests
-    startCommand: java -jar ogrenci-ders-secimi-ve-akademik-yonetim-sistemi-main/target/*.jar
+    runtime: image
+    image:
+      path: Dockerfile
     envVars:
       - key: SPRING_DATASOURCE_URL
         value: jdbc:postgresql://dpg-d7tgivcm0tmc73cnqiu0-a/bys
