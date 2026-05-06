@@ -1,9 +1,9 @@
 services:
   - type: web
     name: bys-backend-final
-    runtime: image
-    image:
-      path: Dockerfile
+    runtime: docker
+    dockerfilePath: ogrenci-ders-secimi-ve-akademik-yonetim-sistemi-main/Dockerfile
+    dockerContext: ogrenci-ders-secimi-ve-akademik-yonetim-sistemi-main
     envVars:
       - key: SPRING_DATASOURCE_URL
         value: jdbc:postgresql://dpg-d7tgivcm0tmc73cnqiu0-a/bys
