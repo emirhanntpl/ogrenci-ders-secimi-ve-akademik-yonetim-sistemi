@@ -1,12 +1,9 @@
 services:
   - type: web
-    name: bys-uygulama
-    env: java
-    region: frankfurt
-    plan: free
-    rootDir: ogrenci-ders-secimi-ve-akademik-yonetim-sistemi-main
+    name: bys-backend-final
+    runtime: java
     buildCommand: mvn clean install -DskipTests
-    startCommand: java -jar target/*.jar
+    startCommand: java -jar ogrenci-ders-secimi-ve-akademik-yonetim-sistemi-main/target/*.jar
     envVars:
       - key: SPRING_DATASOURCE_URL
         value: jdbc:postgresql://dpg-d7tgivcm0tmc73cnqiu0-a/bys
@@ -14,5 +11,3 @@ services:
         value: emirhan
       - key: SPRING_DATASOURCE_PASSWORD
         value: WdPZg36uY61mJVwY2ATK7ukNfIPSaJoo
-      - key: PORT
-        value: 8080
