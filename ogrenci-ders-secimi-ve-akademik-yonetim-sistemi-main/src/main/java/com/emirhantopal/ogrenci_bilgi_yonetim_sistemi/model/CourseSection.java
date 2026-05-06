@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Entity
 @Table
 @AllArgsConstructor
@@ -14,12 +16,9 @@ import lombok.Setter;
 @Setter
 public class CourseSection extends BaseEntity {
 
-
-
     @ManyToOne
     @JoinColumn(name = "course_id")
     private Course course;
-
 
     @ManyToOne
     @JoinColumn(name = "teacher_id")
@@ -33,4 +32,7 @@ public class CourseSection extends BaseEntity {
     @JoinColumn(name = "semester_id")
     private Semester semester;
 
+
+    @OneToMany(mappedBy = "courseSection", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Enrollment> enrollments;
 }

@@ -19,5 +19,6 @@ public class RestAuthController implements IRestAuthController {
     @Override
     public AuthResponse authenticate(@Valid @RequestBody AuthRequest request) {
         return authService.authenticate(request);
+
     }
 }
