@@ -9,6 +9,5 @@ services:
         value: emirhan
       - key: SPRING_DATASOURCE_PASSWORD
         value: WdPZg36uY61mJVwY2ATK7ukNfIPSaJoo
-    rootDirectory: ogrenci-ders-secimi-ve-akademik-yonetim-sistemi-main
-    buildCommand: mvn clean install -DskipTests
-    startCommand: java -jar target/*.jar
+    buildCommand: cd ogrenci-ders-secimi-ve-akademik-yonetim-sistemi-main && mvn clean install -DskipTests
+    startCommand: cd ogrenci-ders-secimi-ve-akademik-yonetim-sistemi-main && java -jar target/*.jar
