@@ -4,9 +4,9 @@ services:
     env: java
     region: frankfurt
     plan: free
+    rootDir: ogrenci-ders-secimi-ve-akademik-yonetim-sistemi-main
     buildCommand: mvn clean install -DskipTests
     startCommand: java -jar target/*.jar
-    rootDir: ogrenci-ders-secimi-ve-akademik-yonetim-sistemi-main
     envVars:
       - key: SPRING_DATASOURCE_URL
         value: jdbc:postgresql://dpg-d7tgivcm0tmc73cnqiu0-a/bys
