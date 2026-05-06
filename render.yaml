@@ -1,9 +1,7 @@
 services:
   - type: web
     name: bys-backend-final
-    runtime: docker
-    dockerfilePath: ogrenci-ders-secimi-ve-akademik-yonetim-sistemi-main/Dockerfile
-    dockerContext: ogrenci-ders-secimi-ve-akademik-yonetim-sistemi-main
+    runtime: java
     envVars:
       - key: SPRING_DATASOURCE_URL
         value: jdbc:postgresql://dpg-d7tgivcm0tmc73cnqiu0-a/bys
@@ -11,3 +9,6 @@ services:
         value: emirhan
       - key: SPRING_DATASOURCE_PASSWORD
         value: WdPZg36uY61mJVwY2ATK7ukNfIPSaJoo
+    rootDirectory: ogrenci-ders-secimi-ve-akademik-yonetim-sistemi-main
+    buildCommand: mvn clean install -DskipTests
+    startCommand: java -jar target/*.jar
