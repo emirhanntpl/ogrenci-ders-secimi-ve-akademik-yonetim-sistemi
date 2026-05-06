@@ -1,7 +1,9 @@
 services:
   - type: web
     name: bys-backend-final
-    runtime: java
+    runtime: native
+    buildCommand: cd ogrenci-ders-secimi-ve-akademik-yonetim-sistemi-main && mvn clean install -DskipTests
+    startCommand: cd ogrenci-ders-secimi-ve-akademik-yonetim-sistemi-main && java -jar target/*.jar
     envVars:
       - key: SPRING_DATASOURCE_URL
         value: jdbc:postgresql://dpg-d7tgivcm0tmc73cnqiu0-a/bys
@@ -9,5 +11,3 @@ services:
         value: emirhan
       - key: SPRING_DATASOURCE_PASSWORD
         value: WdPZg36uY61mJVwY2ATK7ukNfIPSaJoo
-    buildCommand: cd ogrenci-ders-secimi-ve-akademik-yonetim-sistemi-main && mvn clean install -DskipTests
-    startCommand: cd ogrenci-ders-secimi-ve-akademik-yonetim-sistemi-main && java -jar target/*.jar
