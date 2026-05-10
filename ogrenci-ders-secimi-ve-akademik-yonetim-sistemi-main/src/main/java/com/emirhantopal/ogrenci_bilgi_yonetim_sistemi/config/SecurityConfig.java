@@ -71,9 +71,18 @@ public class SecurityConfig {
     @Bean
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("*"));
+
+        // "*" yerine frontend adresini açıkça belirtmek daha güvenlidir ve hata payını düşürür
+        configuration.setAllowedOrigins(List.of(
+                "https://bys-frontend.onrender.com",
+                "http://127.0.0.1:5500", // Yerel testlerin için (Live Server vb.)
+                "http://localhost:5500"
+        ));
+
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "X-Requested-With"));
+        configuration.setAllowCredentials(true); // Cookie veya Auth header kullanımı için önemli
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
