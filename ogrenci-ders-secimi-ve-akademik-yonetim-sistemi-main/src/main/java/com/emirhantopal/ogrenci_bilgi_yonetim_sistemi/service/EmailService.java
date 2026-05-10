@@ -20,8 +20,10 @@ public class EmailService {
 
     public void sendPasswordResetEmail(String to, String token) {
         String subject = "KTÜ BYS - Şifre Sıfırlama Talebi";
-        String resetUrl = "https://bys-frontend.onrender.com/reset-password.html?token=" + token;
         
+        // Canlıdaki frontend adresinize yönlendirme yapar
+        String resetUrl = "https://bys-frontend.onrender.com/reset-password.html?token=" + token;
+
         String htmlContent = "<div style='font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 10px;'>" +
                              "<h2 style='color: #2563eb; text-align: center;'>KTÜ BYS Şifre Sıfırlama</h2>" +
                              "<p style='color: #475569; font-size: 16px;'>Merhaba,</p>" +
