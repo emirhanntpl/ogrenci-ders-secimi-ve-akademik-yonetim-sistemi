@@ -18,7 +18,7 @@ public class EmailService {
 
     public void sendPasswordResetEmail(String to, String token) {
         String subject = "KTÜ BYS - Şifre Sıfırlama Talebi";
-        String resetUrl = "file:///C:/Users/Emirhan/Desktop/ileri%20web%20proje/obs-frontend-html/reset-password.html?token=" + token;
+        String resetUrl = "https://bys-frontend.onrender.com/reset-password.html?token=" + token;
         
         String htmlContent = "<div style='font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 10px;'>" +
                              "<h2 style='color: #2563eb; text-align: center;'>KTÜ BYS Şifre Sıfırlama</h2>" +
