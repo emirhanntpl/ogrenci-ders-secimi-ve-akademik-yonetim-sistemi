@@ -3,6 +3,7 @@ package com.emirhantopal.ogrenci_bilgi_yonetim_sistemi.service;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -110,16 +111,21 @@ public class EmailService {
         sendHtmlEmail(to, subject, htmlContent);
     }
 
+    @Value("${spring.mail.username}")
+    private String fromEmail;
+
     private void sendHtmlEmail(String to, String subject, String htmlContent) {
         MimeMessage message = mailSender.createMimeMessage();
         try {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(fromEmail); // <--- Eksik olan parça bu olabilir!
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setText(htmlContent, true);
             mailSender.send(message);
         } catch (MessagingException e) {
-            System.err.println("E-posta gönderimi başarısız (" + to + "): " + e.getMessage());
+            // Hatanın ne olduğunu Render loglarında tam görmek için throw atalım
+            throw new RuntimeException("E-posta gönderimi başarısız: " + e.getMessage());
         }
     }
 }
