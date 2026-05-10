@@ -8,6 +8,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -115,17 +116,25 @@ public class EmailService {
     private String fromEmail;
 
     private void sendHtmlEmail(String to, String subject, String htmlContent) {
-        MimeMessage message = mailSender.createMimeMessage();
         try {
+            MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            helper.setFrom(fromEmail); // <--- Eksik olan parça bu olabilir!
+
+            //fromEmail boşsa veya null ise Render'daki mailini yedek olarak kullanalım
+            String sender = (fromEmail != null && !fromEmail.isEmpty()) ? fromEmail : "emirhanproje74@gmail.com";
+
+            helper.setFrom(sender);
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setText(htmlContent, true);
+
             mailSender.send(message);
-        } catch (MessagingException e) {
-            // Hatanın ne olduğunu Render loglarında tam görmek için throw atalım
-            throw new RuntimeException("E-posta gönderimi başarısız: " + e.getMessage());
+            System.out.println("E-posta başarıyla gönderildi: " + to);
+        } catch (Exception e) {
+            // Hatanın tam sebebini loglarda görmek için detaylı yazdırıyoruz
+            System.err.println("E-posta GÖNDERİM HATASI: " + e.getMessage());
+            e.printStackTrace();
+            // Frontend'e hata döndürmek yerine sessizce loglayalım ki sistem çökmesin
         }
     }
 }
